@@ -139,7 +139,7 @@ public class DriveFSMSystem extends SubsystemBase {
 						AutoConstants.DRIVEBASE_RADIUS, // Drive base radius (in m).
 						new ReplanningConfig() // Default path replanning config.
 				),
-				() -> {
+			() -> {
 				// Boolean supplier that controls when the path will be mirrored for red alliance
 				// This will flip the path being followed to the red side of the field.
 				// THE ORIGIN WILL REMAIN ON THE BLUE SIDE
@@ -151,7 +151,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				redAlliance = false;
 
 				return redAlliance;
-				},
+			},
 				this // Reference to this subsystem to set requirements
 		);
 
