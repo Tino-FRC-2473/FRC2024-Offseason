@@ -40,7 +40,7 @@ public class ClimberMechFSMRight {
 	 */
 	public ClimberMechFSMRight() {
 		// Perform hardware init
-		motor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_RIGHT_CLIMBER_MOTOR,
+		motor = new CANSparkMax(HardwareMap.RIGHT_CLIMBER_CAN_ID,
 						CANSparkMax.MotorType.kBrushless);
 		motor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		motor.getEncoder().setPosition(0);

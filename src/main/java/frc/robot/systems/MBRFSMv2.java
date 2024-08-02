@@ -30,9 +30,6 @@ public class MBRFSMv2 {
 		SHOOTING,
 		MOVE_TO_AMP,
 	}
-
-	private double[] currLogs;
-	private int tick = 0;
 	private boolean holding = false;
 	private int noteColorFrames = 0;
 
@@ -60,10 +57,10 @@ public class MBRFSMv2 {
 	 * the constructor is called only once when the robot boots.
 	 */
 	public MBRFSMv2() {
-		shooterLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_LSHOOTER_MOTOR,
+		shooterLeftMotor = new CANSparkMax(HardwareMap.TOP_SHOOTER_CAN_ID,
 										CANSparkMax.MotorType.kBrushless);
 
-		shooterRightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_RSHOOTER_MOTOR,
+		shooterRightMotor = new CANSparkMax(HardwareMap.BOTTOM_SHOOTER_CAN_ID,
 										CANSparkMax.MotorType.kBrushless);
 		intakeMotor = new TalonFX(HardwareMap.DEVICE_ID_INTAKE_MOTOR);
 		intakeMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -75,7 +72,6 @@ public class MBRFSMv2 {
 		throughBore.reset();
 
 		timer = new Timer();
-		currLogs = new double[MechConstants.AVERAGE_SIZE];
 
 		colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
@@ -121,31 +117,19 @@ public class MBRFSMv2 {
 			return;
 		}
 
-		currLogs[tick % MechConstants.AVERAGE_SIZE] =
-			intakeMotor.getSupplyCurrent().getValueAsDouble();
-
-		tick++;
-
-		double avgcone = 0;
-		for (int i = 0; i < MechConstants.AVERAGE_SIZE; i++) {
-			avgcone += currLogs[i];
-		}
-		avgcone /= MechConstants.AVERAGE_SIZE;
-
 		//SmartDashboard.putNumber("avg current", avgcone);
 		SmartDashboard.putBoolean("holding", holding);
 		SmartDashboard.putString("TeleOP STATE", currentState.toString());
 		//SmartDashboard.putBoolean("Input button pressed", input.isIntakeButtonPressed());
 		SmartDashboard.putNumber("CurrentNoteFrames", noteColorFrames);
 		SmartDashboard.putString("Current State", getCurrentState().toString());
-		SmartDashboard.putNumber("CurrentIntakeMotor", intakeMotor.get());
 		SmartDashboard.putNumber("Intake power", intakeMotor.get());
 		SmartDashboard.putNumber("Pivot power", pivotMotor.get());
-		//SmartDashboard.putNumber("Left shooter power", shooterLeftMotor.get());
-		//SmartDashboard.putNumber("Right shooter power", shooterRightMotor.get());
+		SmartDashboard.putNumber("Left shooter power", shooterLeftMotor.get());
+		SmartDashboard.putNumber("Right shooter power", shooterRightMotor.get());
 		SmartDashboard.putNumber("Pivot encoder count", throughBore.getDistance());
 		//SmartDashboard.putNumber("Proximity", colorSensor.getProximity());
-		SmartDashboard.putBoolean("HASNOTE --- ", hasNote());
+		SmartDashboard.putBoolean("HASNOTE", hasNote());
 
 		switch (currentState) {
 			case MOVE_TO_SHOOTER:
@@ -426,7 +410,7 @@ public class MBRFSMv2 {
 		if (input.isManualIntakeButtonPressed() && !input.isManualOuttakeButtonPressed()) {
 			intakeMotor.set(MechConstants.MANUAL_INTAKE_POWER);
 		} else if (input.isManualOuttakeButtonPressed() && !input.isManualIntakeButtonPressed()) {
-			intakeMotor.set(MechConstants.AMP_OUTTAKE_POWER);
+			intakeMotor.set(MechConstants.MANUAL_OUTTAKE_POWER);
 		} else {
 			intakeMotor.set(0);
 		}

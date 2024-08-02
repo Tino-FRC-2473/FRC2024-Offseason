@@ -135,7 +135,8 @@ public class TeleopInput {
 
 
 	/* ------------------------ Mech Controller ------------------------ */
-		/**
+
+	/**
 	 * Get the value of the Triangle Button.
 	 * @return if Triangle Button is pressed
 	 */

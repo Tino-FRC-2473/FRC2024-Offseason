@@ -26,6 +26,7 @@ import frc.robot.systems.ClimberMechFSMRight;
 // Systems
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.MBRFSMv2;
+import frc.robot.systems.ShooterFSMSystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -36,6 +37,7 @@ public class Robot extends TimedRobot {
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
 	private MBRFSMv2 mbrfsMv2;
+	private ShooterFSMSystem shooterFSM;
 	private ClimberMechFSMLeft chainLeftFSM;
 	private ClimberMechFSMRight chainRightFSM;
 	private SendableChooser<Command> autoChooser;
@@ -68,6 +70,7 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		driveFSMSystem = new DriveFSMSystem();
 		mbrfsMv2 = new MBRFSMv2();
+		shooterFSM = new ShooterFSMSystem();
 		chainLeftFSM = new ClimberMechFSMLeft();
 		chainRightFSM = new ClimberMechFSMRight();
 
@@ -132,6 +135,7 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Teleop Init --------");
 		driveFSMSystem.reset();
 		mbrfsMv2.reset();
+		shooterFSM.reset();
 		chainLeftFSM.reset();
 		chainRightFSM.reset();
 		if (autonomousCommand != null) {
@@ -143,6 +147,7 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
 		mbrfsMv2.update(input);
+		shooterFSM.update(input);
 		chainLeftFSM.update(input);
 		chainRightFSM.update(input);
 		mField.setRobotPose(driveFSMSystem.getPose());
