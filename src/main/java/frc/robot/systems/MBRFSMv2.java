@@ -283,34 +283,17 @@ public class MBRFSMv2 {
 	}
 
 	private double pid(double currentEncoderPID, double targetEncoder) {
-		double correction = MechConstants.PID_CONSTANT_PIVOT_P * (targetEncoder - currentEncoderPID);
-		return Math.min(MechConstants.MAX_TURN_SPEED, Math.max(MechConstants.MIN_TURN_SPEED, correction));
+		double correction = MechConstants.PID_CONSTANT_PIVOT_P
+			* (targetEncoder - currentEncoderPID);
+		return Math.min(MechConstants.MAX_TURN_SPEED,
+			Math.max(MechConstants.MIN_TURN_SPEED, correction));
 	}
 
 	private double pidAuto(double currentEncoderPID, double targetEncoder) {
-		double correction = MechConstants.PID_CONSTANT_PIVOT_P_AUTO * (targetEncoder - currentEncoderPID);
-		return Math.min(MechConstants.MAX_TURN_SPEED_AUTO, Math.max(MechConstants.MIN_TURN_SPEED_AUTO, correction));
-	}
-
-	public void setIntakeMotorPower(float power) {
-		intakeMotor.set(power);
-	}
-
-	public void pidPivotAuto(double encoderFinal) {
-		System.out.println(throughBore.getDistance());
-		pivotMotor.set(pidAuto(throughBore.getDistance(), encoderFinal));
-	}
-
-	public boolean pidPivotCompleted(double encoderFinal) {
-		return inRange(throughBore.getDistance(), encoderFinal);
-	}
-
-	public void setShooterLeftMotorPower(double power) {
-		shooterLeftMotor.set(-power);
-	}
-
-	public void setShooterRightMotorPower(double power) {
-		shooterRightMotor.set(power);
+		double correction = MechConstants.PID_CONSTANT_PIVOT_P_AUTO
+			* (targetEncoder - currentEncoderPID);
+		return Math.min(MechConstants.MAX_TURN_SPEED_AUTO,
+			Math.max(MechConstants.MIN_TURN_SPEED_AUTO, correction));
 	}
 
 	/* ---------------------------- FSM State Handlers ---------------------------- */
@@ -524,12 +507,12 @@ public class MBRFSMv2 {
 			timer.start();
 		}
 		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.SHOOTER_ENCODER_ROTATIONS));
-		if (timer.get() < 1 + 0.5) {
+		if (timer.get() < MechConstants.AUTO_PRELOAD_REVVING_TIME) {
 			intakeMotor.set(0);
 			shooterLeftMotor.set(-MechConstants.SHOOTING_POWER);
 			shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 			return false;
-		} else if (timer.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME + 0.5) {
+		} else if (timer.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME) {
 			intakeMotor.set(MechConstants.OUTTAKE_POWER);
 			shooterLeftMotor.set(-MechConstants.SHOOTING_POWER);
 			shooterRightMotor.set(MechConstants.SHOOTING_POWER);
@@ -604,11 +587,11 @@ public class MBRFSMv2 {
 			led.rainbow();
 			pivotMotor.set(pid(throughBore.getDistance(), MechConstants.SHOOTER_ENCODER_ROTATIONS));
 
-			if (timerSub.get() < 0.8 + 0.5) {
+			if (timerSub.get() < MechConstants.AUTO_PRELOAD_REVVING_TIME) {
 				intakeMotor.set(0);
 				shooterLeftMotor.set(-MechConstants.SHOOTING_POWER);
 				shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-			} else if (timerSub.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME + 0.5) {
+			} else if (timerSub.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME) {
 				intakeMotor.set(MechConstants.OUTTAKE_POWER);
 				shooterLeftMotor.set(-MechConstants.SHOOTING_POWER);
 				shooterRightMotor.set(MechConstants.SHOOTING_POWER);
@@ -629,7 +612,7 @@ public class MBRFSMv2 {
 		// Returns true when the command should end.
 		@Override
 		public boolean isFinished() {
-			return timerSub.get() >= MechConstants.AUTO_PRELOAD_SHOOTING_TIME + 0.5;
+			return timerSub.get() >= MechConstants.AUTO_PRELOAD_SHOOTING_TIME;
 		}
 	}
 
@@ -638,7 +621,7 @@ public class MBRFSMv2 {
 		private Timer timerSub;
 
 		/**
-		 * ShootNoteCommand command.
+		 * Initializes a new ShootNoteCommand.
 		 */
 		public ShootNoteCommand() {
 			timerSub = new Timer();
@@ -655,11 +638,11 @@ public class MBRFSMv2 {
 		public void execute() {
 			pivotMotor.set(pid(throughBore.getDistance(), MechConstants.SHOOTER_ENCODER_ROTATIONS));
 
-			if (timerSub.get() < MechConstants.AUTO_SHOOTING_TIME) {
+			if (timerSub.get() < MechConstants.AUTO_REVVING_TIME) {
 				intakeMotor.set(MechConstants.OUTTAKE_POWER);
 				shooterLeftMotor.set(0);
 				shooterRightMotor.set(0);
-			} else if (timerSub.get() < MechConstants.AUTO_SHOOTING_TIME + 0.5) {
+			} else if (timerSub.get() < MechConstants.AUTO_SHOOTING_TIME) {
 				shooterLeftMotor.set(-MechConstants.SHOOTING_POWER);
 				shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 			}
@@ -679,14 +662,17 @@ public class MBRFSMv2 {
 		// Returns true when the command should end.
 		@Override
 		public boolean isFinished() {
-			return timerSub.get() >= MechConstants.AUTO_SHOOTING_TIME + 0.5;
+			return timerSub.get() >= MechConstants.AUTO_SHOOTING_TIME;
 		}
 	}
 
 	public class IntakeNoteCommand extends Command {
 
-		Timer timerSub;
+		private Timer timerSub;
 
+		/**
+		 * Initializes a new IntakeNoteCommand.
+		 */
 		public IntakeNoteCommand() {
 			timerSub = new Timer();
 		}
@@ -700,7 +686,7 @@ public class MBRFSMv2 {
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
-			setIntakeMotorPower(0);
+			intakeMotor.set(0);
 			timerSub.stop();
 			timerSub.reset();
 		}
@@ -726,7 +712,7 @@ public class MBRFSMv2 {
 		// Called when the command is initially scheduled.
 		@Override
 		public void initialize() {
-			setIntakeMotorPower(MechConstants.AUTO_HOLDING_POWER);
+			intakeMotor.set(MechConstants.AUTO_HOLDING_POWER);
 		}
 
 		// Called every time the scheduler runs while the command is scheduled.
@@ -744,7 +730,7 @@ public class MBRFSMv2 {
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
-			setIntakeMotorPower(0);
+			intakeMotor.set(0);
 			timerSub.stop();
 			timerSub.reset();
 		}
@@ -752,7 +738,7 @@ public class MBRFSMv2 {
 		// Returns true when the command should end.
 		@Override
 		public boolean isFinished() {
-			return handleAutoMoveShooter() && timerSub.get() > 0.5;
+			return handleAutoMoveShooter() && timerSub.get() > MechConstants.AUTO_PIVOT_TIMER;
 		}
 	}
 
@@ -788,7 +774,7 @@ public class MBRFSMv2 {
 		// Returns true when the command should end.
 		@Override
 		public boolean isFinished() {
-			return handleAutoMoveGround() && timerSub.get() > 0.5;
+			return handleAutoMoveGround() && timerSub.get() > MechConstants.AUTO_PIVOT_TIMER;
 		}
 	}
 
@@ -834,7 +820,7 @@ public class MBRFSMv2 {
 		// Returns true when the command should end.
 		@Override
 		public boolean isFinished() {
-			return handleAutoOuttake() || timerSub.get() >= 0.7;
+			return handleAutoOuttake() || timerSub.get() >= MechConstants.OUTTAKE_AUTO_TIMER;
 		}
 		// Called once the command ends or is interrupted.
 		@Override
@@ -842,9 +828,9 @@ public class MBRFSMv2 {
 			timerSub.stop();
 			timerSub.reset();
 
-			setShooterLeftMotorPower(0);
-			setShooterRightMotorPower(0);
-			setIntakeMotorPower(0);
+			shooterLeftMotor.set(0);
+			shooterRightMotor.set(0);
+			intakeMotor.set(0);
 			holding = false;
 		}
 	}

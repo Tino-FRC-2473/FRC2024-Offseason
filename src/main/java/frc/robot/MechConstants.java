@@ -5,8 +5,12 @@ public final class MechConstants {
 	public static final float SHOOTING_POWER = 0.8f;
 	public static final float AMP_SHOOTER_POWER = 0.1f;
 	public static final float AMP_OUTTAKE_POWER = -0.6f; // -0.75
-	public static final double AUTO_SHOOTING_TIME = 0.5;
-	public static final double AUTO_PRELOAD_SHOOTING_TIME = 1.4;
+	public static final double AUTO_SHOOTING_TIME = 1.0;
+	public static final double AUTO_PRELOAD_SHOOTING_TIME = 1.9;
+	public static final double AUTO_PIVOT_TIMER = 0.5;
+	public static final double AUTO_PRELOAD_REVVING_TIME = 1.3;
+	public static final double OUTTAKE_AUTO_TIMER = 0.7;
+	public static final double AUTO_REVVING_TIME = 0.5;
 
 	public static final float TIMED_INTAKING_DURATION = 1.5f;
 	public static final float TIMED_REVVING_DURATION = 2;

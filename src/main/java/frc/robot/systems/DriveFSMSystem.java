@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj.Timer;
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
-import frc.robot.LED;
+//import frc.robot.LED;
 import frc.robot.RaspberryPI;
 import frc.robot.SwerveConstants.AutoConstants;
 // import frc.robot.LED;
@@ -131,13 +131,15 @@ public class DriveFSMSystem extends SubsystemBase {
 					// Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
 				new HolonomicPathFollowerConfig(
 						// HolonomicPathFollowerConfig, this should live in your Constants class
-						new PIDConstants(5.0, 0.0, 0.0), // Translation PID const
-						new PIDConstants(5.0, 0.0, 0.0), // Rotation PID const
-						4.5, // Max module speed, in m/s
-						0.4, // Drive base radius (in m). Dist: robot center -> furthest module.
+						new PIDConstants(AutoConstants.AUTO_TRANSLATIONAL_KP,
+							0.0, 0.0), // Translation PID const
+						new PIDConstants(AutoConstants.AUTO_ROTATIONAL_KP,
+							0.0, 0.0), // Rotation PID const
+						AutoConstants.MAX_MODULE_SPEED, // Max module speed, in m/s
+						AutoConstants.DRIVEBASE_RADIUS, // Drive base radius (in m).
 						new ReplanningConfig() // Default path replanning config.
 				),
-				() -> {
+			() -> {
 				// Boolean supplier that controls when the path will be mirrored for red alliance
 				// This will flip the path being followed to the red side of the field.
 				// THE ORIGIN WILL REMAIN ON THE BLUE SIDE
@@ -149,7 +151,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				redAlliance = false;
 
 				return redAlliance;
-				},
+			},
 				this // Reference to this subsystem to set requirements
 		);
 
@@ -296,10 +298,10 @@ public class DriveFSMSystem extends SubsystemBase {
 				&& rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
 				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
 				//led.greenLight();
-				//SmartDashboard.putBoolean("Can see tag", true);
+				SmartDashboard.putBoolean("Can see tag", true);
 			} else {
 				//led.orangeLight();
-				//SmartDashboard.putBoolean("Can see tag", false);
+				SmartDashboard.putBoolean("Can see tag", false);
 			}
 		} else {
 			if (!(rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG1_ID)
@@ -309,10 +311,10 @@ public class DriveFSMSystem extends SubsystemBase {
 				&& rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
 				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
 				//led.greenLight();
-				//SmartDashboard.putBoolean("Can see tag", true);
+				SmartDashboard.putBoolean("Can see tag", true);
 			} else {
 				//led.orangeLight();
-				//SmartDashboard.putBoolean("Can see tag", false);
+				SmartDashboard.putBoolean("Can see tag", false);
 			}
 		}
 
@@ -683,10 +685,14 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * Sets the formation of the swerve wheels in an X.
 	 */
 	public void setXFormation() {
-		frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-		frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-		rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-		rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+		frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(
+				Math.toDegrees(AutoConstants.DEG_45))));
+		frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(
+				-Math.toDegrees(AutoConstants.DEG_45))));
+		rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(
+				-Math.toDegrees(AutoConstants.DEG_45))));
+		rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(
+				Math.toDegrees(AutoConstants.DEG_45))));
 	}
 
 	/**

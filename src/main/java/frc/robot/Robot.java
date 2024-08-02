@@ -48,8 +48,9 @@ public class Robot extends TimedRobot {
 	private MjpegServer driverStream;
 	private MjpegServer chainStream;
 
-	private final int streamWidth = 320;
-	private final int streamHeight = 240;
+	private final int streamWidth = 256;
+	private final int streamHeight = 144;
+	private final int streamFPS = 30;
 
 	private final int redSpeakerTagID = 4;
 	private final int blueSpeakerTagID = 7;
@@ -95,7 +96,8 @@ public class Robot extends TimedRobot {
 		SmartDashboard.putData("Field", mField);
 
 		driverCam = CameraServer.startAutomaticCapture(0);
-		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG,256,144,30);
+		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
+			streamHeight, streamFPS);
 		driverCam.setVideoMode(videoMode);
 		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
 		//driverCam.setResolution(streamWidth, streamHeight);
@@ -169,6 +171,10 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() { }
 
+	/**
+	 * Get Autonomous Path Selected.
+	 * @return Returns the value selected by the auto chooser.
+	 */
 	public Command getAutonomousCommand() {
 		return autoChooser.getSelected();
 	}
