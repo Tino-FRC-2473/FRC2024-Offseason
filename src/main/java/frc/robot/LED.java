@@ -83,6 +83,7 @@ public class LED {
 
 	/**
 	 * Changes LED color to green.
+	 * @param flash if you want the LEDs to flash this color.
 	 */
 	public void greenLight(boolean flash) {
 		for (var i = 0; i < ledBuffer.getLength(); i++) {

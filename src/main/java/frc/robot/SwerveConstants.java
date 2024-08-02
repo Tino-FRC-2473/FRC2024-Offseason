@@ -139,6 +139,11 @@ public final class SwerveConstants {
 		public static final double CONSTANT_SPEED_THRESHOLD = 0.3; // meters
 		public static final double WAIT_TIME = 5; // seconds
 
+		public static final double MAX_MODULE_SPEED = 4.5;
+		public static final double AUTO_TRANSLATIONAL_KP = 5.0;
+		public static final double AUTO_ROTATIONAL_KP = 5.0;
+		public static final double DRIVEBASE_RADIUS = 0.4;
+
 		// constants for auto path points
 		public static final double N_0_05 = 0.05;
 		public static final double N_0_10 = 0.1;
