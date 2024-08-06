@@ -2,23 +2,11 @@ package frc.robot;
 
 public final class MechConstants {
 
-<<<<<<< HEAD
 	// Auto Shooter Constants
 	public static final double AUTO_REVVING_TIME = 0.5;
 	public static final double AUTO_SHOOTING_TIME = 1.0;
 	public static final double AUTO_PRELOAD_SHOOTING_TIME = 1.9;
 	public static final double AUTO_PRELOAD_REVVING_TIME = 1.3;
-=======
-	public static final float SHOOTING_POWER = 0.8f;
-	public static final float AMP_SHOOTER_POWER = 0.1f;
-	public static final float AMP_OUTTAKE_POWER = -0.6f; // -0.75
-	public static final double AUTO_SHOOTING_TIME = 1.0;
-	public static final double AUTO_PRELOAD_SHOOTING_TIME = 1.9;
-	public static final double AUTO_PIVOT_TIMER = 0.5;
-	public static final double AUTO_PRELOAD_REVVING_TIME = 1.3;
-	public static final double OUTTAKE_AUTO_TIMER = 0.7;
-	public static final double AUTO_REVVING_TIME = 0.5;
->>>>>>> c8b2795 (Fixing Checkstyles issues from Sunset Showdown competition code (#1))
 
 	// TeleOp Shooter Constants
 	public static final float SHOOTING_POWER = 0.8f;
