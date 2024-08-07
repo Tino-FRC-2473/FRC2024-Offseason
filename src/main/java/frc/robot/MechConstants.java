@@ -17,11 +17,13 @@ public final class MechConstants {
 	public static final double OUTTAKE_AUTO_TIMER = 0.7;
 	public static final float TIMED_INTAKING_DURATION = 1.5f;
 	public static final float AUTO_INTAKE_POWER = 0.2f;
+	public static final float AUTO_OUTTAKE_POWER = -0.2f;
 	public static final float AUTO_HOLDING_POWER = 0.05f;
 
 	// TeleOp Intake Constants
 	public static final float INTAKE_POWER = 0.2f; //0.4
-	public static final float OUTTAKE_POWER = -0.8f;
+	public static final float OUTTAKE_POWER = -0.2f;
+	public static final float FEED_SHOOTER_POWER = -0.8f;
 	public static final float MANUAL_INTAKE_POWER = 0.2f;
 	public static final float MANUAL_OUTTAKE_POWER = -0.2f;
 	public static final float TELE_HOLDING_POWER = 0.0f;
@@ -37,7 +39,7 @@ public final class MechConstants {
 	public static final double GREEN_HIGH = 0.35;
 	public static final double BLUE_HIGH = 0.1;
 	public static final double RED_HIGH = 0.8;
-
+// TODO: TESTS ALL CONSTANTS AND FIX
 	// PID Constants
 		// TeleOp
 	public static final double MIN_TURN_SPEED = -0.4;
@@ -53,4 +55,5 @@ public final class MechConstants {
 	public static final double GROUND_ENCODER_ROTATIONS = -1200;
 	public static final double AMP_ENCODER_ROTATIONS = -525;
 	public static final double SHOOTER_ENCODER_ROTATIONS = 0;
+	public static final double HOME_ENCODER_ROTATION = 0;
 }

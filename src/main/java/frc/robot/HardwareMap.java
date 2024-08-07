@@ -6,13 +6,17 @@ package frc.robot;
  */
 public final class HardwareMap {
 	// ID numbers for devices on the CAN bus
+	// TODO : CHANGE ALL CAN AND DEVICE ID TO THE CORRECT ID NUMBERS
 	public static final int TOP_SHOOTER_CAN_ID = 38;
 	public static final int BOTTOM_SHOOTER_CAN_ID = 36;
-	public static final int DEVICE_ID_ARM_MOTOR = 0;
-	public static final int DEVICE_ID_INTAKE_MOTOR = 1;
-
+	public static final int FRONT_INDEXER_CAN_ID = 37;
+	public static final int BACK_INDEXER_CAN_ID = 38;
 	public static final int LEFT_CLIMBER_CAN_ID = 19;
 	public static final int RIGHT_CLIMBER_CAN_ID = 20;
+
+	public static final int PIVOT_MOTOR_ID = 0;
+	public static final int TOP_INTAKE_MOTOR_ID = 1;
+	public static final int BOTTOM_INTAKE_MOTOR_ID = 2;
 
 	// NEW Chassis
 

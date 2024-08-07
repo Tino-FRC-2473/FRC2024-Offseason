@@ -62,10 +62,11 @@ public class MBRFSMv2 {
 
 		shooterRightMotor = new CANSparkMax(HardwareMap.BOTTOM_SHOOTER_CAN_ID,
 										CANSparkMax.MotorType.kBrushless);
-		intakeMotor = new TalonFX(HardwareMap.DEVICE_ID_INTAKE_MOTOR);
+
+		intakeMotor = new TalonFX(HardwareMap.TOP_INTAKE_MOTOR_ID);
 		intakeMotor.setNeutralMode(NeutralModeValue.Brake);
 
-		pivotMotor = new TalonFX(HardwareMap.DEVICE_ID_ARM_MOTOR);
+		pivotMotor = new TalonFX(HardwareMap.PIVOT_MOTOR_ID);
 		pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
 		throughBore = new Encoder(0, 1);

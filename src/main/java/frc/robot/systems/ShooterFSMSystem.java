@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
 
 // Robot Imports
 import frc.robot.TeleopInput;
@@ -41,9 +42,11 @@ public class ShooterFSMSystem {
 	public ShooterFSMSystem() {
 		shooterTopMotor = new CANSparkMax(HardwareMap.TOP_SHOOTER_CAN_ID,
 						CANSparkMax.MotorType.kBrushless);
+		shooterTopMotor.setIdleMode(IdleMode.kCoast);
 
 		shooterBottomMotor = new CANSparkMax(HardwareMap.BOTTOM_SHOOTER_CAN_ID,
 						CANSparkMax.MotorType.kBrushless);
+		shooterBottomMotor.setIdleMode(IdleMode.kCoast);
 
 		// Reset state machine
 		reset();
@@ -254,10 +257,10 @@ public class ShooterFSMSystem {
 
 			if (timerSub.get() < MechConstants.AUTO_PRELOAD_REVVING_TIME) {
 				shooterTopMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-				shooterBottomMotor.set(MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+				shooterBottomMotor.set(MechConstants.SHOOTING_POWER);
 			} else if (timerSub.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME) {
 				shooterTopMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-				shooterBottomMotor.set(MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+				shooterBottomMotor.set(MechConstants.SHOOTING_POWER);
 			}
 		}
 

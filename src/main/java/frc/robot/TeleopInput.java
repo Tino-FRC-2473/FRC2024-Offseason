@@ -172,7 +172,7 @@ public class TeleopInput {
 	 * Get the value of the Square Button.
 	 * @return if Square Button is pressed
 	 */
-	public boolean isShootAmpButtonPressed() {
+	public boolean isOuttakeButtonPressed() {
 		return mechController.getSquareButton();
 	}
 
