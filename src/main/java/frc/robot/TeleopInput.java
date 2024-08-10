@@ -29,7 +29,6 @@ public class TeleopInput {
 	public TeleopInput() {
 		mechController = new PS4Controller(MECH_CONTROLLER_PORT);
 		driverController = new PS4Controller(DRIVER_CONTROLLER_PORT);
-
 	}
 
 	/* ------------------------ Driver Controller ------------------------ */

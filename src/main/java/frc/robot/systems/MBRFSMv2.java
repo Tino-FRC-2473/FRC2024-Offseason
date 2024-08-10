@@ -57,10 +57,10 @@ public class MBRFSMv2 {
 	 * the constructor is called only once when the robot boots.
 	 */
 	public MBRFSMv2() {
-		shooterLeftMotor = new CANSparkMax(HardwareMap.TOP_SHOOTER_CAN_ID,
+		shooterLeftMotor = new CANSparkMax(HardwareMap.LEFT_SHOOTER_MOTOR_ID,
 										CANSparkMax.MotorType.kBrushless);
 
-		shooterRightMotor = new CANSparkMax(HardwareMap.BOTTOM_SHOOTER_CAN_ID,
+		shooterRightMotor = new CANSparkMax(HardwareMap.LEFT_SHOOTER_MOTOR_ID,
 										CANSparkMax.MotorType.kBrushless);
 
 		intakeMotor = new TalonFX(HardwareMap.TOP_INTAKE_MOTOR_ID);

@@ -5,8 +5,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Third party Hardware Imports
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkBase.IdleMode;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 // Robot Imports
 import frc.robot.TeleopInput;
@@ -29,8 +29,8 @@ public class ShooterFSMSystem {
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
-	private CANSparkMax shooterTopMotor;
-	private CANSparkMax shooterBottomMotor;
+	private TalonFX shooterLeftMotor;
+	private TalonFX shooterRightMotor;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -39,13 +39,11 @@ public class ShooterFSMSystem {
 	 * the constructor is called only once when the robot boots.
 	 */
 	public ShooterFSMSystem() {
-		shooterTopMotor = new CANSparkMax(HardwareMap.TOP_SHOOTER_CAN_ID,
-						CANSparkMax.MotorType.kBrushless);
-		shooterTopMotor.setIdleMode(IdleMode.kCoast);
+		shooterLeftMotor = new TalonFX(HardwareMap.LEFT_SHOOTER_MOTOR_ID);
+		shooterLeftMotor.setNeutralMode(NeutralModeValue.Coast);
 
-		shooterBottomMotor = new CANSparkMax(HardwareMap.BOTTOM_SHOOTER_CAN_ID,
-						CANSparkMax.MotorType.kBrushless);
-		shooterBottomMotor.setIdleMode(IdleMode.kCoast);
+		shooterRightMotor = new TalonFX(HardwareMap.RIGHT_SHOOTER_MOTOR_ID);
+		shooterLeftMotor.setNeutralMode(NeutralModeValue.Coast);
 
 		// Reset state machine
 		reset();
@@ -87,6 +85,8 @@ public class ShooterFSMSystem {
 
 		SmartDashboard.putString("TeleOP STATE", currentState.toString());
 		SmartDashboard.putString("Current State", getCurrentState().toString());
+		SmartDashboard.putNumber("Motor Power Left", shooterLeftMotor.get());
+		SmartDashboard.putNumber("Motor Power Right", shooterRightMotor.get());
 
 		switch (currentState) {
 			case IDLE_STOP:
@@ -156,13 +156,11 @@ public class ShooterFSMSystem {
 				if (input.isRevButtonPressed()) {
 					return ShooterFSMState.REV_UP_SHOOTER;
 				}
-				return ShooterFSMState.IDLE_STOP;
+
 			case REV_UP_SHOOTER:
 				if (input.isRevButtonPressed()) {
 					return ShooterFSMState.REV_UP_SHOOTER;
-				}
-
-				if (!input.isRevButtonPressed()) {
+				} else {
 					return ShooterFSMState.IDLE_STOP;
 				}
 			default:
@@ -180,8 +178,8 @@ public class ShooterFSMSystem {
 	 */
 	public void handleIdleState(TeleopInput input) {
 		led.purpleLight();
-		shooterTopMotor.set(0);
-		shooterBottomMotor.set(0);
+		shooterLeftMotor.set(0);
+		shooterRightMotor.set(0);
 	}
 
 	/**
@@ -190,8 +188,8 @@ public class ShooterFSMSystem {
 	 */
 	public void handleRevShooterState(TeleopInput input) {
 		led.blueLight();
-		shooterTopMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-		shooterBottomMotor.set(MechConstants.SHOOTING_POWER);
+		shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+		shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 	}
 
 	/**
@@ -199,8 +197,8 @@ public class ShooterFSMSystem {
 	 * @return if the action is completed
 	 */
 	public boolean handleAutoRev() {
-		shooterTopMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-		shooterBottomMotor.set(MechConstants.SHOOTING_POWER);
+		shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+		shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 		return true;
 	}
 
@@ -214,16 +212,16 @@ public class ShooterFSMSystem {
 		}
 
 		if (timer.get() < MechConstants.AUTO_PRELOAD_REVVING_TIME) {
-			shooterTopMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-			shooterBottomMotor.set(MechConstants.SHOOTING_POWER);
+			shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+			shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 			return false;
 		} else if (timer.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME) {
-			shooterTopMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-			shooterBottomMotor.set(MechConstants.SHOOTING_POWER);
+			shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+			shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 			return false;
 		} else {
-			shooterTopMotor.set(0);
-			shooterBottomMotor.set(0);
+			shooterLeftMotor.set(0);
+			shooterRightMotor.set(0);
 			timer.stop();
 			timer.reset();
 			return true;
