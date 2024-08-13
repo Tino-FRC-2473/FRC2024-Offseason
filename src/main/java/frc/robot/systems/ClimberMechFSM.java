@@ -180,7 +180,7 @@ public class ClimberMechFSM {
 	 */
 	private void handleClimbingState(TeleopInput input) {
 		if (motorLeft.getEncoder().getPosition() <= CHAIN_ENCODER) {
-			motorLeft.set(SYNCH_MOTOR_POWER);
+			motorLeft.set(-SYNCH_MOTOR_POWER);
 		} else {
 			motorLeft.set(0);
 		}
@@ -198,7 +198,7 @@ public class ClimberMechFSM {
 	 */
 	private void handleHooksUpState(TeleopInput input) {
 		if (motorLeft.getEncoder().getPosition() <= HOOKS_UP_ENCODER) {
-			motorLeft.set(UP_MOTOR_POWER);
+			motorLeft.set(-UP_MOTOR_POWER);
 		} else {
 			motorLeft.set(0);
 		}
