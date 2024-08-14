@@ -20,7 +20,7 @@ public class ClimberMechFSM {
 		HOOKS_UP
 	}
 
-	private static final float SYNCH_MOTOR_POWER = 0.5f; //0.25
+	private static final float SYNCH_MOTOR_POWER = 0.2f; //0.25
 	private static final float UP_MOTOR_POWER = 0.25f;
 	private static final float HOOKS_UP_ENCODER = 11.00f;
 	private static final float CHAIN_ENCODER = 35.57f;
@@ -103,12 +103,13 @@ public class ClimberMechFSM {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
-		SmartDashboard.putString("Left Climber State", currentState.toString());
+		SmartDashboard.putString("Climber State", currentState.toString());
 
 		currentState = nextState(input);
 		// SmartDashboard.putNumber("left output", motor.getAppliedOutput());
 		// SmartDashboard.putNumber("left motor applied", motor.get());
 		SmartDashboard.putNumber("left encoder position", motorLeft.getEncoder().getPosition());
+		SmartDashboard.putNumber("right encoder position", motorRight.getEncoder().getPosition());
 	}
 
 
@@ -123,16 +124,16 @@ public class ClimberMechFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private ClimberMechFSMState nextState(TeleopInput input) {
-        double currentEncoderLeft = motorLeft.getEncoder().getPosition();
+        double currentEncoderLeft = -motorLeft.getEncoder().getPosition();
         double currentEncoderRight = motorRight.getEncoder().getPosition();
 
 		switch (currentState) {
 			case IDLE_STOP:
 				if (input.synchClimberTrigger() && 
-                    (HOOKS_UP_ENCODER >= currentEncoderLeft && currentEncoderLeft > CHAIN_ENCODER) &&
-                    (HOOKS_UP_ENCODER >= currentEncoderRight && currentEncoderRight > CHAIN_ENCODER)) {
+                    (HOOKS_UP_ENCODER <= currentEncoderLeft && currentEncoderLeft < CHAIN_ENCODER) &&
+                    (HOOKS_UP_ENCODER <= currentEncoderRight && currentEncoderRight < CHAIN_ENCODER)) {
 					return ClimberMechFSMState.CLIMBING;
-				} else if (!input.isHooksUpButtonPressed() || 
+				} else if (input.isHooksUpButtonPressed() && 
                     (currentEncoderLeft <= HOOKS_UP_ENCODER && currentEncoderRight <= HOOKS_UP_ENCODER)) {
 					return ClimberMechFSMState.HOOKS_UP;
 				} else {
@@ -140,23 +141,17 @@ public class ClimberMechFSM {
 				}
 			case CLIMBING:
 				if (input.synchClimberTrigger() && 
-                (currentEncoderLeft > CHAIN_ENCODER && currentEncoderRight > CHAIN_ENCODER)) {
+				(currentEncoderLeft <= CHAIN_ENCODER && currentEncoderRight <= CHAIN_ENCODER)) {
 					return ClimberMechFSMState.CLIMBING;
-				} else if (!input.synchClimberTrigger() || 
-					(currentEncoderLeft <= CHAIN_ENCODER && currentEncoderRight <= CHAIN_ENCODER)) {
-					return ClimberMechFSMState.IDLE_STOP;
 				} else {
-					return ClimberMechFSMState.CLIMBING;
+					return ClimberMechFSMState.IDLE_STOP;
 				}
 			case HOOKS_UP:
 				if (input.isHooksUpButtonPressed() && 
-					(currentEncoderLeft > HOOKS_UP_ENCODER && currentEncoderRight > HOOKS_UP_ENCODER)) {
+					(currentEncoderLeft <= HOOKS_UP_ENCODER && currentEncoderRight <= HOOKS_UP_ENCODER)) {
 					return ClimberMechFSMState.HOOKS_UP;
-				} else if (!input.isHooksUpButtonPressed() || 
-				(currentEncoderLeft <= HOOKS_UP_ENCODER && currentEncoderRight <= HOOKS_UP_ENCODER)) {
-					return ClimberMechFSMState.IDLE_STOP;
 				} else {
-					return ClimberMechFSMState.HOOKS_UP;
+					return ClimberMechFSMState.IDLE_STOP;
 				}
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
