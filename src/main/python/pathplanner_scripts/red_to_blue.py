@@ -3,7 +3,6 @@ def swap_color_paths(paths: list, blue_prefix:str="B", red_prefix:str="R") -> bo
     B1 --> R1, etc.
     leaves the relative timing of all the commands, rotation targets, etc. THE SAME! adjust as necessary
 
-
     starting poses:
 
     B1: 0.69, 6.74, __   | R1: 15.89, 6.76, __
