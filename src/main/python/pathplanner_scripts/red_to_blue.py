@@ -15,6 +15,7 @@ def load_json_object(path: str) -> dict:
 
     Returns the json object.
     """
+
     with open(path, 'r') as openfile:
         return json.load(openfile)
 
@@ -52,18 +53,18 @@ def swap_color_paths(paths: list, blue_prefix:str="B", red_prefix:str="R") -> bo
     return True
 
 def swap_objects(blue_path: str, red_path: str) -> None:
-    #swap to red
-    blue_object: dict = load_json_object(blue_path)
-    red_object: dict = load_json_object(red_path)
+    """
+    Swaps two path files given their respective paths
+    """
 
-    #
-    apply_swap_to_json(blue_object, red_path, True)
-    apply_swap_to_json(red_object, blue_path, False)
-
-
-
+    apply_swap_to_json(load_json_object(blue_path), red_path, True)
+    apply_swap_to_json(load_json_object(red_path), blue_path, False)
 
 def apply_swap_to_json(json_object, mirror_path: str, is_blue: bool) -> None:
+    """
+    Applies the swap conversions onto a json object given the mirror path and whether or not its from the blue side.
+    """
+
     waypoints: list = list(json_object["waypoints"])
     json_object["waypoints"] = convert_waypoint_data(waypoints, is_blue)
     convert_rotation_heading(json_object)
@@ -75,6 +76,7 @@ def convert_waypoint_data(waypoints: list, is_blue: bool) -> list:
 
     Returns the new waypoints list.
     """
+
     temp = waypoints
     for waypoint in temp:
         x_pos = waypoint["anchor"]["x"]
@@ -91,6 +93,7 @@ def convert_rotation_heading(json_obj: dict) -> None:
     Converts the rotation and heading of the json object to the opposite side of the field.
 
     """
+
     json_obj["goalEndState"]["heading"] = 180 - json_obj["goalEndState"]["heading"]
     json_obj["previewStartingState"]["rotation"] = 180 - json_obj["previewStartingState"]["rotation"]
 
@@ -100,6 +103,7 @@ def convert_xypos(x: float, y: float, is_blue: bool) -> tuple[float, float]:
 
     Returns a tuple of the x and y value.
     """
+
     # TODO: Implement value converting
     if is_blue:
         pass
