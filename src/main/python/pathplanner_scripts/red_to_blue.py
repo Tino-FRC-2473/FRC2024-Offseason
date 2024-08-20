@@ -1,4 +1,5 @@
 import json
+import sys
 
 REL_PATH = "src\\main\\deploy\\pathplanner\\paths"
 
@@ -20,7 +21,7 @@ def load_json_object(path: str) -> dict:
         return json.load(openfile)
 
 
-def swap_color_paths(paths: list, blue_prefix:str="B", red_prefix:str="R") -> bool:
+def swap_color_paths(paths: list[str], blue_prefix:str="B", red_prefix:str="R") -> bool:
     """
     B1 --> R1, etc.
     leaves the relative timing of all the commands, rotation targets, etc. THE SAME! adjust as necessary
@@ -111,3 +112,11 @@ def convert_xypos(x: float, y: float, is_blue: bool) -> tuple[float, float]:
         pass
 
     return (0, 0)
+
+def main():
+    if len(sys.argv) < 3:
+        sys.exit("Usage: python red_to_blue.py <NAME_OF_FILE.EXTENSION> <NAME_OF_OTHER_FILE.EXTENSION>")
+    swap_objects(sys.argv[0], sys.argv[1])
+
+if __name__ == '__main__':
+    main()
