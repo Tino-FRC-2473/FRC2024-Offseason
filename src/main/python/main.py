@@ -5,9 +5,11 @@ import ntcore
 import numpy as np
 import cv2
 
-inst = ntcore.NetworkTableInstance.getDefault()
-inst.startClient4("python")
-inst.setServerTeam(2473)
+
+
+#inst = ntcore.NetworkTableInstance.getDefault()
+#inst.startClient4("python")
+#inst.setServerTeam(2473)
 
 FOV = (50.28, 29.16)
 RES = (640 , 480)
@@ -16,6 +18,8 @@ CAM_ANGLE = -15
 input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE)
 tag_module = AprilTag()
 ARUCO_LENGTH_METERS = 0.165
+tag_module.calibrate(RES,'/Users/sharvil/FRC2024-Offseason/src/main/python/charuco_images',ARUCO_LENGTH_METERS/9,6,9,True)
+
 
 while True:
     p = time.time()
@@ -30,13 +34,13 @@ while True:
         for key, value in tagData.items():
             pose_list[(key - 1) * 6 : (key * 6)] = np.concatenate((value[0].flatten(), value[1].flatten()), axis=0).tolist()
             
-        table = inst.getTable("datatable")
+        #table = inst.getTable("datatable")
 
-        xPub = table.getDoubleTopic("fps_incremented_value").publish()
-        xPub.set(frame.sum())
+        #xPub = table.getDoubleTopic("fps_incremented_value").publish()
+        #xPub.set(frame.sum())
 
-        tagDataPub = table.getDoubleArrayTopic("april_tag_data").publish()
-        tagDataPub.set(pose_list)
+        #tagDataPub = table.getDoubleArrayTopic("april_tag_data").publish()
+        #tagDataPub.set(pose_list)
         
         # outputStreamPub = table.getDoubleArrayTopic("output_stream").publish()
         # outputStreamPub.set(annotated_frame.flatten().tolist())

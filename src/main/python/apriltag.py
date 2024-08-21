@@ -4,6 +4,9 @@ import os
 import math
 import pupil_apriltags as apriltag
 
+
+
+
 # basically fixes the intrinsic parameters and is the class that returns the 3D stuff
 # printed 3dpose --> tvec (x: left/right, y: up/down, z: front/back), rvec
 # max z is 20 feet (detects, but not necessarily accurate); max x is 1 foot on either side
@@ -11,8 +14,9 @@ import pupil_apriltags as apriltag
 class AprilTag():
 
     def __init__(self):
-        self.camera_matrix = np.load('calibration_data/camera1_matrix.npy')
-        self.dist_coeffs = np.load('calibration_data/camera1_dist.npy')
+        self.header = '/Users/sharvil/FRC2024-Offseason/src/main/python/'
+        self.camera_matrix = np.load(self.header+'calibration_data/camera1_matrix.npy')
+        self.dist_coeffs = np.load(self.header+'calibration_data/camera1_dist.npy')
         self.detector = apriltag.Detector(families="tag36h11", nthreads=4) 
         pass
 
@@ -33,8 +37,11 @@ class AprilTag():
         imgpoints = []  # 2d points in image plane.
 
         images = os.listdir(dirpath)
+        print(images)
         for fname in images:
             print(fname)
+            print(os.path.join(dirpath, fname))
+            cv2.imshow("test",cv2.imread(os.path.join(dirpath, fname)))
             img = cv2.resize(cv2.imread(os.path.join(dirpath, fname)), RES)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             # Find the chess board corners
@@ -58,8 +65,8 @@ class AprilTag():
         self.camera_matrix = mtx
         self.dist_coeffs = dist
 
-        np.save('calibration_data/camera1_matrix.npy',mtx)
-        np.save('calibration_data/camera1_dist.npy',dist)
+        np.save(self.header+'calibration_data/camera3_matrix.npy',mtx)
+        np.save(self.header+'calibration_data/camera3_dist.npy',dist)
         print('Calibration complete')
 
     def draw_axis_on_image(self, image, camera_matrix, dist_coeffs, rvec, tvec,cvec, size=1):
