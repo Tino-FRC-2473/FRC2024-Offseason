@@ -62,7 +62,7 @@ def swap_objects(blue_path: str, red_path: str) -> None:
     """
     blue_object: dict = load_json_object(blue_path)
     red_object: dict = load_json_object(red_path)
-    
+
     apply_swap_to_json(blue_object, red_path, True)
     apply_swap_to_json(red_object, blue_path, False)
 
@@ -126,7 +126,7 @@ def swap_two_files(blue_path: str, red_path: str) -> None:
 
 def main():
     if len(sys.argv) < 3:
-        sys.exit("Usage: python red_to_blue.py <NAME_OF_FILE.EXTENSION> <NAME_OF_OTHER_FILE.EXTENSION>")
+        sys.exit("Usage: python red_to_blue.py <NAME_OF_BLUE_FILE.EXTENSION> <NAME_OF_RED_FILE.EXTENSION>")
 
     for arg in sys.argv:
         print(arg)
