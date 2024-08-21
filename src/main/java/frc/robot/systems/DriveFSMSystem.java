@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 // Robot Imports
 import frc.robot.TeleopInput;
@@ -92,6 +93,7 @@ public class DriveFSMSystem extends SubsystemBase {
 			rearRight.getPosition()
 		});
 
+	private MBRFSMv2 mbrfsm;
 
 	private int lockedSpeakerId;
 	private boolean isSpeakerAligned;
@@ -117,7 +119,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * one-time initialization or configuration of hardware required. Note
 	 * the constructor is called only once when the robot boots.
 	 */
-	public DriveFSMSystem() {
+	public DriveFSMSystem(MBRFSMv2 mbrfsm) {
 		gyro = new AHRS(SPI.Port.kMXP);
 
 		AutoBuilder.configureHolonomic(
@@ -814,5 +816,31 @@ public class DriveFSMSystem extends SubsystemBase {
 	 */
 	public static double clamp(double value, double lowerBound, double upperBound) {
 		return Math.min(Math.max(value, lowerBound), upperBound);
+	}
+
+	public class NoteAlignmentCommand extends Command {
+		private Timer timer = new Timer();
+
+		@Override
+		public void initialize() {
+			System.out.println("ALIGNMENT INITIALIZED");
+			timer.start();
+		}
+
+		@Override
+		public void execute() {
+			alignToNote();
+		}
+
+		@Override
+		public boolean isFinished() {
+			return mbrfsm.hasNote();
+		}
+
+		@Override
+		public void end(boolean interrupted) {
+			timer.stop();
+			timer.reset();
+		}
 	}
 }
