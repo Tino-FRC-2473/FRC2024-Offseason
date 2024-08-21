@@ -1,14 +1,14 @@
 import json
 import sys
 
-REL_PATH = "src\\main\\deploy\\pathplanner\\paths"
+REL_PATH = "src/main/deploy/pathplanner/paths"
 
 def dump_json_object(path: str, json_object) -> None:
     """
     Dumps the json object to the specified path.
     """
     with open(path, 'w') as outfile:
-        json.dump(outfile, json_object)
+        json.dump(json_object, outfile, indent=2)
 
 def load_json_object(path: str) -> dict:
     """
@@ -18,7 +18,11 @@ def load_json_object(path: str) -> dict:
     """
 
     with open(path, 'r') as openfile:
-        return json.load(openfile)
+        # return json.load(openfile)
+        try:
+            return json.load(openfile)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Error decoding JSON from file {path}: {e}")
 
 
 def swap_color_paths(paths: list[str], blue_prefix:str="B", red_prefix:str="R") -> bool:
@@ -48,7 +52,6 @@ def swap_color_paths(paths: list[str], blue_prefix:str="B", red_prefix:str="R") 
             return True
         else:
             raise ValueError("File path does not start with specified blue or red prefix.")
-            return False
 
 
     return True
@@ -57,9 +60,11 @@ def swap_objects(blue_path: str, red_path: str) -> None:
     """
     Swaps two path files given their respective paths
     """
-
-    apply_swap_to_json(load_json_object(blue_path), red_path, True)
-    apply_swap_to_json(load_json_object(red_path), blue_path, False)
+    blue_object: dict = load_json_object(blue_path)
+    red_object: dict = load_json_object(red_path)
+    
+    apply_swap_to_json(blue_object, red_path, True)
+    apply_swap_to_json(red_object, blue_path, False)
 
 def apply_swap_to_json(json_object, mirror_path: str, is_blue: bool) -> None:
     """
@@ -95,7 +100,7 @@ def convert_rotation_heading(json_obj: dict) -> None:
 
     """
 
-    json_obj["goalEndState"]["heading"] = 180 - json_obj["goalEndState"]["heading"]
+    json_obj["goalEndState"]["rotation"] = 180 - json_obj["goalEndState"]["rotation"]
     json_obj["previewStartingState"]["rotation"] = 180 - json_obj["previewStartingState"]["rotation"]
 
 def convert_xypos(x: float, y: float, is_blue: bool) -> tuple[float, float]:
@@ -105,18 +110,27 @@ def convert_xypos(x: float, y: float, is_blue: bool) -> tuple[float, float]:
     Returns a tuple of the x and y value.
     """
 
-    # TODO: Implement value converting
-    if is_blue:
-        pass
-    else:
-        pass
+    # if is_blue:
+    #     pass
+    # else:
+    #     pass
 
-    return (0, 0)
+    field_length = 0.69 + 15.89
+
+    return (field_length - x, y)
+
+def swap_two_files(blue_path: str, red_path: str) -> None:
+
+    apply_swap_to_json(load_json_object(blue_path), red_path, True)
+    apply_swap_to_json(load_json_object(red_path), blue_path, False)
 
 def main():
     if len(sys.argv) < 3:
         sys.exit("Usage: python red_to_blue.py <NAME_OF_FILE.EXTENSION> <NAME_OF_OTHER_FILE.EXTENSION>")
-    swap_objects(sys.argv[0], sys.argv[1])
+
+    for arg in sys.argv:
+        print(arg)
+    swap_two_files(sys.argv[1], sys.argv[2])
 
 if __name__ == '__main__':
     main()
