@@ -39,10 +39,10 @@ class AprilTag():
         images = os.listdir(dirpath)
         print(images)
         for fname in images:
-            print(fname)
+            print(fname, cv2.haveImageReader(os.path.join(dirpath, fname)))
             print(os.path.join(dirpath, fname))
             cv2.imshow("test",cv2.imread(os.path.join(dirpath, fname)))
-            img = cv2.resize(cv2.imread(os.path.join(dirpath, fname)), RES)
+            img = cv2.resize(cv2.imread(os.path.join(dirpath, fname)),RES)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             # Find the chess board corners
             ret, corners = cv2.findChessboardCorners(gray, (width, height), None)
@@ -64,6 +64,7 @@ class AprilTag():
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
         self.camera_matrix = mtx
         self.dist_coeffs = dist
+        print("done, not saved")
 
         np.save(self.header+'calibration_data/camera3_matrix.npy',mtx)
         np.save(self.header+'calibration_data/camera3_dist.npy',dist)

@@ -18,7 +18,7 @@ CAM_ANGLE = -15
 input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE)
 tag_module = AprilTag()
 ARUCO_LENGTH_METERS = 0.165
-tag_module.calibrate(RES,'/Users/sharvil/FRC2024-Offseason/src/main/python/charuco_images',ARUCO_LENGTH_METERS/9,6,9,True)
+tag_module.calibrate(RES,'/Users/sharvil/FRC2024-Offseason/src/main/python/charuco_images_jpeg',ARUCO_LENGTH_METERS/9,6,9,True)
 
 
 while True:
