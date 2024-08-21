@@ -1,6 +1,6 @@
 *.pyc
 
-*.jpg
+#*.jpg
 *.png
 *.dat
 
