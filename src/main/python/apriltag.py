@@ -19,8 +19,8 @@ class AprilTag():
         self.dist_coeffs = np.load(self.header+'calibration_data/camera1_dist.npy')
         self.detector = apriltag.Detector(families="tag36h11", nthreads=4) 
         pass
-
-    def calibrate(self, RES, dirpath, square_size, width, height, visualize=False):
+    #removed parameter: square_size
+    def calibrate(self, RES, dirpath, width, height, visualize=False):
         """ Apply camera calibration operation for images in the given directory path. """
 
         # termination criteria
@@ -30,7 +30,7 @@ class AprilTag():
         objp = np.zeros((height*width, 3), np.float32)
         objp[:, :2] = np.mgrid[0:width, 0:height].T.reshape(-1, 2)
 
-        objp = objp * square_size
+        #objp = objp * square_size
 
         # Arrays to store object points and image points from all the images.
         objpoints = []  # 3d point in real world space
@@ -40,8 +40,6 @@ class AprilTag():
         print(images)
         for fname in images:
             print(fname, cv2.haveImageReader(os.path.join(dirpath, fname)))
-            print(os.path.join(dirpath, fname))
-            cv2.imshow("test",cv2.imread(os.path.join(dirpath, fname)))
             img = cv2.resize(cv2.imread(os.path.join(dirpath, fname)),RES)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             # Find the chess board corners
@@ -53,11 +51,14 @@ class AprilTag():
 
                 corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
                 imgpoints.append(corners2)
-
                 # Draw and display the corners
                 img = cv2.drawChessboardCorners(img, (width, height), corners2, ret)
 
             if visualize:
+                if ret:
+                    print('found chessboard corners')
+                else:
+                    print('did not find chessboard corners')
                 cv2.imshow('img',img)
                 cv2.waitKey(0)
 

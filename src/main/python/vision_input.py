@@ -5,13 +5,13 @@ import time
 
 
 class VisionInput:
-    def __init__(self, fov, res: tuple, cam_height, cam_angle):
+    def __init__(self, fov, res: tuple, cam_height, cam_angle,cam_index = 1):
         self.fov = fov
         self.w = res[0]
         self.h = res[1]
         self.cam_h = cam_height
         self.cam_a = cam_angle
-        self.cap = cv2.VideoCapture(1)
+        self.cap = cv2.VideoCapture(cam_index)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, res[0])
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, res[1])
         
