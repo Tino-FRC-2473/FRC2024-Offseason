@@ -12,13 +12,13 @@ import cv2
 #inst.setServerTeam(2473)
 
 FOV = (50.28, 29.16)
-RES = (640 , 480)
+RES = (1280 , 800)
 CAM_HEIGHT = 0.4
 CAM_ANGLE = -15
 input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE,0)
 tag_module = AprilTag()
 ARUCO_LENGTH_METERS = 0.165
-tag_module.calibrate(RES,'/Users/sharvil/FRC2024-Offseason/src/main/python/charuco_images_jpeg',6,9,True)
+tag_module.calibrate(RES,'/Users/sharvil/FRC2024-Offseason/src/main/python/charuco_images_jpeg',6,9,ARUCO_LENGTH_METERS/9,True)
 
 
 while True:
@@ -56,4 +56,4 @@ while True:
         break
     except Exception as error:
         print("An exception occurred:", error)
-    print('Loop time: ' + str(time.time()-p))
+    #print('Loop time: ' + str(time.time()-p))

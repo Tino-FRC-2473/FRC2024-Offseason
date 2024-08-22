@@ -19,8 +19,7 @@ class AprilTag():
         self.dist_coeffs = np.load(self.header+'calibration_data/camera1_dist.npy')
         self.detector = apriltag.Detector(families="tag36h11", nthreads=4) 
         pass
-    #removed parameter: square_size
-    def calibrate(self, RES, dirpath, width, height, visualize=False):
+    def calibrate(self, RES, dirpath, width, height, square_size, visualize=False):
         """ Apply camera calibration operation for images in the given directory path. """
 
         # termination criteria
@@ -30,7 +29,7 @@ class AprilTag():
         objp = np.zeros((height*width, 3), np.float32)
         objp[:, :2] = np.mgrid[0:width, 0:height].T.reshape(-1, 2)
 
-        #objp = objp * square_size
+        objp = objp * square_size
 
         # Arrays to store object points and image points from all the images.
         objpoints = []  # 3d point in real world space
