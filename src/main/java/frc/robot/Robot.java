@@ -3,9 +3,8 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 
+// WPILib Imports
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
@@ -14,16 +13,20 @@ import edu.wpi.first.cscore.VideoSink;
 import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.Encoder;
-// WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
+// Third Party Imports
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
+// Systems
 import frc.robot.systems.ClimberMechFSMLeft;
 import frc.robot.systems.ClimberMechFSMRight;
-// Systems
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.MBRFSMv2;
 import frc.robot.systems.ShooterFSMSystem;
@@ -103,7 +106,7 @@ public class Robot extends TimedRobot {
 			streamHeight, streamFPS);
 		driverCam.setVideoMode(videoMode);
 		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-		//driverCam.setResolution(streamWidth, streamHeight);
+		driverCam.setResolution(streamWidth, streamHeight);
 
 		//Label all named commands here
 	}
@@ -126,7 +129,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousPeriodic() {
 		CommandScheduler.getInstance().run();
-		// driveFSMSystem.updateAutonomous();
+		driveFSMSystem.updateAutonomous();
 		mField.setRobotPose(driveFSMSystem.getPose());
 	}
 

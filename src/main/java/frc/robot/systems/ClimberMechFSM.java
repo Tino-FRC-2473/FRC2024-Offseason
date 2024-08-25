@@ -3,7 +3,6 @@ package frc.robot.systems;
 // WPILib Imports
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
 
@@ -32,7 +31,7 @@ public class ClimberMechFSM {
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
 	private CANSparkMax motorLeft;
-    private CANSparkMax motorRight;
+	private CANSparkMax motorRight;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -45,12 +44,10 @@ public class ClimberMechFSM {
 		motorLeft = new CANSparkMax(HardwareMap.LEFT_CLIMBER_CAN_ID,
 						CANSparkMax.MotorType.kBrushless);
 		motorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
-		motorLeft.getEncoder().setPosition(0);
 
-        motorRight = new CANSparkMax(HardwareMap.RIGHT_CLIMBER_CAN_ID,
+		motorRight = new CANSparkMax(HardwareMap.RIGHT_CLIMBER_CAN_ID,
 						CANSparkMax.MotorType.kBrushless);
 		motorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
-		motorRight.getEncoder().setPosition(0);
 
 		// Reset state machine
 		reset();
@@ -74,6 +71,8 @@ public class ClimberMechFSM {
 	 */
 	public void reset() {
 		currentState = ClimberMechFSMState.IDLE_STOP;
+		motorLeft.getEncoder().setPosition(0);
+		motorRight.getEncoder().setPosition(0);
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
@@ -124,31 +123,33 @@ public class ClimberMechFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private ClimberMechFSMState nextState(TeleopInput input) {
-        double currentEncoderLeft = -motorLeft.getEncoder().getPosition();
-        double currentEncoderRight = motorRight.getEncoder().getPosition();
+		double currentEncoderLeft = -motorLeft.getEncoder().getPosition();
+		double currentEncoderRight = motorRight.getEncoder().getPosition();
 
 		switch (currentState) {
 			case IDLE_STOP:
-				if (input.synchClimberTrigger() && 
-                    (HOOKS_UP_ENCODER <= currentEncoderLeft && currentEncoderLeft < CHAIN_ENCODER) &&
-                    (HOOKS_UP_ENCODER <= currentEncoderRight && currentEncoderRight < CHAIN_ENCODER)) {
+				if (input.synchClimberTrigger() && (HOOKS_UP_ENCODER <= currentEncoderLeft
+					&& currentEncoderLeft < CHAIN_ENCODER)
+					&& (HOOKS_UP_ENCODER <= currentEncoderRight
+					&& currentEncoderRight < CHAIN_ENCODER)) {
 					return ClimberMechFSMState.CLIMBING;
-				} else if (input.isHooksUpButtonPressed() && 
-                    (currentEncoderLeft <= HOOKS_UP_ENCODER && currentEncoderRight <= HOOKS_UP_ENCODER)) {
+				} else if (input.isHooksUpButtonPressed()
+					&& (currentEncoderLeft <= HOOKS_UP_ENCODER
+					&& currentEncoderRight <= HOOKS_UP_ENCODER)) {
 					return ClimberMechFSMState.HOOKS_UP;
 				} else {
 					return ClimberMechFSMState.IDLE_STOP;
 				}
 			case CLIMBING:
-				if (input.synchClimberTrigger() && 
-				(currentEncoderLeft <= CHAIN_ENCODER && currentEncoderRight <= CHAIN_ENCODER)) {
+				if (input.synchClimberTrigger() && (currentEncoderLeft <= CHAIN_ENCODER
+					&& currentEncoderRight <= CHAIN_ENCODER)) {
 					return ClimberMechFSMState.CLIMBING;
 				} else {
 					return ClimberMechFSMState.IDLE_STOP;
 				}
 			case HOOKS_UP:
-				if (input.isHooksUpButtonPressed() && 
-					(currentEncoderLeft <= HOOKS_UP_ENCODER && currentEncoderRight <= HOOKS_UP_ENCODER)) {
+				if (input.isHooksUpButtonPressed() && (currentEncoderLeft <= HOOKS_UP_ENCODER
+					&& currentEncoderRight <= HOOKS_UP_ENCODER)) {
 					return ClimberMechFSMState.HOOKS_UP;
 				} else {
 					return ClimberMechFSMState.IDLE_STOP;
@@ -166,7 +167,7 @@ public class ClimberMechFSM {
 	 */
 	private void handleIdleState(TeleopInput input) {
 		motorLeft.set(0);
-        motorRight.set(0);
+		motorRight.set(0);
 	}
 	/**
 	 * Handle behavior in CLIMBING state.
@@ -180,7 +181,7 @@ public class ClimberMechFSM {
 			motorLeft.set(0);
 		}
 
-        if (motorRight.getEncoder().getPosition() <= CHAIN_ENCODER) {
+		if (motorRight.getEncoder().getPosition() <= CHAIN_ENCODER) {
 			motorRight.set(SYNCH_MOTOR_POWER);
 		} else {
 			motorRight.set(0);
@@ -198,7 +199,7 @@ public class ClimberMechFSM {
 			motorLeft.set(0);
 		}
 
-        if (motorRight.getEncoder().getPosition() <= HOOKS_UP_ENCODER) {
+		if (motorRight.getEncoder().getPosition() <= HOOKS_UP_ENCODER) {
 			motorRight.set(UP_MOTOR_POWER);
 		} else {
 			motorRight.set(0);
