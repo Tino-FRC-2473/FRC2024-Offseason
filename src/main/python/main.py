@@ -1,55 +1,60 @@
+import cv2
+import numpy as np
+from detector import Detector
 from vision_input import VisionInput
-from apriltag import AprilTag
 import time
 import ntcore
-import numpy as np
-import cv2
 
 inst = ntcore.NetworkTableInstance.getDefault()
 inst.startClient4("python")
 inst.setServerTeam(2473)
 
 FOV = (50.28, 29.16)
-RES = (640 , 480)
-CAM_HEIGHT = 0.4
-CAM_ANGLE = -15
+RES = (320, 240)
+CAM_HEIGHT = 0.7493
+CAM_ANGLE = 50
+d = Detector()
 input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE)
-tag_module = AprilTag()
-ARUCO_LENGTH_METERS = 0.165
+cnt = 0
+p = 0
+
 
 while True:
     p = time.time()
-    try: 
-        frame = input.getFrame()
-
-        annotated_frame = frame.copy()
-        tagData = tag_module.estimate_3d_pose(frame, annotated_frame, ARUCO_LENGTH_METERS)
-        annotated_frame = cv2.resize(annotated_frame, (320,240))
-        
-        pose_list = [4000 for _ in range(16 * 6)]
-        for key, value in tagData.items():
-            pose_list[(key - 1) * 6 : (key * 6)] = np.concatenate((value[0].flatten(), value[1].flatten()), axis=0).tolist()
-            
+    try:
         table = inst.getTable("datatable")
+        noteY = table.getDoubleTopic("note_yaw").publish()
+        noteD = table.getDoubleTopic("note_distance").publish()
 
-        xPub = table.getDoubleTopic("fps_incremented_value").publish()
-        xPub.set(frame.sum())
+        frame = input.getFrame()
+        results = d.detectGameElement(np.asarray(frame), ["RING"])
 
-        tagDataPub = table.getDoubleArrayTopic("april_tag_data").publish()
-        tagDataPub.set(pose_list)
-        
-        # outputStreamPub = table.getDoubleArrayTopic("output_stream").publish()
-        # outputStreamPub.set(annotated_frame.flatten().tolist())
+        if results is not None:
+            for type, target in results.items():
+                
+                if target is not None:
+                    yaw = target.get_yaw_degrees()
+                    distance = target.get_distance_meters()
+                    pitch = target.get_pitch_degrees()
+                    noteY.set(yaw)
+                    noteD.set(distance)
+                    # print("yaw: ", yaw)
+                    # print("distance: ", distance)
+                    # print("pitch: ", pitch)
 
-        cv2.imshow('result', annotated_frame)
+        cv2.imshow('result', frame)
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
-        time.sleep(0.02)
+        # time.sleep(0.02)
     except KeyboardInterrupt:
         print("keyboard interrupt")
         input.close()
-        break
+        break 
     except Exception as error:
         print("An exception occurred:", error)
-    print('Loop time: ' + str(time.time()-p))
+        input.close()
+        break
+
+
+   
