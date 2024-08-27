@@ -51,8 +51,6 @@ public class MBRFSMv2 {
 	private Encoder throughBore;
 	private Timer timer;
 
-
-
 	/* ======================== Constructor ======================== */
 	/**
 	 * Create PivotFSM and initialize to starting state. Also perform any
@@ -61,10 +59,10 @@ public class MBRFSMv2 {
 	 */
 	public MBRFSMv2() {
 		shooterLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_LSHOOTER_MOTOR,
-										CANSparkMax.MotorType.kBrushless);
+				CANSparkMax.MotorType.kBrushless);
 
 		shooterRightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_RSHOOTER_MOTOR,
-										CANSparkMax.MotorType.kBrushless);
+				CANSparkMax.MotorType.kBrushless);
 		intakeMotor = new TalonFX(HardwareMap.DEVICE_ID_INTAKE_MOTOR);
 		intakeMotor.setNeutralMode(NeutralModeValue.Brake);
 
@@ -86,11 +84,13 @@ public class MBRFSMv2 {
 	/* ======================== Public methods ======================== */
 	/**
 	 * Return current FSM state.
+	 * 
 	 * @return Current FSM state
 	 */
 	public MBRFSMState getCurrentState() {
 		return currentState;
 	}
+
 	/**
 	 * Reset this system to its start state. This may be called from mode init
 	 * when the robot is enabled.
@@ -113,16 +113,16 @@ public class MBRFSMv2 {
 	/**
 	 * Update FSM based on new inputs. This function only calls the FSM state
 	 * specific handlers.
+	 * 
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
 		if (input == null) {
 			return;
 		}
 
-		currLogs[tick % MechConstants.AVERAGE_SIZE] =
-			intakeMotor.getSupplyCurrent().getValueAsDouble();
+		currLogs[tick % MechConstants.AVERAGE_SIZE] = intakeMotor.getSupplyCurrent().getValueAsDouble();
 
 		tick++;
 
@@ -132,19 +132,20 @@ public class MBRFSMv2 {
 		}
 		avgcone /= MechConstants.AVERAGE_SIZE;
 
-		//SmartDashboard.putNumber("avg current", avgcone);
+		// SmartDashboard.putNumber("avg current", avgcone);
 		SmartDashboard.putBoolean("holding", holding);
 		SmartDashboard.putString("TeleOP STATE", currentState.toString());
-		//SmartDashboard.putBoolean("Input button pressed", input.isIntakeButtonPressed());
+		// SmartDashboard.putBoolean("Input button pressed",
+		// input.isIntakeButtonPressed());
 		SmartDashboard.putNumber("CurrentNoteFrames", noteColorFrames);
 		SmartDashboard.putString("Current State", getCurrentState().toString());
 		SmartDashboard.putNumber("CurrentIntakeMotor", intakeMotor.get());
 		SmartDashboard.putNumber("Intake power", intakeMotor.get());
 		SmartDashboard.putNumber("Pivot power", pivotMotor.get());
-		//SmartDashboard.putNumber("Left shooter power", shooterLeftMotor.get());
-		//SmartDashboard.putNumber("Right shooter power", shooterRightMotor.get());
+		// SmartDashboard.putNumber("Left shooter power", shooterLeftMotor.get());
+		// SmartDashboard.putNumber("Right shooter power", shooterRightMotor.get());
 		SmartDashboard.putNumber("Pivot encoder count", throughBore.getDistance());
-		//SmartDashboard.putNumber("Proximity", colorSensor.getProximity());
+		// SmartDashboard.putNumber("Proximity", colorSensor.getProximity());
 		SmartDashboard.putBoolean("HASNOTE --- ", hasNote());
 
 		switch (currentState) {
@@ -170,38 +171,38 @@ public class MBRFSMv2 {
 		currentState = nextState(input);
 	}
 
-	///**
+	/// **
 	// * Performs specific action based on the autoState passed in.
 	// * @param autoState autoState that the subsystem executes.
 	// * @return if the action carried out in this state has finished executing
 	// */
 	// public boolean updateAutonomous(AutoFSMState autoState) {
-	// 	switch (autoState) {
-	// 		case NOTE1:
-	// 			return handleAutoMoveGround() && handleAutoIntake();
-	// 		case NOTE2:
-	// 			return handleAutoMoveGround() && handleAutoIntake();
-	// 		case NOTE3:
-	// 			return handleAutoMoveGround() && handleAutoIntake();
-	// 		case NOTE4:
-	// 			return handleAutoMoveGround() && handleAutoIntake();
-	// 		case NOTE5:
-	// 			return handleAutoMoveGround() && handleAutoIntake();
-	// 		case NOTE6:
-	// 			return handleAutoMoveGround() && handleAutoIntake();
-	// 		case NOTE7:
-	// 			return handleAutoMoveGround() && handleAutoIntake();
-	// 		case NOTE8:
-	// 			return handleAutoMoveGround() && handleAutoIntake();
-	// 		case SPEAKER:
-	// 			return handleAutoMoveShooter() & handleAutoRev();
-	// 		case SHOOT:
-	// 			return handleAutoShoot();
-	// 		case SHOOT_PRELOADED:
-	// 			return handleAutoShootPreloaded();
-	// 		default:
-	// 			return true;
-	// 	}
+	// switch (autoState) {
+	// case NOTE1:
+	// return handleAutoMoveGround() && handleAutoIntake();
+	// case NOTE2:
+	// return handleAutoMoveGround() && handleAutoIntake();
+	// case NOTE3:
+	// return handleAutoMoveGround() && handleAutoIntake();
+	// case NOTE4:
+	// return handleAutoMoveGround() && handleAutoIntake();
+	// case NOTE5:
+	// return handleAutoMoveGround() && handleAutoIntake();
+	// case NOTE6:
+	// return handleAutoMoveGround() && handleAutoIntake();
+	// case NOTE7:
+	// return handleAutoMoveGround() && handleAutoIntake();
+	// case NOTE8:
+	// return handleAutoMoveGround() && handleAutoIntake();
+	// case SPEAKER:
+	// return handleAutoMoveShooter() & handleAutoRev();
+	// case SHOOT:
+	// return handleAutoShoot();
+	// case SHOOT_PRELOADED:
+	// return handleAutoShootPreloaded();
+	// default:
+	// return true;
+	// }
 	// }
 
 	/* ======================== Private methods ======================== */
@@ -210,30 +211,31 @@ public class MBRFSMv2 {
 	 * and the current state of this FSM. This method should not have any side
 	 * effects on outputs. In other words, this method should only read or get
 	 * values to decide what state to go to.
+	 * 
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 * @return FSM state for the next iteration
 	 */
 	private MBRFSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case MOVE_TO_SHOOTER:
 				if (input.isIntakeButtonPressed() && !input.isShootButtonPressed()
-					&& !input.isRevButtonPressed() && !input.isAmpButtonPressed()
-					&& !holding) {
+						&& !input.isRevButtonPressed() && !input.isAmpButtonPressed()
+						&& !holding) {
 					return MBRFSMState.MOVE_TO_GROUND;
 				}
 
 				if (input.isAmpButtonPressed() && !input.isIntakeButtonPressed()
-					&& !input.isShootButtonPressed()
-					&& !input.isRevButtonPressed()) {
+						&& !input.isShootButtonPressed()
+						&& !input.isRevButtonPressed()) {
 					return MBRFSMState.MOVE_TO_AMP;
 				}
 
 				if (!input.isIntakeButtonPressed() && !input.isAmpButtonPressed()
-					&& (input.isShootButtonPressed()
-					|| input.isRevButtonPressed())) {
+						&& (input.isShootButtonPressed()
+								|| input.isRevButtonPressed())) {
 					if (inRange(throughBore.getDistance(),
-						MechConstants.SHOOTER_ENCODER_ROTATIONS)) {
+							MechConstants.SHOOTER_ENCODER_ROTATIONS)) {
 						holding = false;
 
 						return MBRFSMState.SHOOTING;
@@ -244,9 +246,9 @@ public class MBRFSMv2 {
 				return MBRFSMState.MOVE_TO_SHOOTER;
 			case MOVE_TO_GROUND:
 				if (input.isIntakeButtonPressed() && !input.isShootButtonPressed()
-					&& !input.isRevButtonPressed() && !input.isAmpButtonPressed()) {
+						&& !input.isRevButtonPressed() && !input.isAmpButtonPressed()) {
 					if (inRange(throughBore.getDistance(),
-						MechConstants.GROUND_ENCODER_ROTATIONS)) {
+							MechConstants.GROUND_ENCODER_ROTATIONS)) {
 						return MBRFSMState.INTAKING;
 					} else {
 						return MBRFSMState.MOVE_TO_GROUND;
@@ -255,19 +257,19 @@ public class MBRFSMv2 {
 				return MBRFSMState.MOVE_TO_SHOOTER;
 			case INTAKING:
 				if (input.isIntakeButtonPressed() && !input.isShootButtonPressed()
-					&& !input.isRevButtonPressed() && !input.isAmpButtonPressed()) {
+						&& !input.isRevButtonPressed() && !input.isAmpButtonPressed()) {
 					return MBRFSMState.INTAKING;
 				}
 				return MBRFSMState.MOVE_TO_SHOOTER;
 			case SHOOTING:
 				if (!input.isIntakeButtonPressed() && (input.isShootButtonPressed()
-					|| input.isRevButtonPressed()) && !input.isAmpButtonPressed()) {
+						|| input.isRevButtonPressed()) && !input.isAmpButtonPressed()) {
 					return MBRFSMState.SHOOTING;
 				}
 				return MBRFSMState.MOVE_TO_SHOOTER;
 			case MOVE_TO_AMP:
 				if (input.isAmpButtonPressed() && !input.isShootButtonPressed()
-					&& !input.isRevButtonPressed() && !input.isIntakeButtonPressed()) {
+						&& !input.isRevButtonPressed() && !input.isIntakeButtonPressed()) {
 					return MBRFSMState.MOVE_TO_AMP;
 				}
 				return MBRFSMState.MOVE_TO_SHOOTER;
@@ -279,27 +281,30 @@ public class MBRFSMv2 {
 	/* ------------------------ Command handlers ------------------------ */
 
 	private boolean inRange(double a, double b) {
-		return Math.abs(a - b) < MechConstants.INRANGE_VALUE; //EXPERIMENTAL
+		return Math.abs(a - b) < MechConstants.INRANGE_VALUE; // EXPERIMENTAL
 	}
 
 	private double pid(double currentEncoderPID, double targetEncoder) {
 		double correction = MechConstants.PID_CONSTANT_PIVOT_P
-			* (targetEncoder - currentEncoderPID);
+				* (targetEncoder - currentEncoderPID);
 		return Math.min(MechConstants.MAX_TURN_SPEED,
-			Math.max(MechConstants.MIN_TURN_SPEED, correction));
+				Math.max(MechConstants.MIN_TURN_SPEED, correction));
 	}
 
 	private double pidAuto(double currentEncoderPID, double targetEncoder) {
 		double correction = MechConstants.PID_CONSTANT_PIVOT_P_AUTO
-			* (targetEncoder - currentEncoderPID);
+				* (targetEncoder - currentEncoderPID);
 		return Math.min(MechConstants.MAX_TURN_SPEED_AUTO,
-			Math.max(MechConstants.MIN_TURN_SPEED_AUTO, correction));
+				Math.max(MechConstants.MIN_TURN_SPEED_AUTO, correction));
 	}
 
-	/* ---------------------------- FSM State Handlers ---------------------------- */
+	/*
+	 * ---------------------------- FSM State Handlers ----------------------------
+	 */
 
 	/**
 	 * Handles the moving to shooter state of the MBR Mech.
+	 * 
 	 * @param input
 	 */
 	public void handleMoveShooterState(TeleopInput input) {
@@ -324,8 +329,9 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the moving to ground state of the MBR Mech.
+	 * 
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 */
 	public void handleMoveGroundState(TeleopInput input) {
 		led.orangeLight(false);
@@ -344,8 +350,9 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the intaking state of the MBR Mech.
+	 * 
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 */
 	public void handleIntakingState(TeleopInput input) {
 		if (!holding) {
@@ -370,8 +377,9 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the shooting state of the MBR Mech.
+	 * 
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 */
 	public void handleShootingState(TeleopInput input) {
 		led.blueLight();
@@ -391,11 +399,12 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the moving to Amp state of the MBR Mech.
+	 * 
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 */
 	public void handleMoveAmpState(TeleopInput input) {
-		//led.greenLight(false);
+		// led.greenLight(false);
 		// shooterLeftMotor.set(0);
 		// shooterRightMotor.set(0);
 		if (!holding) {
@@ -406,22 +415,23 @@ public class MBRFSMv2 {
 
 		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.AMP_ENCODER_ROTATIONS));
 		// if (input.isShootAmpButtonPressed()) {
-		// 	intakeMotor.set(AMP_SHOOT_POWER);
+		// intakeMotor.set(AMP_SHOOT_POWER);
 		// } else {
-		// 	intakeMotor.set(0);
+		// intakeMotor.set(0);
 		// }
 
-		//if (input.isAmpButtonPressed() && !input.isShootAmpButtonPressed()) {
-		//	shooterLeftMotor.set(-MechConstants.AMP_SHOOTER_POWER); // dont forget the - sign
-		//	shooterRightMotor.set(MechConstants.AMP_SHOOTER_POWER);
-		//	intakeMotor.set(0);
-		//}
+		// if (input.isAmpButtonPressed() && !input.isShootAmpButtonPressed()) {
+		// shooterLeftMotor.set(-MechConstants.AMP_SHOOTER_POWER); // dont forget the -
+		// sign
+		// shooterRightMotor.set(MechConstants.AMP_SHOOTER_POWER);
+		// intakeMotor.set(0);
+		// }
 
-		//if (input.isAmpButtonPressed() && input.isShootAmpButtonPressed()) {
-		//	shooterLeftMotor.set(-MechConstants.AMP_SHOOTER_POWER);
-		//	shooterRightMotor.set(MechConstants.AMP_SHOOTER_POWER);
-		//	intakeMotor.set(MechConstants.AMP_OUTTAKE_POWER);
-		//}
+		// if (input.isAmpButtonPressed() && input.isShootAmpButtonPressed()) {
+		// shooterLeftMotor.set(-MechConstants.AMP_SHOOTER_POWER);
+		// shooterRightMotor.set(MechConstants.AMP_SHOOTER_POWER);
+		// intakeMotor.set(MechConstants.AMP_OUTTAKE_POWER);
+		// }
 
 		if (input.isManualIntakeButtonPressed() && !input.isManualOuttakeButtonPressed()) {
 			intakeMotor.set(MechConstants.MANUAL_INTAKE_POWER);
@@ -432,9 +442,9 @@ public class MBRFSMv2 {
 		}
 	}
 
-
 	/**
 	 * Handles the Auto Move to Ground state of the MBR Mech.
+	 * 
 	 * @return if the pivot is at the correct position
 	 */
 	public boolean handleAutoMoveGround() {
@@ -445,6 +455,7 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the Auto Move to Shooter state of the MBR Mech.
+	 * 
 	 * @return if the pivot is at the correct position
 	 */
 	public boolean handleAutoMoveShooter() {
@@ -461,6 +472,7 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the Auto Rev state of the MBR Mech.
+	 * 
 	 * @return if the action is completed
 	 */
 	public boolean handleAutoRev() {
@@ -476,6 +488,7 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the Auto Shoot state of the MBR Mech.
+	 * 
 	 * @return if the action is completed
 	 */
 	public boolean handleAutoShoot() {
@@ -500,6 +513,7 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the Auto Shoot state for a preloaded note.
+	 * 
 	 * @return if the action is completed
 	 */
 	public boolean handleAutoShootPreloaded() {
@@ -529,6 +543,7 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the Auto Intake state of the MBR Mech.
+	 * 
 	 * @return if the action is completed
 	 */
 	public boolean handleAutoIntake() {
@@ -540,6 +555,7 @@ public class MBRFSMv2 {
 
 	/**
 	 * Handles the Auto Outtake state of the MBR Mech.
+	 * 
 	 * @return if the action is completed
 	 */
 	public boolean handleAutoOuttake() {
@@ -550,6 +566,7 @@ public class MBRFSMv2 {
 
 	/**
 	 * Checks if the intake is holding a note.
+	 * 
 	 * @return if the intake is holding a note
 	 */
 	public boolean hasNote() {
@@ -683,6 +700,7 @@ public class MBRFSMv2 {
 			led.orangeLight(false);
 			timerSub.start();
 		}
+
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
@@ -694,7 +712,7 @@ public class MBRFSMv2 {
 		// Returns true when the command should end.
 		@Override
 		public boolean isFinished() {
-			return handleAutoIntake();
+			return handleAutoIntake() || timerSub.get() >= 1.3f;
 		}
 	}
 
@@ -785,11 +803,12 @@ public class MBRFSMv2 {
 		public boolean isFinished() {
 			return handleAutoRev();
 		}
+
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
-			//setShooterLeftMotorPower(0);
-			//setShooterRightMotorPower(0);
+			// setShooterLeftMotorPower(0);
+			// setShooterRightMotorPower(0);
 		}
 	}
 
@@ -822,6 +841,7 @@ public class MBRFSMv2 {
 		public boolean isFinished() {
 			return handleAutoOuttake() || timerSub.get() >= MechConstants.OUTTAKE_AUTO_TIMER;
 		}
+
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
