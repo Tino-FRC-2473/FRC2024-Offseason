@@ -15,10 +15,16 @@ FOV = (50.28, 29.16)
 RES = (1280 , 800)
 CAM_HEIGHT = 0.4
 CAM_ANGLE = -15
-input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE,0)
+input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE,1)
 tag_module = AprilTag()
 ARUCO_LENGTH_METERS = 0.165
-tag_module.calibrate(RES,'/Users/sharvil/FRC2024-Offseason/src/main/python/charuco_images_jpeg',6,9,ARUCO_LENGTH_METERS/9,True)
+tag_module.calibrate(RES,'/Users/jaseer/Documents/GitHub/FRC2024-Offseason/src/main/python/charuco_images_jpeg',6,9,ARUCO_LENGTH_METERS/9,True)
+
+
+def printAprilTagData(tagData):
+    data = list(tagData.values())
+    if len(data) > 0:
+        print('\r'+str(data[0]))
 
 
 while True:
@@ -28,6 +34,7 @@ while True:
 
         annotated_frame = frame.copy()
         tagData = tag_module.estimate_3d_pose(frame, annotated_frame, ARUCO_LENGTH_METERS)
+        printAprilTagData(tagData)
         annotated_frame = cv2.resize(annotated_frame, (320,240))
         
         pose_list = [4000 for _ in range(16 * 6)]
@@ -54,6 +61,8 @@ while True:
         print("keyboard interrupt")
         input.close()
         break
-    except Exception as error:
-        print("An exception occurred:", error)
+    except Exception as e:
+        print("An exception occurred:", e)
+        #raise e
+        
     #print('Loop time: ' + str(time.time()-p))

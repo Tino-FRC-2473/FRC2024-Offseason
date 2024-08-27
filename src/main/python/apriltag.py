@@ -5,8 +5,6 @@ import math
 import pupil_apriltags as apriltag
 
 
-
-
 # basically fixes the intrinsic parameters and is the class that returns the 3D stuff
 # printed 3dpose --> tvec (x: left/right, y: up/down, z: front/back), rvec
 # max z is 20 feet (detects, but not necessarily accurate); max x is 1 foot on either side
@@ -14,7 +12,7 @@ import pupil_apriltags as apriltag
 class AprilTag():
 
     def __init__(self):
-        self.header = '/Users/sharvil/FRC2024-Offseason/src/main/python/'
+        self.header = '/Users/jaseer/Documents/GitHub/FRC2024-Offseason/src/main/python/'
         self.camera_matrix = np.load(self.header+'calibration_data/camera1_matrix.npy')
         self.dist_coeffs = np.load(self.header+'calibration_data/camera1_dist.npy')
         self.detector = apriltag.Detector(families="tag36h11", nthreads=4) 
@@ -64,7 +62,6 @@ class AprilTag():
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
         self.camera_matrix = mtx
         self.dist_coeffs = dist
-        print("done, not saved")
 
         np.save(self.header+'calibration_data/camera3_matrix.npy',mtx)
         np.save(self.header+'calibration_data/camera3_dist.npy',dist)
@@ -107,7 +104,7 @@ class AprilTag():
         try:
             # Define the 3D coordinates of the marker corners in the marker coordinate system
             marker_points_3d = np.array([[-marker_size/2, -marker_size/2, 0], [marker_size/2, -marker_size/2, 0], [marker_size/2, marker_size/2, 0], [-marker_size/2, marker_size/2, 0]], dtype=np.float32)
-            #marker_points_3d = np.array([[0,0,0], [marker_size,0,0], [marker_size, marker_size, 0], [0, marker_size, 0]])
+            # marker_points_3d = np.array([[0,0,0], [marker_size,0,0], [marker_size, marker_size, 0], [0, marker_size, 0]])
             # Convert image points to float32
             image_points_2d = corners
 
@@ -125,24 +122,23 @@ class AprilTag():
 
     def estimate_3d_pose(self, image, frame_ann, ARUCO_LENGTH_METERS):
 
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-            results = self.detector.detect(gray)
-            ids = [r.tag_id for r in results]
-            corners = [r.corners for r in results]
+        results = self.detector.detect(gray)
+        ids = [r.tag_id for r in results]
+        corners = [r.corners for r in results]
 
-            pose_data = {}
-            num_tags = len(ids) if ids is not None else 0
-            if num_tags != 0:
-                # Estimate the pose of each detected marker
-                for i in range(len(ids)):
-                    # Estimate the pose
-                    tvec, rvec, cvec= self.estimate_pose_single_marker(corners[i], ARUCO_LENGTH_METERS, self.camera_matrix, self.dist_coeffs)
-                    
-                    pose_data[ids[i]] = (cvec, tvec)
-                    
-                    self.draw_axis_on_image(frame_ann, self.camera_matrix, self.dist_coeffs, rvec, tvec, cvec, 0.1)
+        pose_data = {}
+        num_tags = len(ids) if ids is not None else 0
+        if num_tags != 0:
+            # Estimate the pose of each detected marker
+            for i in range(len(ids)):
+                # Estimate the pose
+                tvec, rvec, cvec= self.estimate_pose_single_marker(corners[i], ARUCO_LENGTH_METERS, self.camera_matrix, self.dist_coeffs)
 
-            return pose_data
+                # pose_data[ids[i]] = (cvec, tvec)
+                pose_data[ids[i]] = (tvec, rvec, cvec)
 
+                self.draw_axis_on_image(frame_ann, self.camera_matrix, self.dist_coeffs, rvec, tvec, cvec, 0.1)
 
+        return pose_data
