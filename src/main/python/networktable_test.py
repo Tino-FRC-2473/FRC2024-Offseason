@@ -16,13 +16,9 @@ class EasyNetworkTableExample(wpilib.TimedRobot):
         # Start publishing topics within that table that correspond to the X and Y values
         # for some operation in your program.
         # The topic names are actually "/datatable/x" and "/datatable/y".
-        self.xPub = table.getDoubleTopic("x").publish
+        self.xPub = table.getDoubleTopic("testY").publish()
         
-        self.yPub = table.getDoubleTopic("y").publish()
+        self.yPub = table.getDoubleTopic("testX").publish()
 
         self.x = 0
-        self.y = 0
-
-    def teleopPeriodic(self) -> None:
-        # Publish values that are constantly increasing.
-        
+        self.y = 0        

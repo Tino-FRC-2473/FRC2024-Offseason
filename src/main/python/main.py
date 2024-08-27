@@ -61,6 +61,7 @@ while True:
             yPub.set(y)
             x += 0.05
             y += 1.0
+            time.sleep(1)
 
         # cv2.imshow('result', annotated_frame)
         # key = cv2.waitKey(1) & 0xFF
