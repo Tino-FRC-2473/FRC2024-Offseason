@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
 	private Command autonomousCommand;
 	private final Field2d mField = new Field2d();
 
+	private RaspberryPI raspberryPi;
 	private UsbCamera driverCam;
 	private UsbCamera chainCam;
 	private VideoSink videoSink;
@@ -70,6 +71,7 @@ public class Robot extends TimedRobot {
 		mbrfsMv2 = new MBRFSMv2();
 		chainLeftFSM = new ClimberMechFSMLeft();
 		chainRightFSM = new ClimberMechFSMRight();
+		raspberryPi = new RaspberryPI();
 
 		NamedCommands.registerCommand("S_TIN", mbrfsMv2.new IntakeNoteCommand());
 		NamedCommands.registerCommand("S_TON", mbrfsMv2.new OuttakeNoteCommand());
