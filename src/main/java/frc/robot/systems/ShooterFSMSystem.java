@@ -257,14 +257,18 @@ public class ShooterFSMSystem {
 		if (timer.get() < MechConstants.AUTO_PRELOAD_REVVING_TIME) {
 			// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
 			// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-			shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(MechConstants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVelocityVoltage.withVelocity(-MechConstants.SHOOT_VELOCITY));
+			shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(
+				MechConstants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(mVelocityVoltage.withVelocity(
+				-MechConstants.SHOOT_VELOCITY));
 			return false;
 		} else if (timer.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME) {
 			// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
 			// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-			shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(MechConstants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVelocityVoltage.withVelocity(-MechConstants.SHOOT_VELOCITY));
+			shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(
+				MechConstants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(mVelocityVoltage.withVelocity(
+				-MechConstants.SHOOT_VELOCITY));
 			return false;
 		} else {
 			shooterLeftMotor.set(0);
