@@ -17,6 +17,7 @@ public class RaspberryPI {
 	private double previousValueReceived = 0;
 	private DoubleSubscriber noteY;
 	private DoubleSubscriber noteD;
+	private DoubleSubscriber aprilP;
 	private double previousTimeReceived = 0;
 	private Timer timer = new Timer();
 	public static final int VALUES_PER_TAG = 6;
@@ -29,11 +30,15 @@ public class RaspberryPI {
 		tagSubscriber = table.getDoubleArrayTopic("april_tag_data").subscribe(null);
 		noteY = table.getDoubleTopic("note_yaw").subscribe(-1);
 		noteD = table.getDoubleTopic("note_distance").subscribe(-1);
+		aprilP = table.getDoubleTopic("april_pitch").subscribe(-1);
 	}
 
 	/**Updates the values in SmartDashboard. */
 	public void update() {
 		updateFPS();
+		updateNoteY();
+		updateNoteD();
+		updateAprilP();
 	}
 
 	/**
@@ -47,6 +52,27 @@ public class RaspberryPI {
 		}
 		previousValueReceived = currentReceivedValue;
 		SmartDashboard.putNumber("FPS", fps);
+	}
+
+	/**
+	 * Updates the noteY each iteration of the robot.
+	 */
+	public void updateNoteY() {
+		SmartDashboard.putNumber("NoteYaw", noteY.get());
+	}
+
+	/**
+	 * Updates the noteD each iteration of the robot.
+	 */
+	public void updateNoteD() {
+		SmartDashboard.putNumber("NoteDistance", noteD.get());
+	}
+
+	/**
+	 * Updates the aprilY each iteration of the robot.
+	 */
+	public void updateAprilP() {
+		SmartDashboard.putNumber("AprilPitch", aprilP.get());
 	}
 
 	/**
