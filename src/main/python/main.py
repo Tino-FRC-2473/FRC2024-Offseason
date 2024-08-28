@@ -17,25 +17,26 @@ CAM_ANGLE = -15
 # tag_module = AprilTag()
 # ARUCO_LENGTH_METERS = 0.165
 
+        table = inst.getTable("datatable")
+
 while True:
     p = time.time()
     try: 
-        # frame = input.getFrame()
+        frame = input.getFrame()
 
-        # annotated_frame = frame.copy()
-        # tagData = tag_module.estimate_3d_pose(frame, annotated_frame, ARUCO_LENGTH_METERS)
-        # annotated_frame = cv2.resize(annotated_frame, (320,240))
+        annotated_frame = frame.copy()
+        tagData = tag_module.estimate_3d_pose(frame, annotated_frame, ARUCO_LENGTH_METERS)
+        annotated_frame = cv2.resize(annotated_frame, (320,240))
         
-        # pose_list = [4000 for _ in range(16 * 6)]
-        # for key, value in tagData.items():
-        #     pose_list[(key - 1) * 6 : (key * 6)] = np.concatenate((value[0].flatten(), value[1].flatten()), axis=0).tolist()
+        pose_list = [4000 for _ in range(16 * 6)]
+        for key, value in tagData.items():
+             pose_list[(key - 1) * 6 : (key * 6)] = np.concatenate((value[0].flatten(), value[1].flatten()), axis=0).tolist()
             
-        table = inst.getTable("datatable")
 
         # xPub = table.getDoubleTopic("fps_incremented_value").publish()
         # xPub.set(frame.sum())
 
-        # tagDataPub = table.getDoubleArrayTopic("april_tag_data").publish()
+        tagDataPub = table.getDoubleArrayTopic("april_tag_data").publish()
         # tagDataPub.set(pose_list)
         
         # outputStreamPub = table.getDoubleArrayTopic("output_stream").publish()
