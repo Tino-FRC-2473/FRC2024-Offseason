@@ -325,47 +325,29 @@ public class DriveFSMSystem extends SubsystemBase {
 		//SmartDashboard.putNumber("Y Pos", getPose().getY());
 		//SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
 
-		/*
+		
 		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-		SmartDashboard.putNumber("Gyro Yaw", gyro.getYaw());
-		SmartDashboard.putNumber("Gyro Fused Heading", gyro.getFusedHeading());
-		*/
+		
 
-		/*SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
-			input.getControllerLeftJoystickY()
-					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-					OIConstants.DRIVE_DEADBAND));
+		// SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
+		// 	input.getControllerLeftJoystickY()
+		// 			* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
+		// 			+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
+		// 			OIConstants.DRIVE_DEADBAND));
 
-		SmartDashboard.putNumber("y feed", -MathUtil.applyDeadband((
-			input.getControllerLeftJoystickX()
-					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-					OIConstants.DRIVE_DEADBAND));
+		// SmartDashboard.putNumber("y feed", -MathUtil.applyDeadband((
+		// 	input.getControllerLeftJoystickX()
+		// 			* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
+		// 			+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
+		// 			OIConstants.DRIVE_DEADBAND));
 
-		SmartDashboard.putNumber("ang feed", -MathUtil.applyDeadband(
-			(input.getControllerRightJoystickX()
-					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT),
-					OIConstants.DRIVE_DEADBAND));
+		// SmartDashboard.putNumber("ang feed", -MathUtil.applyDeadband(
+		// 	(input.getControllerRightJoystickX()
+		// 			* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
+		// 			/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT),
+		// 			OIConstants.DRIVE_DEADBAND));
 
-
-
-		SwerveModuleState[] states = new SwerveModuleState[] {
-			frontLeft.getState(),
-			frontRight.getState(),
-			rearLeft.getState(),
-			rearRight.getState()
-		};
-
-		Pose2d[] poses = new Pose2d[] {
-			getPose()
-		};
-
-		statePublisher.set(states);
-		posePublisher.set(poses);
-
-		*/
+		
 
 		switch (currentState) {
 			case TELEOP_STATE:
@@ -378,7 +360,7 @@ public class DriveFSMSystem extends SubsystemBase {
 					-MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND),
-					true);
+					false);
 
 				if (input.isCrossButtonPressed()) {
 					gyro.reset();
@@ -502,9 +484,9 @@ public class DriveFSMSystem extends SubsystemBase {
 		double ySpeedDelivered = ySpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double rotDelivered = rot * DriveConstants.MAX_ANGULAR_SPEED;
 
-		//SmartDashboard.putNumber("x speed delivered", xSpeedDelivered);
-		//SmartDashboard.putNumber("y speed delivered", ySpeedDelivered);
-		//SmartDashboard.putNumber("rot speed delivered", rotDelivered);
+		SmartDashboard.putNumber("x speed delivered", xSpeed);
+		SmartDashboard.putNumber("y speed delivered", ySpeed);
+		SmartDashboard.putNumber("rot speed delivered", rot);
 
 
 		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
@@ -530,6 +512,13 @@ public class DriveFSMSystem extends SubsystemBase {
 		frontRight.setDesiredState(swerveModuleStates[1]);
 		rearLeft.setDesiredState(swerveModuleStates[2]);
 		rearRight.setDesiredState(swerveModuleStates[(2 + 1)]);
+
+		Pose2d[] poses = new Pose2d[] {
+			getPose()
+		};
+
+		statePublisher.set(swerveModuleStates);
+		posePublisher.set(poses);
 
 		//System.out.println("S1" + swerveModuleStates[0]);
 		//System.out.println("S2" + swerveModuleStates[1]);

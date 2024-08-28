@@ -36,17 +36,17 @@ public class Robot extends TimedRobot {
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
 	private MBRFSMv2 mbrfsMv2;
-	private ClimberMechFSMLeft chainLeftFSM;
-	private ClimberMechFSMRight chainRightFSM;
+	//private ClimberMechFSMLeft chainLeftFSM;
+	//private ClimberMechFSMRight chainRightFSM;
 	private SendableChooser<Command> autoChooser;
 	private Command autonomousCommand;
 	private final Field2d mField = new Field2d();
 
-	private UsbCamera driverCam;
-	private UsbCamera chainCam;
-	private VideoSink videoSink;
-	private MjpegServer driverStream;
-	private MjpegServer chainStream;
+	//private UsbCamera driverCam;
+	//private UsbCamera chainCam;
+	//private VideoSink videoSink;
+	//private MjpegServer driverStream;
+	//private MjpegServer chainStream;
 
 	private final int streamWidth = 256;
 	private final int streamHeight = 144;
@@ -68,8 +68,8 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		driveFSMSystem = new DriveFSMSystem();
 		mbrfsMv2 = new MBRFSMv2();
-		chainLeftFSM = new ClimberMechFSMLeft();
-		chainRightFSM = new ClimberMechFSMRight();
+		//chainLeftFSM = new ClimberMechFSMLeft();
+		//chainRightFSM = new ClimberMechFSMRight();
 
 		NamedCommands.registerCommand("S_TIN", mbrfsMv2.new IntakeNoteCommand());
 		NamedCommands.registerCommand("S_TON", mbrfsMv2.new OuttakeNoteCommand());
@@ -95,11 +95,11 @@ public class Robot extends TimedRobot {
 		SmartDashboard.putData("Auto Chooser", autoChooser);
 		SmartDashboard.putData("Field", mField);
 
-		driverCam = CameraServer.startAutomaticCapture(0);
-		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
-			streamHeight, streamFPS);
-		driverCam.setVideoMode(videoMode);
-		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+		//driverCam = CameraServer.startAutomaticCapture(0);
+		//VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
+		//	streamHeight, streamFPS);
+		//driverCam.setVideoMode(videoMode);
+		//driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
 		//driverCam.setResolution(streamWidth, streamHeight);
 
 		//Label all named commands here
@@ -132,8 +132,8 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Teleop Init --------");
 		driveFSMSystem.reset();
 		mbrfsMv2.reset();
-		chainLeftFSM.reset();
-		chainRightFSM.reset();
+		//chainLeftFSM.reset();
+		//chainRightFSM.reset();
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
@@ -143,8 +143,8 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
 		mbrfsMv2.update(input);
-		chainLeftFSM.update(input);
-		chainRightFSM.update(input);
+		//chainLeftFSM.update(input);
+		//chainRightFSM.update(input);
 		mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
