@@ -11,6 +11,7 @@ public final class MechConstants {
 	// TeleOp Shooter Constants
 	public static final float SHOOTING_POWER = 0.8f;
 	public static final float TIMED_REVVING_DURATION = 2;
+	public static final float SHOOT_VELOCITY = 100; // rps
 
 	// Auto Intake Constants
 	public static final double AUTO_PIVOT_TIMER = 0.5;
@@ -56,4 +57,14 @@ public final class MechConstants {
 	public static final double AMP_ENCODER_ROTATIONS = -525;
 	public static final double SHOOTER_ENCODER_ROTATIONS = 0;
 	public static final double HOME_ENCODER_ROTATION = 0;
+
+	// Motion Magic Constants
+	public static final double MM_CONSTANT_S = 0.25; //0.25V to overcome static friction
+	public static final double MM_CONSTANT_V = 0.114; //0.114V for 1rps target velocity
+	public static final double MM_CONSTANT_A = 0.01; //0.01V for 1rps/s acceleration
+	public static final double MM_CONSTANT_P = 0.11; //0.11V to account for error of 1rps
+	public static final double MM_CONSTANT_I = 0.002; //0.002V Integrated error 1 rps
+
+	public static final double CONFIG_CONSTANT_A = 400; //max acceleration of 400 rps/s
+	public static final double CONFIG_CONSTANT_J = 4000; //target jerk of 4000 rps/s/s
 }

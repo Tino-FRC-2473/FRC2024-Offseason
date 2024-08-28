@@ -4,6 +4,11 @@ package frc.robot.systems;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 // Third party Hardware Imports
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -22,10 +27,16 @@ public class ShooterFSMSystem {
 		REV_UP_SHOOTER,
 	}
 
+	private final MotionMagicVelocityVoltage mVelocityVoltage = new MotionMagicVelocityVoltage(0);
+
 	/* ======================== Private variables ======================== */
 	private ShooterFSMState currentState;
 	private LED led = new LED();
 	private Timer timer = new Timer();
+	private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
+	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
+	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
+	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -44,6 +55,32 @@ public class ShooterFSMSystem {
 
 		shooterRightMotor = new TalonFX(HardwareMap.RIGHT_SHOOTER_MOTOR_ID);
 		shooterLeftMotor.setNeutralMode(NeutralModeValue.Coast);
+
+		// Add 0.25 V output to overcome static friction
+		slot0Configs.kS = MechConstants.MM_CONSTANT_S;
+		// A velocity target of 1 rps results in 0.114 V output
+		slot0Configs.kV = MechConstants.MM_CONSTANT_V;
+		// An acceleration of 1 rps/s requires 0.01 V output
+		slot0Configs.kA = MechConstants.MM_CONSTANT_A;
+
+		slot0Configs.kP = MechConstants.MM_CONSTANT_P;
+		slot0Configs.kI = MechConstants.MM_CONSTANT_I;
+		slot0Configs.kD = 0;
+
+		motionMagicConfigs.MotionMagicAcceleration = MechConstants.CONFIG_CONSTANT_A;
+		// Target acceleration 400 rps/s (0.25 seconds to max)
+		motionMagicConfigs.MotionMagicJerk = MechConstants.CONFIG_CONSTANT_J;
+		// Target jerk of 4000 rps/s/s (0.1 seconds)
+
+		// loop to print err if any
+		// for (int i = 0; i < 5; i++) {
+		statusCode = shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
+		statusCode = shooterRightMotor.getConfigurator().apply(talonFXConfigs);
+			// if (statusCode.isOK()) break;
+		// }
+		// if (!statusCode.isOK()) {
+			// System.out.println("Could not configure device. Error: " + statusCode.toString());
+		// }
 
 		// Reset state machine
 		reset();
@@ -85,8 +122,10 @@ public class ShooterFSMSystem {
 
 		SmartDashboard.putString("TeleOP STATE", currentState.toString());
 		SmartDashboard.putString("Current State", getCurrentState().toString());
-		SmartDashboard.putNumber("Motor Power Left", shooterLeftMotor.get());
-		SmartDashboard.putNumber("Motor Power Right", shooterRightMotor.get());
+		SmartDashboard.putNumber("Motor Velocity Left",
+			shooterLeftMotor.getVelocity().getValueAsDouble());
+		SmartDashboard.putNumber("Motor Velocity Right",
+				shooterRightMotor.getVelocity().getValueAsDouble());
 
 		switch (currentState) {
 			case IDLE_STOP:
@@ -188,8 +227,10 @@ public class ShooterFSMSystem {
 	 */
 	public void handleRevShooterState(TeleopInput input) {
 		led.blueLight();
-		shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-		shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+		// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+		// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+		shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(MechConstants.SHOOT_VELOCITY));
+		shooterRightMotor.setControl(mVelocityVoltage.withVelocity(-MechConstants.SHOOT_VELOCITY));
 	}
 
 	/**
@@ -197,8 +238,10 @@ public class ShooterFSMSystem {
 	 * @return if the action is completed
 	 */
 	public boolean handleAutoRev() {
-		shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-		shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+		// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+		// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+		shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(MechConstants.SHOOT_VELOCITY));
+		shooterRightMotor.setControl(mVelocityVoltage.withVelocity(-MechConstants.SHOOT_VELOCITY));
 		return true;
 	}
 
@@ -212,12 +255,16 @@ public class ShooterFSMSystem {
 		}
 
 		if (timer.get() < MechConstants.AUTO_PRELOAD_REVVING_TIME) {
-			shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-			shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+			// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+			// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+			shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(MechConstants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(mVelocityVoltage.withVelocity(-MechConstants.SHOOT_VELOCITY));
 			return false;
 		} else if (timer.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME) {
-			shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-			shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+			// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
+			// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+			shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(MechConstants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(mVelocityVoltage.withVelocity(-MechConstants.SHOOT_VELOCITY));
 			return false;
 		} else {
 			shooterLeftMotor.set(0);
