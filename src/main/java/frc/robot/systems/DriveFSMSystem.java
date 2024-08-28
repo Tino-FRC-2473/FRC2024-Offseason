@@ -488,12 +488,18 @@ public class DriveFSMSystem extends SubsystemBase {
 		SmartDashboard.putNumber("y speed delivered", ySpeed);
 		SmartDashboard.putNumber("rot speed delivered", rot);
 
+		ChassisSpeeds cs;
+		if (fieldRelative) {
+			cs = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered,
+					rotDelivered, Rotation2d.fromDegrees(getHeading()));
+		} else {
+			cs = new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
+		}
 
-		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
-			fieldRelative
-				? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered,
-					rotDelivered, Rotation2d.fromDegrees(getHeading()))
-				: new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
+		SmartDashboard.putNumberArray("cs vals", new double[] {cs.vxMetersPerSecond,
+			cs.vyMetersPerSecond, cs.omegaRadiansPerSecond});
+
+		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(cs);
 
 		/*SmartDashboard.putNumber("s0d", swerveModuleStates[0].speedMetersPerSecond);
 		SmartDashboard.putNumber("s1d", swerveModuleStates[1].speedMetersPerSecond);
