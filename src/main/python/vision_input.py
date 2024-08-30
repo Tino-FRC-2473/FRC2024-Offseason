@@ -11,7 +11,7 @@ class VisionInput:
         self.h = res[1]
         self.cam_h = cam_height
         self.cam_a = cam_angle
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, res[0])
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, res[1])
         
