@@ -496,8 +496,7 @@ public class DriveFSMSystem extends SubsystemBase {
 			cs = new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
 		}
 
-		SmartDashboard.putNumberArray("cs vals", new double[] {cs.vxMetersPerSecond,
-			cs.vyMetersPerSecond, cs.omegaRadiansPerSecond});
+		SmartDashboard.putNumber("cs val", cs.vyMetersPerSecond);
 
 		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(cs);
 
@@ -514,10 +513,16 @@ public class DriveFSMSystem extends SubsystemBase {
 		SwerveDriveKinematics.desaturateWheelSpeeds(
 			swerveModuleStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
 
-		frontLeft.setDesiredState(swerveModuleStates[0]);
-		frontRight.setDesiredState(swerveModuleStates[1]);
-		rearLeft.setDesiredState(swerveModuleStates[2]);
-		rearRight.setDesiredState(swerveModuleStates[(2 + 1)]);
+		SwerveModuleState[] tamperedStates = swerveModuleStates;
+		double conv = 0.78 + 0.19 * Math.sqrt(xSpeed);
+		SmartDashboard.putNumber("CONV", conv);
+		//tamperedStates[1].speedMetersPerSecond *= conv;
+		//tamperedStates[2].speedMetersPerSecond *= conv;
+
+		frontLeft.setDesiredState(tamperedStates[0]);
+		frontRight.setDesiredState(tamperedStates[1]);
+		rearLeft.setDesiredState(tamperedStates[2]);
+		rearRight.setDesiredState(tamperedStates[(2 + 1)]);
 
 		Pose2d[] poses = new Pose2d[] {
 			getPose()

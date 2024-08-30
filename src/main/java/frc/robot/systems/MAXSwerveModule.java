@@ -153,10 +153,10 @@ public class MAXSwerveModule {
 		SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState,
 				new Rotation2d(turningEncoder.getPosition()));
 
-		SmartDashboard.putNumber("Driving Spark MAX" + drivingSparkMax.getDeviceId(),
-			optimizedDesiredState.speedMetersPerSecond);
-		SmartDashboard.putNumber("Turning Spark MAX" + turningSparkMax.getDeviceId(),
-			optimizedDesiredState.angle.getRadians());
+		SmartDashboard.putNumber("Position Driving Spark MAX" + drivingSparkMax.getDeviceId(),
+			drivingEncoder.getPosition());
+		SmartDashboard.putNumber("Position Turning Spark MAX" + turningSparkMax.getDeviceId(),
+			turningEncoder.getPosition());
 
 		// Command driving and turning SPARKS MAX towards their respective setpoints.
 		drivingPIDController.setReference(optimizedDesiredState
