@@ -1,5 +1,7 @@
 package frc.robot.systems;
 
+import javax.swing.tree.ExpandVetoException;
+
 import com.kauailabs.navx.IMUProtocol.GyroUpdate;
 // Third party Hardware Imports
 import com.kauailabs.navx.frc.AHRS;
@@ -385,11 +387,11 @@ public class DriveFSMSystem extends SubsystemBase {
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
 
-				if(input.getControllerRightJoystickX() != 0) {
+				if(rot != 0) {
 					oldRotation = Rotation2d.fromDegrees(getHeading());
 				} else {
 					// Do the course correction, calculate the deviation and lerp it back.
-					var thetaD = rot % 360;
+					var thetaD = getHeading() % 360;
 					var thetaE = oldRotation.getDegrees() % 360;
 
 					rot = pidRotation(thetaD, thetaE);
@@ -562,7 +564,13 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * @return
 	 */
 	public double pidRotation(double deviated, double expected) {
-		double correction = MechConstants.PID_CONSTANT_ROTATION_PIVOT_P * (expected - deviated);
+		double arc1 = 360 + (expected - deviated);
+		double arc2 = (expected - deviated);
+
+		double correction = Math.abs(arc1) > Math.abs(arc2) ? arc2 / Math.abs(arc2) * 
+			MechConstants.PID_CONSTANT_ROTATION_PIVOT_P * Math.min(Math.abs(arc1), Math.abs(arc2))
+			: arc1 / Math.abs(arc1) * MechConstants.PID_CONSTANT_ROTATION_PIVOT_P * 
+			Math.min(Math.abs(arc1), Math.abs(arc2));
 
 		return clamp(MechConstants.MAX_TURN_SPEED, MechConstants.MIN_TURN_SPEED, correction);
 	}
