@@ -1,5 +1,6 @@
 package frc.robot.systems;
 
+import com.kauailabs.navx.IMUProtocol.GyroUpdate;
 // Third party Hardware Imports
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.Timer;
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
+import frc.robot.MechConstants;
 //import frc.robot.LED;
 import frc.robot.RaspberryPI;
 import frc.robot.SwerveConstants.AutoConstants;
@@ -98,9 +100,10 @@ public class DriveFSMSystem extends SubsystemBase {
 	private boolean isNoteAligned;
 	private boolean isSpeakerPositionAligned;
 
-
 	private boolean redAlliance;
 	private Double[] tagOrientationAngles;
+
+	private Rotation2d oldRotation;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -369,16 +372,31 @@ public class DriveFSMSystem extends SubsystemBase {
 
 		switch (currentState) {
 			case TELEOP_STATE:
-				drive(-MathUtil.applyDeadband((input.getControllerLeftJoystickY()
+
+			var xSpeed = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
-					-MathUtil.applyDeadband((input.getControllerLeftJoystickX()
+					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
+
+			var ySpeed = -MathUtil.applyDeadband((input.getControllerLeftJoystickX()
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
-					-MathUtil.applyDeadband((input.getControllerRightJoystickX()
+					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
+
+			var rot = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND),
-					true);
+					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
+
+				if(input.getControllerRightJoystickX() != 0) {
+					oldRotation = Rotation2d.fromDegrees(getHeading());
+				} else {
+					// Do the course correction, calculate the deviation and lerp it back.
+					var thetaD = rot % 360;
+					var thetaE = oldRotation.getDegrees() % 360;
+
+					rot = pidRotation(thetaD, thetaE);
+				}
+
+				drive(xSpeed, ySpeed, rot, true);
+
 
 				if (input.isCrossButtonPressed()) {
 					gyro.reset();
@@ -537,6 +555,27 @@ public class DriveFSMSystem extends SubsystemBase {
 		//System.out.println("S4" + swerveModuleStates[(2 + 1)]);
 	}
 
+	/**
+	 * Pids the value to expected
+	 * @param deviated deviated value that is being "pidded"
+	 * @param expected the value that should be pid towards.
+	 * @return
+	 */
+	public double pidRotation(double deviated, double expected) {
+		double correction = MechConstants.PID_CONSTANT_ROTATION_PIVOT_P * (expected - deviated);
+
+		return clamp(MechConstants.MAX_TURN_SPEED, MechConstants.MIN_TURN_SPEED, correction);
+	}
+
+	/**
+	 * Checks if a value is approximately another value. 
+	 * @param expected value that is being compared to
+	 * @param current current value
+	 * @return (the absolute difference is under the epsilon)
+	 */
+	public boolean approxEquals(double expected, double current, double epsilon) {
+		return Math.abs(current - expected) < epsilon;
+	}
 
 	/**
 	 * Drives the robot to a final odometry state.

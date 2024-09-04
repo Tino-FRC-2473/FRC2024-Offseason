@@ -46,4 +46,7 @@ public final class MechConstants {
 	public static final double GREEN_HIGH = 0.35;
 	public static final double BLUE_HIGH = 0.1;
 	public static final double RED_HIGH = 0.8;
+
+	public static final double ROTATION_EPSILON = 0.001;
+	public static final double PID_CONSTANT_ROTATION_PIVOT_P = 0.001;
 }
