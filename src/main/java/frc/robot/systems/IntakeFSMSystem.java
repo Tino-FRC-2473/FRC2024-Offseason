@@ -2,14 +2,17 @@ package frc.robot.systems;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 
 // Third party Hardware Imports
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.ColorSensorV3;
-import com.revrobotics.CANSparkBase.IdleMode;
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -17,7 +20,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
 import frc.robot.LED;
-import frc.robot.MechConstants;
+import frc.robot.Constants;
 
 public class IntakeFSMSystem {
 	/* ======================== Constants ======================== */
@@ -34,19 +37,23 @@ public class IntakeFSMSystem {
 	private IntakeFSMState currentState;
 	private boolean hasNote = false;
 	private int noteColorFrames = 0;
-	private Timer timer;
+	private LED led;
+	private Timer timer = new Timer();
+	private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
+	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
+	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
+	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
-	private CANSparkMax frontIndexMotor;
-	private CANSparkMax backIndexMotor;
+	private TalonFX frontIndexMotor;
+	private TalonFX backIndexMotor;
 	private TalonFX topIntakeMotor;
 	private TalonFX bottomIntakeMotor;
 	private TalonFX pivotMotor;
 
 	private Encoder throughBore;
 	private final ColorSensorV3 colorSensor;
-	private LED led;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -56,13 +63,11 @@ public class IntakeFSMSystem {
 	 */
 	public IntakeFSMSystem() {
 		// Perform hardware init
-		frontIndexMotor = new CANSparkMax(HardwareMap.FRONT_INDEXER_MOTOR_ID,
-										CANSparkMax.MotorType.kBrushless);
-		frontIndexMotor.setIdleMode(IdleMode.kBrake);
+		frontIndexMotor = new TalonFX(HardwareMap.FRONT_INDEXER_MOTOR_ID);
+		frontIndexMotor.setNeutralMode(NeutralModeValue.Brake);
 
-		backIndexMotor = new CANSparkMax(HardwareMap.BACK_INDEXER_MOTOR_ID,
-										CANSparkMax.MotorType.kBrushless);
-		backIndexMotor.setIdleMode(IdleMode.kBrake);
+		backIndexMotor = new TalonFX(HardwareMap.BACK_INDEXER_MOTOR_ID);
+		backIndexMotor.setNeutralMode(NeutralModeValue.Brake);
 
 		pivotMotor = new TalonFX(HardwareMap.PIVOT_MOTOR_ID);
 		pivotMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -76,11 +81,29 @@ public class IntakeFSMSystem {
 		throughBore = new Encoder(0, 1);
 		throughBore.reset();
 
-		colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
-
-		timer = new Timer();
-
+		colorSensor = new ColorSensorV3(Port.kOnboard);
 		led = new LED();
+
+		// Add 0.25 V output to overcome static friction
+		slot0Configs.kS = Constants.MM_CONSTANT_S;
+		// A velocity target of 1 rps results in 0.114 V output
+		slot0Configs.kV = Constants.MM_CONSTANT_V;
+		// An acceleration of 1 rps/s requires 0.01 V output
+		slot0Configs.kA = Constants.MM_CONSTANT_A;
+
+		slot0Configs.kP = Constants.MM_CONSTANT_P;
+		slot0Configs.kI = Constants.MM_CONSTANT_I;
+		slot0Configs.kD = 0;
+
+		motionMagicConfigs.MotionMagicAcceleration = Constants.CONFIG_CONSTANT_A;
+		// Target acceleration 400 rps/s (0.25 seconds to max)
+		motionMagicConfigs.MotionMagicJerk = Constants.CONFIG_CONSTANT_J;
+		// Target jerk of 4000 rps/s/s (0.1 seconds)
+
+		statusCode = frontIndexMotor.getConfigurator().apply(talonFXConfigs);
+		statusCode = backIndexMotor.getConfigurator().apply(talonFXConfigs);
+		statusCode = topIntakeMotor.getConfigurator().apply(talonFXConfigs);
+		statusCode = bottomIntakeMotor.getConfigurator().apply(talonFXConfigs);
 
 		// Reset state machine
 		reset();
@@ -145,6 +168,13 @@ public class IntakeFSMSystem {
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
 		currentState = nextState(input);
+
+		SmartDashboard.putString("CURRENT STATE", currentState.toString());
+		SmartDashboard.putNumber("Back Indexer Velocity",
+			backIndexMotor.getVelocity().getValueAsDouble());
+		SmartDashboard.putNumber("Front Indexer Velocity",
+			frontIndexMotor.getVelocity().getValueAsDouble());
+		SmartDashboard.putBoolean("HASNOTE", hasNote);
 	}
 
 	/* ======================== Private methods ======================== */
@@ -186,7 +216,7 @@ public class IntakeFSMSystem {
 				}
 
 			case MOVE_TO_GROUND:
-				if (inRange(throughBore.getDistance(), MechConstants.GROUND_ENCODER_ROTATIONS)) {
+				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_ROTATIONS)) {
 					if (input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
 						&& !hasNote && !input.isShootButtonPressed()) {
 						return IntakeFSMState.INTAKING;
@@ -195,7 +225,7 @@ public class IntakeFSMSystem {
 						return IntakeFSMState.OUTTAKING;
 					}
 				} else if (!inRange(throughBore.getDistance(),
-					MechConstants.GROUND_ENCODER_ROTATIONS)) {
+					Constants.GROUND_ENCODER_ROTATIONS)) {
 					if ((input.isIntakeButtonPressed() || input.isOuttakeButtonPressed())
 						&& !input.isShootButtonPressed()) {
 						return IntakeFSMState.MOVE_TO_GROUND;
@@ -208,7 +238,7 @@ public class IntakeFSMSystem {
 				}
 
 			case INTAKING:
-				if (inRange(throughBore.getDistance(), MechConstants.GROUND_ENCODER_ROTATIONS)
+				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_ROTATIONS)
 					&& input.isIntakeButtonPressed() && !hasNote
 					&& !input.isOuttakeButtonPressed() && !input.isShootButtonPressed()) {
 					return IntakeFSMState.INTAKING;
@@ -224,7 +254,7 @@ public class IntakeFSMSystem {
 				}
 
 			case OUTTAKING:
-				if (inRange(throughBore.getDistance(), MechConstants.GROUND_ENCODER_ROTATIONS)
+				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_ROTATIONS)
 					&& input.isOuttakeButtonPressed() && !input.isIntakeButtonPressed()
 					&& !input.isShootButtonPressed()) {
 					return IntakeFSMState.OUTTAKING;
@@ -246,21 +276,33 @@ public class IntakeFSMSystem {
 /* ------------------------ Command handlers ------------------------ */
 
 	private boolean inRange(double a, double b) {
-		return Math.abs(a - b) < MechConstants.INRANGE_VALUE; //EXPERIMENTAL
+		return Math.abs(a - b) < Constants.INRANGE_VALUE; //EXPERIMENTAL
 	}
 
+	/**
+	 * A PID controller for the pivot motor.
+	 * @param currentEncoderPID The current position of the pivot motor in encoder units.
+	 * @param targetEncoder The target position of the pivot motor in encoder units.
+	 * @return The correct power to send to the pivot motor to achieve the target position.
+	 */
 	private double pid(double currentEncoderPID, double targetEncoder) {
-		double correction = MechConstants.PID_CONSTANT_PIVOT_P
+		double correction = Constants.PID_CONSTANT_PIVOT_P
 			* (targetEncoder - currentEncoderPID);
-		return Math.min(MechConstants.MAX_TURN_SPEED,
-			Math.max(MechConstants.MIN_TURN_SPEED, correction));
+		return Math.min(Constants.MAX_TURN_SPEED,
+			Math.max(Constants.MIN_TURN_SPEED, correction));
 	}
 
+	/**
+	 * A PID controller for the pivot motor in autonomous mode.
+	 * @param currentEncoderPID The current position of the pivot motor in encoder units.
+	 * @param targetEncoder The target position of the pivot motor in encoder units.
+	 * @return The correct power to send to the pivot motor to achieve the target position.
+	 */
 	private double pidAuto(double currentEncoderPID, double targetEncoder) {
-		double correction = MechConstants.PID_CONSTANT_PIVOT_P_AUTO
+		double correction = Constants.PID_CONSTANT_PIVOT_P_AUTO
 			* (targetEncoder - currentEncoderPID);
-		return Math.min(MechConstants.MAX_TURN_SPEED_AUTO,
-			Math.max(MechConstants.MIN_TURN_SPEED_AUTO, correction));
+		return Math.min(Constants.MAX_TURN_SPEED_AUTO,
+			Math.max(Constants.MIN_TURN_SPEED_AUTO, correction));
 	}
 
 	/**
@@ -268,11 +310,11 @@ public class IntakeFSMSystem {
 	 * @return if the intake is holding a note
 	 */
 	public boolean hasNote() {
-		boolean isInRange = colorSensor.getProximity() >= MechConstants.PROXIMIIY_THRESHOLD;
+		boolean isInRange = colorSensor.getProximity() >= Constants.PROXIMIIY_THRESHOLD;
 		SmartDashboard.putBoolean("is close enough", isInRange);
 
 		noteColorFrames = isInRange ? (noteColorFrames + 1) : 0;
-		hasNote = noteColorFrames >= MechConstants.NOTE_FRAMES_MIN;
+		hasNote = noteColorFrames >= Constants.NOTE_FRAMES_MIN;
 
 		return hasNote;
 	}
@@ -290,7 +332,7 @@ public class IntakeFSMSystem {
 			led.rainbow();
 		}
 
-		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.HOME_ENCODER_ROTATION));
+		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_ROTATIONS));
 		topIntakeMotor.set(0);
 		bottomIntakeMotor.set(0);
 		frontIndexMotor.set(0);
@@ -305,11 +347,11 @@ public class IntakeFSMSystem {
 	private void handleMoveGroundState(TeleopInput input) {
 		led.orangeLight(false);
 
-		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.GROUND_ENCODER_ROTATIONS));
+		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_ROTATIONS));
 		topIntakeMotor.set(0);
 		bottomIntakeMotor.set(0);
-		frontIndexMotor.set(0);
 		backIndexMotor.set(0);
+		frontIndexMotor.set(0);
 	}
 
 	/**
@@ -324,11 +366,12 @@ public class IntakeFSMSystem {
 			led.greenLight(true);
 		}
 
-		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.GROUND_ENCODER_ROTATIONS));
-		bottomIntakeMotor.set(MechConstants.INTAKE_POWER);
-		topIntakeMotor.set(MechConstants.INTAKE_POWER);
-		frontIndexMotor.set(MechConstants.INTAKE_POWER);
-		backIndexMotor.set(0);
+		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_ROTATIONS));
+		topIntakeMotor.setControl(Constants.MM_VOLTAGE.withVelocity(Constants.INTAKE_VELOCITY));
+		bottomIntakeMotor.setControl(Constants.MM_VOLTAGE.withVelocity(Constants.INTAKE_VELOCITY));
+		backIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(-Constants.INTAKE_VELOCITY));
+		// don't forget the "-"" sign
+		frontIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(Constants.INTAKE_VELOCITY));
 	}
 
 	/**
@@ -343,11 +386,12 @@ public class IntakeFSMSystem {
 			led.redLight(false);
 		}
 
-		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.GROUND_ENCODER_ROTATIONS));
-		bottomIntakeMotor.set(MechConstants.OUTTAKE_POWER);
-		topIntakeMotor.set(MechConstants.OUTTAKE_POWER);
-		frontIndexMotor.set(MechConstants.OUTTAKE_POWER);
-		backIndexMotor.set(MechConstants.OUTTAKE_POWER);
+		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_ROTATIONS));
+		bottomIntakeMotor.set(0);
+		topIntakeMotor.set(0);
+		backIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(-Constants.OUTTAKE_VELOCITY));
+		// don't forget the "-"" sign
+		frontIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(Constants.OUTTAKE_VELOCITY));
 	}
 
 	/**
@@ -358,40 +402,14 @@ public class IntakeFSMSystem {
 	private void handleFeedShooterState(TeleopInput input) {
 		led.blueLight();
 
-		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.HOME_ENCODER_ROTATION));
+		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_ROTATIONS));
 		topIntakeMotor.set(0);
 		bottomIntakeMotor.set(0);
-		frontIndexMotor.set(MechConstants.FEED_SHOOTER_POWER);
-		backIndexMotor.set(MechConstants.FEED_SHOOTER_POWER);
-	}
-
-
-	private boolean handleAutoShootPreloaded() {
-		if (timer.get() == 0) {
-			timer.start();
-		}
-		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.HOME_ENCODER_ROTATION));
-		if (timer.get() < MechConstants.AUTO_PRELOAD_REVVING_TIME) {
-			topIntakeMotor.set(0);
-			bottomIntakeMotor.set(0);
-			frontIndexMotor.set(0);
-			backIndexMotor.set(0);
-			return false;
-		} else if (timer.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME) {
-			topIntakeMotor.set(0);
-			bottomIntakeMotor.set(0);
-			frontIndexMotor.set(MechConstants.FEED_SHOOTER_POWER);
-			backIndexMotor.set(MechConstants.FEED_SHOOTER_POWER);
-			return false;
-		} else {
-			topIntakeMotor.set(0);
-			bottomIntakeMotor.set(0);
-			frontIndexMotor.set(0);
-			backIndexMotor.set(0);
-			timer.stop();
-			timer.reset();
-			return true;
-		}
+		backIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(
+			-Constants.FEED_SHOOTER_VELOCITY));
+		// don't forget the "-"" sign
+		frontIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(
+			Constants.FEED_SHOOTER_VELOCITY));
 	}
 
 	/**
@@ -400,8 +418,8 @@ public class IntakeFSMSystem {
 	 */
 	private boolean handleAutoMoveGround() {
 		led.orangeLight(false);
-		pivotMotor.set(pidAuto(throughBore.getDistance(), MechConstants.GROUND_ENCODER_ROTATIONS));
-		return inRange(throughBore.getDistance(), MechConstants.GROUND_ENCODER_ROTATIONS);
+		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.GROUND_ENCODER_ROTATIONS));
+		return inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_ROTATIONS);
 	}
 
 	/**
@@ -415,20 +433,20 @@ public class IntakeFSMSystem {
 			led.orangeLight(false);
 		}
 
-		pivotMotor.set(pidAuto(throughBore.getDistance(), MechConstants.HOME_ENCODER_ROTATION));
-		return inRange(throughBore.getDistance(), MechConstants.HOME_ENCODER_ROTATION);
+		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.HOME_ENCODER_ROTATIONS));
+		return inRange(throughBore.getDistance(), Constants.HOME_ENCODER_ROTATIONS);
 	}
 
 	/**
 	 * Performs action for auto STATE3.
 	 * @return if the action carried out has finished executing
 	 */
-	private boolean handleAutoFeedShooter() {
+	private boolean handleAutoOuttake() {
 		if (timer.get() == 0) {
 			timer.start();
 		}
-		pivotMotor.set(pid(throughBore.getDistance(), MechConstants.HOME_ENCODER_ROTATION));
-		if (timer.get() > MechConstants.AUTO_SHOOTING_TIME) {
+		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_ROTATIONS));
+		if (timer.get() > Constants.AUTO_SHOOTING_TIME) {
 			topIntakeMotor.set(0);
 			bottomIntakeMotor.set(0);
 			frontIndexMotor.set(0);
@@ -439,17 +457,275 @@ public class IntakeFSMSystem {
 		} else {
 			topIntakeMotor.set(0);
 			bottomIntakeMotor.set(0);
-			frontIndexMotor.set(MechConstants.FEED_SHOOTER_POWER);
-			backIndexMotor.set(MechConstants.FEED_SHOOTER_POWER);
+			backIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(
+				-Constants.FEED_SHOOTER_VELOCITY));
+			// don't forget the "-"" sign
+			frontIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(
+				Constants.FEED_SHOOTER_VELOCITY));
 			return false;
 		}
 	}
 
+	/**
+	 * Performs action for auto Intake.
+	 * @return if the action carried out has finished executing
+	 */
 	private boolean handleAutoIntake() {
-		topIntakeMotor.set(MechConstants.AUTO_INTAKE_POWER);
-		bottomIntakeMotor.set(MechConstants.AUTO_INTAKE_POWER);
-		frontIndexMotor.set(MechConstants.AUTO_INTAKE_POWER);
-		backIndexMotor.set(0);
+		bottomIntakeMotor.setControl(Constants.MM_VOLTAGE.withVelocity(Constants.INTAKE_VELOCITY));
+		topIntakeMotor.setControl(Constants.MM_VOLTAGE.withVelocity(Constants.INTAKE_VELOCITY));
+		frontIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(Constants.INTAKE_VELOCITY));
+		backIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(-Constants.INTAKE_VELOCITY));
 		return hasNote();
 	}
+
+	/*------------------------- COMMAND CLASSES -------------------------- */
+
+	public class IntakeCommand extends Command {
+		private Timer timerSub;
+
+		/**
+		 * Initializes a new IntakeCommand.
+		*/
+		public IntakeCommand() {
+			timerSub = new Timer();
+		}
+
+		/**
+		 * Called when the command is initially scheduled.
+		 *
+		 * Sets LED to orange and starts timer.
+		 */
+		@Override
+		public void initialize() {
+			led.orangeLight(false);
+			timerSub.start();
+		}
+
+		/**
+		 * Called once the command ends or is interrupted.
+		 *
+		 * Sets all intake motors to 0 power and resets the timer.
+		 * @param interrupted Whether the command was interrupted
+		 */
+		@Override
+		public void end(boolean interrupted) {
+			topIntakeMotor.set(0);
+			bottomIntakeMotor.set(0);
+			frontIndexMotor.set(0);
+			backIndexMotor.set(0);
+			timerSub.stop();
+			timerSub.reset();
+		}
+
+		/**
+		 * Returns true when the command should end.
+		 */
+		@Override
+		public boolean isFinished() {
+			return handleAutoIntake();
+		}
+	}
+
+	public class PivotToGroundCommand extends Command {
+
+		private Timer timerSub;
+
+		/**
+		 * Initializes a new PivotToGroundCommand.
+		 */
+		public PivotToGroundCommand() {
+			timerSub = new Timer();
+		}
+
+		/**
+		 * Called every time the scheduler runs while the command is scheduled.
+		 */
+		@Override
+		public void execute() {
+			led.orangeLight(false);
+			if (handleAutoMoveGround()) {
+				timerSub.start();
+			}
+
+			System.out.println("ptg");
+		}
+
+		/**
+		 * Called once the command ends or is interrupted.
+		 */
+		@Override
+		public void end(boolean interrupted) {
+			timerSub.stop();
+			timerSub.reset();
+		}
+
+		/**
+		 * Returns true when the command should end.
+		 * @return if the action is completed
+		 */
+		@Override
+		public boolean isFinished() {
+			return handleAutoMoveGround() && timerSub.get() > Constants.AUTO_PIVOT_TIMER;
+		}
+	}
+
+	public class PivotToHomeCommand extends Command {
+
+		private Timer timerSub;
+
+		/**
+		 * Initializes a new PivotToHomeCommand.
+		 */
+		public PivotToHomeCommand() {
+			timerSub = new Timer();
+		}
+
+		/**
+		 * Called every time the scheduler runs while the command is scheduled.
+		 */
+		@Override
+		public void execute() {
+			if (hasNote) {
+				led.rainbow();
+			}
+
+			if (handleAutoMoveHome()) {
+				timerSub.start();
+			}
+		}
+
+		/**
+		 * Called once the command ends or is interrupted.
+		 */
+		@Override
+		public void end(boolean interrupted) {
+			topIntakeMotor.set(0);
+			bottomIntakeMotor.set(0);
+			frontIndexMotor.set(0);
+			backIndexMotor.set(0);
+			timerSub.stop();
+			timerSub.reset();
+		}
+
+		@Override
+		public boolean isFinished() {
+			return handleAutoMoveHome();
+		}
+	}
+
+	public class OuttakeNoteCommand extends Command {
+
+		private Timer timerSub;
+
+		/**
+		 * Initializes a new OuttakeNoteCommand.
+		 */
+		public OuttakeNoteCommand() {
+			timerSub = new Timer();
+		}
+
+		/**
+		 * Called when the command is initially scheduled.
+		 */
+		@Override
+		public void initialize() {
+			led.blueLight();
+			timerSub.start();
+		}
+
+		/**
+		 * Called every time the scheduler runs while the command is scheduled.
+		 */
+		@Override
+		public void execute() {
+			handleAutoOuttake();
+			System.out.println("OUTTAKING" + timerSub.get());
+		}
+
+		/**
+		 * Returns true when the command should end.
+		 */
+		@Override
+		public boolean isFinished() {
+			return handleAutoOuttake() || timerSub.get() >= Constants.OUTTAKE_AUTO_TIMER;
+		}
+
+		/**
+		 * Called once the command ends or is interrupted.
+		 */
+		@Override
+		public void end(boolean interrupted) {
+			timerSub.stop();
+			timerSub.reset();
+
+			topIntakeMotor.set(0);
+			bottomIntakeMotor.set(0);
+			frontIndexMotor.set(0);
+			backIndexMotor.set(0);
+			hasNote = false;
+		}
+	}
+
+	public class OuttakePreloadedCommand extends Command {
+
+		private Timer timerSub;
+
+		/**
+		 * Initializes a new OuttakePreloadedCommand.
+		 */
+		public OuttakePreloadedCommand() {
+			timerSub = new Timer();
+		}
+
+		@Override
+		public void initialize() {
+			timerSub.start();
+		}
+
+		/**
+		 * Called every time the scheduler runs while the command is scheduled.
+		 */
+		@Override
+		public void execute() {
+			led.rainbow();
+			pivotMotor.set(pidAuto(throughBore.getDistance(),
+				Constants.HOME_ENCODER_ROTATIONS));
+
+			if (timerSub.get() < Constants.AUTO_PRELOAD_REVVING_TIME) {
+				topIntakeMotor.set(0);
+				bottomIntakeMotor.set(0);
+				frontIndexMotor.set(0);
+				backIndexMotor.set(0);
+			} else if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
+				topIntakeMotor.set(0);
+				bottomIntakeMotor.set(0);
+				frontIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(
+					Constants.INTAKE_VELOCITY));
+				backIndexMotor.setControl(Constants.MM_VOLTAGE.withVelocity(
+						-Constants.INTAKE_VELOCITY));
+			}
+		}
+
+		/**
+		 * Called once the command ends or is interrupted.
+		 */
+		@Override
+		public void end(boolean interrupted) {
+			topIntakeMotor.set(0);
+			bottomIntakeMotor.set(0);
+			frontIndexMotor.set(0);
+			backIndexMotor.set(0);
+			timerSub.stop();
+			timerSub.reset();
+		}
+
+		/**
+		 * Returns true when the command should end.
+		 */
+		@Override
+		public boolean isFinished() {
+			return timerSub.get() >= Constants.AUTO_PRELOAD_SHOOTING_TIME;
+		}
+	}
 }
+

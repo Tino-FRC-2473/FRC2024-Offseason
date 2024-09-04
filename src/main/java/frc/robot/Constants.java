@@ -1,6 +1,8 @@
 package frc.robot;
 
-public final class MechConstants {
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+
+public final class Constants {
 
 	// Auto Shooter Constants
 	public static final double AUTO_REVVING_TIME = 0.5;
@@ -22,12 +24,9 @@ public final class MechConstants {
 	public static final float AUTO_HOLDING_POWER = 0.05f;
 
 	// TeleOp Intake Constants
-	public static final float INTAKE_POWER = 0.2f; //0.4
-	public static final float OUTTAKE_POWER = -0.2f;
-	public static final float FEED_SHOOTER_POWER = -0.8f;
-	public static final float MANUAL_INTAKE_POWER = 0.2f;
-	public static final float MANUAL_OUTTAKE_POWER = -0.2f;
-	public static final float TELE_HOLDING_POWER = 0.0f;
+	public static final float INTAKE_VELOCITY = 8; //rps
+	public static final float OUTTAKE_VELOCITY = -8; //rps
+	public static final float FEED_SHOOTER_VELOCITY = 50; //rps
 
 	// REV Color Sensor Constants
 	public static final int NOTE_FRAMES_MIN = 5;
@@ -53,18 +52,19 @@ public final class MechConstants {
 	public static final double INRANGE_VALUE = 30;
 
 	// Encoder Position Constants
+	// TODO: TEST ENCODER VALUES AND FIX
 	public static final double GROUND_ENCODER_ROTATIONS = -1200;
-	public static final double AMP_ENCODER_ROTATIONS = -525;
-	public static final double SHOOTER_ENCODER_ROTATIONS = 0;
-	public static final double HOME_ENCODER_ROTATION = 0;
+	public static final double HOME_ENCODER_ROTATIONS = 0;
 
 	// Motion Magic Constants
-	public static final double MM_CONSTANT_S = 0.25; //0.25V to overcome static friction
-	public static final double MM_CONSTANT_V = 0.114; //0.114V for 1rps target velocity
-	public static final double MM_CONSTANT_A = 0.01; //0.01V for 1rps/s acceleration
-	public static final double MM_CONSTANT_P = 0.11; //0.11V to account for error of 1rps
-	public static final double MM_CONSTANT_I = 0.002; //0.002V Integrated error 1 rps
+	public static final double MM_CONSTANT_S = 0.25; //Voltage required to overcome static friction
+	public static final double MM_CONSTANT_V = 0.114; //Voltage for velocity of 1rps
+	public static final double MM_CONSTANT_A = 0.01; //Voltage for acceleration of 1rps/s
+	public static final double MM_CONSTANT_P = 0.11; //Voltgae for Proportional error of 1 rps
+	public static final double MM_CONSTANT_I = 0.002; //Voltage for Integrated error of 1 rps
 
-	public static final double CONFIG_CONSTANT_A = 400; //max acceleration of 400 rps/s
-	public static final double CONFIG_CONSTANT_J = 4000; //target jerk of 4000 rps/s/s
+	public static final double CONFIG_CONSTANT_A = 400; //max acceleration in rps/s
+	public static final double CONFIG_CONSTANT_J = 4000; //target jerk in rps/s/s
+
+	public static final MotionMagicVelocityVoltage MM_VOLTAGE = new MotionMagicVelocityVoltage(0);
 }

@@ -3,6 +3,7 @@ package frc.robot.systems;
 // WPILib Imports
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -17,7 +18,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
 import frc.robot.LED;
-import frc.robot.MechConstants;
+import frc.robot.Constants;
 
 public class ShooterFSMSystem {
 	/* ======================== Constants ======================== */
@@ -27,7 +28,7 @@ public class ShooterFSMSystem {
 		REV_UP_SHOOTER,
 	}
 
-	private final MotionMagicVelocityVoltage mVelocityVoltage = new MotionMagicVelocityVoltage(0);
+	private final MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
 
 	/* ======================== Private variables ======================== */
 	private ShooterFSMState currentState;
@@ -57,30 +58,23 @@ public class ShooterFSMSystem {
 		shooterLeftMotor.setNeutralMode(NeutralModeValue.Coast);
 
 		// Add 0.25 V output to overcome static friction
-		slot0Configs.kS = MechConstants.MM_CONSTANT_S;
+		slot0Configs.kS = Constants.MM_CONSTANT_S;
 		// A velocity target of 1 rps results in 0.114 V output
-		slot0Configs.kV = MechConstants.MM_CONSTANT_V;
+		slot0Configs.kV = Constants.MM_CONSTANT_V;
 		// An acceleration of 1 rps/s requires 0.01 V output
-		slot0Configs.kA = MechConstants.MM_CONSTANT_A;
+		slot0Configs.kA = Constants.MM_CONSTANT_A;
 
-		slot0Configs.kP = MechConstants.MM_CONSTANT_P;
-		slot0Configs.kI = MechConstants.MM_CONSTANT_I;
+		slot0Configs.kP = Constants.MM_CONSTANT_P;
+		slot0Configs.kI = Constants.MM_CONSTANT_I;
 		slot0Configs.kD = 0;
 
-		motionMagicConfigs.MotionMagicAcceleration = MechConstants.CONFIG_CONSTANT_A;
+		motionMagicConfigs.MotionMagicAcceleration = Constants.CONFIG_CONSTANT_A;
 		// Target acceleration 400 rps/s (0.25 seconds to max)
-		motionMagicConfigs.MotionMagicJerk = MechConstants.CONFIG_CONSTANT_J;
+		motionMagicConfigs.MotionMagicJerk = Constants.CONFIG_CONSTANT_J;
 		// Target jerk of 4000 rps/s/s (0.1 seconds)
 
-		// loop to print err if any
-		// for (int i = 0; i < 5; i++) {
 		statusCode = shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
 		statusCode = shooterRightMotor.getConfigurator().apply(talonFXConfigs);
-			// if (statusCode.isOK()) break;
-		// }
-		// if (!statusCode.isOK()) {
-			// System.out.println("Could not configure device. Error: " + statusCode.toString());
-		// }
 
 		// Reset state machine
 		reset();
@@ -229,8 +223,8 @@ public class ShooterFSMSystem {
 		led.blueLight();
 		// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
 		// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-		shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(MechConstants.SHOOT_VELOCITY));
-		shooterRightMotor.setControl(mVelocityVoltage.withVelocity(-MechConstants.SHOOT_VELOCITY));
+		shooterLeftMotor.setControl(velocityVoltage.withVelocity(Constants.SHOOT_VELOCITY));
+		shooterRightMotor.setControl(velocityVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
 	}
 
 	/**
@@ -240,8 +234,8 @@ public class ShooterFSMSystem {
 	public boolean handleAutoRev() {
 		// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
 		// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-		shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(MechConstants.SHOOT_VELOCITY));
-		shooterRightMotor.setControl(mVelocityVoltage.withVelocity(-MechConstants.SHOOT_VELOCITY));
+		shooterLeftMotor.setControl(velocityVoltage.withVelocity(Constants.SHOOT_VELOCITY));
+		shooterRightMotor.setControl(velocityVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
 		return true;
 	}
 
@@ -254,21 +248,21 @@ public class ShooterFSMSystem {
 			timer.start();
 		}
 
-		if (timer.get() < MechConstants.AUTO_PRELOAD_REVVING_TIME) {
+		if (timer.get() < Constants.AUTO_PRELOAD_REVVING_TIME) {
 			// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
 			// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-			shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(
-				MechConstants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVelocityVoltage.withVelocity(
-				-MechConstants.SHOOT_VELOCITY));
+			shooterLeftMotor.setControl(velocityVoltage.withVelocity(
+				Constants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(velocityVoltage.withVelocity(
+				-Constants.SHOOT_VELOCITY));
 			return false;
-		} else if (timer.get() < MechConstants.AUTO_PRELOAD_SHOOTING_TIME) {
+		} else if (timer.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
 			// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
 			// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-			shooterLeftMotor.setControl(mVelocityVoltage.withVelocity(
-				MechConstants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVelocityVoltage.withVelocity(
-				-MechConstants.SHOOT_VELOCITY));
+			shooterLeftMotor.setControl(velocityVoltage.withVelocity(
+				Constants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(velocityVoltage.withVelocity(
+				-Constants.SHOOT_VELOCITY));
 			return false;
 		} else {
 			shooterLeftMotor.set(0);
@@ -276,6 +270,100 @@ public class ShooterFSMSystem {
 			timer.stop();
 			timer.reset();
 			return true;
+		}
+	}
+
+	/*-------------------------- COMMAND CLASSES -------------------------- */
+
+	public class ShootPreloadedCommand extends Command {
+
+		private Timer timerSub;
+
+		/**
+		 * ShootPreloadedNoteCommand command.
+		 */
+		public ShootPreloadedCommand() {
+			timerSub = new Timer();
+		}
+
+		/**
+		 * Called when the command is initially scheduled.
+		*/
+		@Override
+		public void initialize() {
+			timerSub.start();
+		}
+
+		@Override
+		public void execute() {
+			led.rainbow();
+			if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
+				// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER);
+				// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
+				shooterLeftMotor.setControl(velocityVoltage.withVelocity(
+					-Constants.SHOOT_VELOCITY));
+				shooterRightMotor.setControl(velocityVoltage.withVelocity(
+					Constants.SHOOT_VELOCITY));
+			}
+		}
+
+		@Override
+		public void end(boolean interrupted) {
+			shooterLeftMotor.set(0);
+			shooterRightMotor.set(0);
+			timerSub.stop();
+			timerSub.reset();
+		}
+
+		// Returns true when the command should end.
+		@Override
+		public boolean isFinished() {
+			return timerSub.get() >= Constants.AUTO_PRELOAD_SHOOTING_TIME;
+		}
+	}
+
+	public class ShootNoteCommand extends Command {
+
+		private Timer timerSub;
+
+		/**
+		 * Initializes a new ShootNoteCommand.
+		 */
+		public ShootNoteCommand() {
+			timerSub = new Timer();
+		}
+
+		// Called when the command is initially scheduled.
+		@Override
+		public void initialize() {
+			timerSub.start();
+		}
+
+		// Called every time the scheduler runs while the command is scheduled.
+		@Override
+		public void execute() {
+			if (timerSub.get() < Constants.AUTO_SHOOTING_TIME) {
+				shooterLeftMotor.setControl(velocityVoltage.withVelocity(
+					Constants.SHOOT_VELOCITY));
+				shooterRightMotor.setControl(velocityVoltage.withVelocity(
+					-Constants.SHOOT_VELOCITY));
+			}
+		}
+
+		// Called once the command ends or is interrupted.
+		@Override
+		public void end(boolean interrupted) {
+			shooterLeftMotor.set(0);
+			shooterRightMotor.set(0);
+
+			timerSub.stop();
+			timerSub.reset();
+		}
+
+		// Returns true when the command should end.
+		@Override
+		public boolean isFinished() {
+			return timerSub.get() >= Constants.AUTO_SHOOTING_TIME;
 		}
 	}
 }

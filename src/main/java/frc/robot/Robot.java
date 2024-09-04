@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
-
 // WPILib Imports
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.MjpegServer;
@@ -28,8 +27,9 @@ import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.systems.ClimberMechFSMLeft;
 import frc.robot.systems.ClimberMechFSMRight;
 import frc.robot.systems.DriveFSMSystem;
-import frc.robot.systems.MBRFSMv2;
+import frc.robot.systems.IntakeFSMSystem;
 import frc.robot.systems.ShooterFSMSystem;
+// import frc.robot.systems.ShooterFSMSystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -39,10 +39,11 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
-	private MBRFSMv2 mbrfsMv2;
 	private ShooterFSMSystem shooterFSM;
 	private ClimberMechFSMLeft chainLeftFSM;
 	private ClimberMechFSMRight chainRightFSM;
+	private IntakeFSMSystem intakeFSM;
+
 	private SendableChooser<Command> autoChooser;
 	private Command autonomousCommand;
 	private final Field2d mField = new Field2d();
@@ -72,20 +73,21 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFSMSystem = new DriveFSMSystem();
-		mbrfsMv2 = new MBRFSMv2();
 		shooterFSM = new ShooterFSMSystem();
 		chainLeftFSM = new ClimberMechFSMLeft();
 		chainRightFSM = new ClimberMechFSMRight();
+		intakeFSM = new IntakeFSMSystem();
 
-		NamedCommands.registerCommand("S_TIN", mbrfsMv2.new IntakeNoteCommand());
-		NamedCommands.registerCommand("S_TON", mbrfsMv2.new OuttakeNoteCommand());
-		NamedCommands.registerCommand("S_PGS",
-			mbrfsMv2.new PivotGroundToShooterCommand());
-		NamedCommands.registerCommand("S_PSG",
-			mbrfsMv2.new PivotShooterToGroundCommand());
-		NamedCommands.registerCommand("S_TRS", mbrfsMv2.new RevShooterCommand());
-		NamedCommands.registerCommand("G_SPN", mbrfsMv2.new ShootPreloadedCommand());
-		NamedCommands.registerCommand("G_SSN", mbrfsMv2.new ShootNoteCommand());
+		// IntakeFSM Commands
+		NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
+		NamedCommands.registerCommand("I_OTN", intakeFSM.new OuttakeNoteCommand());
+		NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
+		NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
+		NamedCommands.registerCommand("I_OTP", intakeFSM.new OuttakePreloadedCommand());
+
+		// ShooterFSM Commands
+		NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand());
+		NamedCommands.registerCommand("S_RSN", shooterFSM.new ShootNoteCommand());
 
 		/*
 		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
@@ -137,10 +139,10 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		driveFSMSystem.reset();
-		mbrfsMv2.reset();
 		shooterFSM.reset();
 		chainLeftFSM.reset();
 		chainRightFSM.reset();
+		intakeFSM.reset();
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
@@ -149,10 +151,10 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
-		mbrfsMv2.update(input);
 		shooterFSM.update(input);
 		chainLeftFSM.update(input);
 		chainRightFSM.update(input);
+		intakeFSM.update(input);
 		mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
