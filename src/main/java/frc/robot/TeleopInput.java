@@ -174,22 +174,38 @@ public class TeleopInput {
 	public boolean isShootAmpButtonPressed() {
 		return mechController.getSquareButton();
 	}
-
 	/**
 	 * Get the value of the Cross  button.
 	 * @return if Cross button is pressed
 	 */
-	public boolean synchClimberTrigger() {
-		return mechController.getCrossButton();
+	public boolean isAutoRaiseButtonPressed() {
+		return false;
+	}
+	/**
+	 * Get the value of the Options Button.
+	 * @return if Options Button is pressed
+	 */
+	public boolean isAutoLowerButtonPressed() {
+		return false;
+	}
+	/**
+	 * Get the value of the Cross  button.
+	 * @return if Cross button is pressed
+	 */
+	public boolean isManualRaiseButtonPressed() {
+		//return mechController.getCrossButton();
+		return false;
 	}
 
 	/**
 	 * Get the value of the Options Button.
 	 * @return if Options Button is pressed
 	 */
-	public boolean isHooksUpButtonPressed() {
-		return mechController.getOptionsButton();
+	public boolean isManualLowerButtonPressed() {
+		//return mechController.getOptionsButton();
+		return false;
 	}
+
 
 	/**
 	 * Get the value of the L2 button.
