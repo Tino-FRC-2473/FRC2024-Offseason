@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -328,7 +329,7 @@ public class DriveFSMSystem extends SubsystemBase {
 
 		//SmartDashboard.putNumber("X Pos", getPose().getX());
 		//SmartDashboard.putNumber("Y Pos", getPose().getY());
-		//SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
+		SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
 
 		/*
 		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
@@ -383,19 +384,25 @@ public class DriveFSMSystem extends SubsystemBase {
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
 
-			var rot = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
+			var rotSpeed = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
+			
+			var rot = 0.0;
 
-				if(rot != 0) {
+				if (rotSpeed != 0) {
 					oldRotation = Rotation2d.fromDegrees(getHeading());
 				} else {
 					// Do the course correction, calculate the deviation and lerp it back.
 					var thetaD = getHeading() % 360;
-					var thetaE = oldRotation.getDegrees() % 360;
+					var thetaE = (oldRotation == null) ? (getHeading() % 360) : (oldRotation.getDegrees() % 360);
+					
+					SmartDashboard.putNumber("Theta D", thetaD);
+					SmartDashboard.putNumber("Theta E", thetaE);
 
 					rot = pidRotation(thetaD, thetaE);
 				}
+
 
 				drive(xSpeed, ySpeed, rot, true);
 
@@ -522,9 +529,9 @@ public class DriveFSMSystem extends SubsystemBase {
 		double ySpeedDelivered = ySpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double rotDelivered = rot * DriveConstants.MAX_ANGULAR_SPEED;
 
-		//SmartDashboard.putNumber("x speed delivered", xSpeedDelivered);
-		//SmartDashboard.putNumber("y speed delivered", ySpeedDelivered);
-		//SmartDashboard.putNumber("rot speed delivered", rotDelivered);
+		SmartDashboard.putNumber("x speed delivered", xSpeedDelivered);
+		SmartDashboard.putNumber("y speed delivered", ySpeedDelivered);
+		SmartDashboard.putNumber("rot speed delivered", rotDelivered);
 
 
 		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
@@ -567,12 +574,12 @@ public class DriveFSMSystem extends SubsystemBase {
 		double arc1 = 360 + (expected - deviated);
 		double arc2 = (expected - deviated);
 
-		double correction = Math.abs(arc1) > Math.abs(arc2) ? arc2 / Math.abs(arc2) * 
-			MechConstants.PID_CONSTANT_ROTATION_PIVOT_P * Math.min(Math.abs(arc1), Math.abs(arc2))
-			: arc1 / Math.abs(arc1) * MechConstants.PID_CONSTANT_ROTATION_PIVOT_P * 
-			Math.min(Math.abs(arc1), Math.abs(arc2));
+		double correction = Math.abs(arc1) > Math.abs(arc2) ? arc2 * MechConstants.PID_CONSTANT_ROTATION_PIVOT_P
+			: arc1 * MechConstants.PID_CONSTANT_ROTATION_PIVOT_P;
 
-		return clamp(MechConstants.MAX_TURN_SPEED, MechConstants.MIN_TURN_SPEED, correction);
+		SmartDashboard.putNumber("Saved Heading", deviated);
+		SmartDashboard.putNumber("Largest Arc", correction / MechConstants.PID_CONSTANT_ROTATION_PIVOT_P);
+		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED);
 	}
 
 	/**
