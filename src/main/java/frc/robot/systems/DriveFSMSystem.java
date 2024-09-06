@@ -201,6 +201,8 @@ public class DriveFSMSystem extends SubsystemBase {
 		gyro.reset();
 		gyro.setAngleAdjustment(0);
 
+		oldRotation = new Rotation2d(getHeading());
+
 		if (redAlliance) {
 			tagOrientationAngles = new Double[]
 				{null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
@@ -388,23 +390,21 @@ public class DriveFSMSystem extends SubsystemBase {
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
 			
-			var rot = 0.0;
+			if (rotSpeed != 0) {
+				oldRotation = Rotation2d.fromDegrees(getHeading());
+			} else {
+				// Do the course correction, calculate the deviation and lerp it back.
+				var thetaD = getHeading() % 360;
+				var thetaE = (oldRotation == null) ? (getHeading() % 360) : (oldRotation.getDegrees() % 360);
+				
+				SmartDashboard.putNumber("Theta D", thetaD);
+				SmartDashboard.putNumber("Theta E", thetaE);
 
-				if (rotSpeed != 0) {
-					oldRotation = Rotation2d.fromDegrees(getHeading());
-				} else {
-					// Do the course correction, calculate the deviation and lerp it back.
-					var thetaD = getHeading() % 360;
-					var thetaE = (oldRotation == null) ? (getHeading() % 360) : (oldRotation.getDegrees() % 360);
-					
-					SmartDashboard.putNumber("Theta D", thetaD);
-					SmartDashboard.putNumber("Theta E", thetaE);
-
-					rot = pidRotation(thetaD, thetaE);
-				}
+				rotSpeed = pidRotation(thetaD, thetaE);
+			}
 
 
-				drive(xSpeed, ySpeed, rot, true);
+			drive(xSpeed, ySpeed, rotSpeed, true);
 
 
 				if (input.isCrossButtonPressed()) {
