@@ -184,7 +184,7 @@ public class ClimberMechFSM {
                 else return ClimberMechFSMState.LOWER_HOOK_MANUAL;
             case IDLE:
                 if ((rightMotor.getEncoder().getPosition() < RIGHT_FINAL_POSITION && leftMotor.getEncoder().getPosition() > LEFT_FINAL_POSITION) &&
-				(input.isAutoRaiseButtonPressed())) {
+				(!input.isAutoRaiseButtonPressed() && wasAutoRaised)) {
 					updateButtonVariables(input);
 					return ClimberMechFSMState.RAISE_HOOK_AUTO;
 				} else if ((rightMotor.getEncoder().getPosition() < RIGHT_FINAL_POSITION && leftMotor.getEncoder().getPosition() > LEFT_FINAL_POSITION) &&
