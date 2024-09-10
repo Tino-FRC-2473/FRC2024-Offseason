@@ -15,16 +15,18 @@ FOV = (50.28, 29.16)
 RES = (1280 , 800)
 CAM_HEIGHT = 0.4
 CAM_ANGLE = -15
-input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE,1)
+input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE,0)
 tag_module = AprilTag()
 ARUCO_LENGTH_METERS = 0.165
-tag_module.calibrate(RES,'/Users/jaseer/Documents/GitHub/FRC2024-Offseason/src/main/python/charuco_images_jpeg',6,9,ARUCO_LENGTH_METERS/9,True)
+tag_module.calibrate(RES,'/Users/jaseer/Documents/GitHub/FRC2024-Offseason/src/main/python/charuco_images_jpeg',6,9,ARUCO_LENGTH_METERS/9,False)
 
 
 def printAprilTagData(tagData):
     data = list(tagData.values())
     if len(data) > 0:
-        print('\r'+str(data[0]))
+        print('Translational: ' + str(data[0][0]))
+        print('Rotational: ' + str(data[0][1]))
+        print('cvec: ' + str(data[0][2]))
 
 
 while True:
