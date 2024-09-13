@@ -1,36 +1,61 @@
 import cv2
+from detector import Detector
 import numpy as np
-from apriltag import AprilTag
-from vision_input import VisionInput
+import os
 import time
+import math
+import ntcore
+from target import Target
 
-RES = (640, 480)
+cap = cv2.VideoCapture(0)
 
-tag_module = AprilTag()
-CALIB_DIR = 'cam1_photos'
-CALIB_SIZE_METERS = 0.015
-CALIB_WIDTH = 9
-CALIB_HEIGHT = 9
-#tag_module.calibrate(RES, CALIB_DIR, CALIB_SIZE_METERS, CALIB_WIDTH, CALIB_HEIGHT, visualize=True)
-#UNCOMMENT ABOVE IF CALIBRATION DATA is not in /calibration_data direcotry
+inst = ntcore.NetworkTableInstance.getDefault()
 
-FOV = (50.28, 29.16)
-CAM_HEIGHT = 0.4
-CAM_ANGLE = -15
-input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE)
-TAG_LENGTH_METERS = 0.165
+LOW_THRESHOLD = 80
+HIGH_THRESHOLD = 170
 
-while True:
-    frame = input.getFrame()
-    annotated_frame = frame.copy()
-    tagData = tag_module.estimate_3d_pose(frame, annotated_frame, TAG_LENGTH_METERS)
+while(True):
+    table = inst.getTable("datatable")
 
-    pose_list = [4000 for _ in range(16 * 6)]
-    for key, value in tagData.items():
-        pose_list[(key - 1) * 6 : (key * 6)] = np.concatenate((value[0].flatten(), value[1].flatten()), axis=0).tolist()
     
-    cv2.imshow('result', annotated_frame)
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('q'):
-        break
 
+    ret, frame = cap.read()
+    assert ret 
+    
+    d = Detector()
+
+    # convert tuple from (height, width, # of channels) to just (height, width)
+    frame_single_channel = frame[:,:,0]
+
+    orange_mask = d.detectOrange(frame_single_channel, LOW_THRESHOLD, HIGH_THRESHOLD)
+    largest_contour = d.find_largest_orange_contour(orange_mask)
+
+    print("yaw degrees" + str(d.get_yaw_degrees(largest_contour)))
+
+   
+
+    #cv2.drawContours(frame, contour, 0, [255, 0, 0], 2)
+    if largest_contour is not None and d.contour_is_note(largest_contour):
+        target = Target(largest_contour, "RING")
+
+        yaw = target.get_yaw_degrees()
+        dist = target.get_distance_meters()
+        print("yaw: " + yaw)
+        print("distance: " + dist)
+        table_yaw = table.getDoubleTopic("note_yaw").publish()
+        table_yaw.set(yaw)
+
+        table_distance = table.getDoubleTopic("note_distance").publish()
+        table_distance.set(dist)
+
+        cv2.ellipse(orange_mask, cv2.fitEllipse(largest_contour), (255, 0, 255), 10) # TRY -1
+
+    # TODO: ALTER THRESHOLD VALS HERE - define orange based on intensity thresholds? (exposure, brightness..)
+    cv2.imshow("masked stream", orange_mask)
+
+    key = cv2.waitKey(1)
+    if key == ord('q'):  # Quit if 'q' key is pressed
+        break
+    
+cap.release()
+cv2.destroyAllWindows()

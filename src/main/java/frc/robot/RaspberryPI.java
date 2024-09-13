@@ -1,6 +1,8 @@
 package frc.robot;
 
 import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.IntegerArraySubscriber;
+import edu.wpi.first.networktables.IntegerSubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -18,6 +20,12 @@ public class RaspberryPI {
 	private DoubleSubscriber noteY;
 	private DoubleSubscriber noteD;
 	private DoubleSubscriber aprilP;
+	private IntegerSubscriber aprilId;
+	// private IntegerArraySubscriber aprilKeys;
+	// private DoubleArraySubscriber aprilTrans;
+	// private DoubleArraySubscriber aprilRot;
+	// private DoubleArraySubscriber aprilCvec;
+	private DoubleSubscriber aprilYaw;
 	private double previousTimeReceived = 0;
 	private Timer timer = new Timer();
 	public static final int VALUES_PER_TAG = 6;
@@ -31,6 +39,13 @@ public class RaspberryPI {
 		noteY = table.getDoubleTopic("note_yaw").subscribe(-1);
 		noteD = table.getDoubleTopic("note_distance").subscribe(-1);
 		aprilP = table.getDoubleTopic("april_pitch").subscribe(-1);
+		aprilYaw = table.getDoubleTopic("april_yaw").subscribe(-1);
+		aprilId = table.getIntegerTopic("april_id").subscribe(-1);
+		// aprilKeys = table.getIntegerArrayTopic("tag_keys").subscribe(new long[]{});
+		// aprilTrans = table.getDoubleArrayTopic("tag_transational").subscribe(new double[]{});
+		// aprilRot = table.getDoubleArrayTopic("tag_rotational").subscribe(new double[]{});
+		// aprilCvec = table.getDoubleArrayTopic("tag_cvec").subscribe(new double[]{});
+
 	}
 
 	/**Updates the values in SmartDashboard. */
@@ -38,7 +53,7 @@ public class RaspberryPI {
 		updateFPS();
 		updateNoteY();
 		updateNoteD();
-		updateAprilP();
+		//updateAprilP();
 	}
 
 	/**
@@ -69,11 +84,20 @@ public class RaspberryPI {
 	}
 
 	/**
-	 * Updates the aprilY each iteration of the robot.
+	 * Updates the april yaw each iteration of the robot.
 	 */
-	public void updateAprilP() {
-		SmartDashboard.putNumber("AprilPitch", aprilP.get());
+	public void updateAprilYaw() {
+		SmartDashboard.putNumber("AprilYaw", aprilYaw.get());
 	}
+
+	/**
+	 * Updates the april yaw each iteration of the robot.
+	 */
+	public void updateAprilId() {
+		SmartDashboard.putNumber("AprilId", aprilId.get());
+	}
+
+	
 
 	/**
 	 * @param id id of the april tag we are fetching data on
