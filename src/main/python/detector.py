@@ -2,7 +2,7 @@ import cv2
 import math
 import numpy as np
 from target import Target
-import skimage.color
+# import skimage.color
 import time
 
 class Detector:
