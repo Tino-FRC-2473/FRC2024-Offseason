@@ -1,8 +1,5 @@
 package frc.robot.systems;
 
-import javax.swing.tree.ExpandVetoException;
-
-import com.kauailabs.navx.IMUProtocol.GyroUpdate;
 // Third party Hardware Imports
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -25,7 +22,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -107,6 +103,8 @@ public class DriveFSMSystem extends SubsystemBase {
 	private Double[] tagOrientationAngles;
 
 	private Rotation2d oldRotation;
+	private double oldPoseX;
+	private double oldPoseY;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -202,6 +200,8 @@ public class DriveFSMSystem extends SubsystemBase {
 		gyro.setAngleAdjustment(0);
 
 		oldRotation = new Rotation2d(getHeading());
+		oldPoseX = getPose().getX();
+		oldPoseY = getPose().getY();
 
 		if (redAlliance) {
 			tagOrientationAngles = new Double[]
@@ -278,6 +278,9 @@ public class DriveFSMSystem extends SubsystemBase {
 					rearRight.getPosition()
 				},
 				pose);
+
+		oldPoseX = pose.getX();
+		oldPoseY = pose.getY();
 	}
 
 	/**
@@ -378,33 +381,47 @@ public class DriveFSMSystem extends SubsystemBase {
 		switch (currentState) {
 			case TELEOP_STATE:
 
-			var xSpeed = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
+				var xSpeed = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
 
-			var ySpeed = -MathUtil.applyDeadband((input.getControllerLeftJoystickX()
+				var ySpeed = -MathUtil.applyDeadband((input.getControllerLeftJoystickX()
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
 
-			var rotSpeed = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
+				var rotSpeed = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
-			
-			if (rotSpeed != 0) {
-				oldRotation = Rotation2d.fromDegrees(getHeading());
-			} else {
-				// Do the course correction, calculate the deviation and lerp it back.
-				var thetaD = getHeading() % 360;
-				var thetaE = (oldRotation == null) ? (getHeading() % 360) : (oldRotation.getDegrees() % 360);
-				
-				SmartDashboard.putNumber("Theta D", thetaD);
-				SmartDashboard.putNumber("Theta E", thetaE);
 
-				rotSpeed = pidRotation(thetaD, thetaE);
-			}
+				if (rotSpeed != 0) {
+					oldRotation = Rotation2d.fromDegrees(getHeading());
+				} else {
+					// Do the course correction, calculate the deviation and lerp it back.
+					var thetaD = getHeading() % 360;
+					var thetaE = (oldRotation == null) ? (getHeading() % 360) :
+						(oldRotation.getDegrees() % 360);
 
+					SmartDashboard.putNumber("Theta D", thetaD);
+					SmartDashboard.putNumber("Theta E", thetaE);
 
-			drive(xSpeed, ySpeed, rotSpeed, true);
+					rotSpeed = pidRotation(thetaD, thetaE);
+				}
+
+				if (xSpeed != 0 || ySpeed != 0) {
+					if (xSpeed != 0) {
+						oldPoseX = getPose().getX();
+					} else {
+						xSpeed = pidPosition(getPose().getX(), oldPoseX);
+					}
+
+					if (ySpeed != 0) {
+						oldPoseY = getPose().getY();
+					} else {
+						ySpeed = pidPosition(getPose().getY(), oldPoseY);
+					}
+				}
+
+				drive(xSpeed, ySpeed, rotSpeed, true);
 
 
 				if (input.isCrossButtonPressed()) {
@@ -565,21 +582,30 @@ public class DriveFSMSystem extends SubsystemBase {
 	}
 
 	/**
-	 * Pids the value to expected
+	 * Returns a clamped correction speed to correct deviated values.
 	 * @param deviated deviated value that is being "pidded"
 	 * @param expected the value that should be pid towards.
-	 * @return
+	 * @return clamped correction value for angular speed
 	 */
 	public double pidRotation(double deviated, double expected) {
 		double arc1 = 360 + (expected - deviated);
 		double arc2 = (expected - deviated);
 
-		double correction = Math.abs(arc1) > Math.abs(arc2) ? arc2 * MechConstants.PID_CONSTANT_ROTATION_PIVOT_P
-			: arc1 * MechConstants.PID_CONSTANT_ROTATION_PIVOT_P;
+		double correction = Math.abs(arc1) > Math.abs(arc2)
+			? arc2 * MechConstants.PID_CONSTANT_ROTATION_SWERVE_P
+			: arc1 * MechConstants.PID_CONSTANT_ROTATION_SWERVE_P;
 
 		SmartDashboard.putNumber("Saved Heading", deviated);
-		SmartDashboard.putNumber("Largest Arc", correction / MechConstants.PID_CONSTANT_ROTATION_PIVOT_P);
+		SmartDashboard.putNumber("Largest Arc", correction
+			/ MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
+
 		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED);
+	}
+
+	public double pidPosition(double deviated, double expected) {
+		double diff = deviated - expected;
+		double correction = diff * MechConstants.PID_CONSTANT_POSITION_SWERVE_P;
+		return clamp(correction, MechConstants.MIN_POS_SPEED, MechConstants.MAX_POS_SPEED);
 	}
 
 	/**
