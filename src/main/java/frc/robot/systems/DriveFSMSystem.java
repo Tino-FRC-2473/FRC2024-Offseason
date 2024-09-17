@@ -407,16 +407,23 @@ public class DriveFSMSystem extends SubsystemBase {
 					rotSpeed = pidRotation(thetaD, thetaE);
 				}
 
+				SmartDashboard.putNumber("old Pose x", oldPoseX);
+				SmartDashboard.putNumber("old pose y", oldPoseY);
+				SmartDashboard.putNumber("XSPEED", xSpeed);
+				SmartDashboard.putNumber("YSPEED", ySpeed);
+
 				if (xSpeed != 0 || ySpeed != 0) {
 					if (xSpeed != 0) {
 						oldPoseX = getPose().getX();
 					} else {
+						System.out.println("REACHED X CORRECTION");
 						xSpeed = pidPosition(getPose().getX(), oldPoseX);
 					}
 
 					if (ySpeed != 0) {
 						oldPoseY = getPose().getY();
 					} else {
+						System.out.println("REACHED Y CORRECTION");
 						ySpeed = pidPosition(getPose().getY(), oldPoseY);
 					}
 				}
@@ -604,7 +611,7 @@ public class DriveFSMSystem extends SubsystemBase {
 
 	public double pidPosition(double deviated, double expected) {
 		double diff = deviated - expected;
-		double correction = diff * MechConstants.PID_CONSTANT_POSITION_SWERVE_P;
+		double correction = -diff * MechConstants.PID_CONSTANT_POSITION_SWERVE_P;
 		return clamp(correction, MechConstants.MIN_POS_SPEED, MechConstants.MAX_POS_SPEED);
 	}
 
