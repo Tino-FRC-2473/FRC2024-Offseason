@@ -381,54 +381,71 @@ public class DriveFSMSystem extends SubsystemBase {
 		switch (currentState) {
 			case TELEOP_STATE:
 
-				var xSpeed = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
+				double xSpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
 
-				var ySpeed = -MathUtil.applyDeadband((input.getControllerLeftJoystickX()
+				double ySpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickX()
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
 
-				var rotSpeed = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
+				double rotSpeedInput = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
 
-				if (rotSpeed != 0) {
+				double correctedRotSpeed;
+				double correctedXSpeed;
+				double correctedYSpeed;
+
+				boolean correctRot = false;
+				boolean correctX = false;
+				boolean correctY = false;
+
+				if (rotSpeedInput != 0) {
 					oldRotation = Rotation2d.fromDegrees(getHeading());
+					correctRot = false;
 				} else {
 					// Do the course correction, calculate the deviation and lerp it back.
-					var thetaD = getHeading() % 360;
-					var thetaE = (oldRotation == null) ? (getHeading() % 360) :
+					correctRot = true;
+					double thetaD = getHeading() % 360;
+					double thetaE = (oldRotation == null) ? (getHeading() % 360) :
 						(oldRotation.getDegrees() % 360);
 
 					SmartDashboard.putNumber("Theta D", thetaD);
 					SmartDashboard.putNumber("Theta E", thetaE);
 
-					rotSpeed = pidRotation(thetaD, thetaE);
+					correctedRotSpeed = pidRotation(thetaD, thetaE);
 				}
 
 				SmartDashboard.putNumber("old Pose x", oldPoseX);
 				SmartDashboard.putNumber("old pose y", oldPoseY);
-				SmartDashboard.putNumber("XSPEED", xSpeed);
-				SmartDashboard.putNumber("YSPEED", ySpeed);
+				SmartDashboard.putNumber("get pose x", getPose().getX());
+				SmartDashboard.putNumber("get pose y", getPose().getY());
 
-				if (xSpeed != 0 || ySpeed != 0) {
-					if (xSpeed != 0) {
+				if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
+					if (xSpeedInput != 0) {
 						oldPoseX = getPose().getX();
+						correctX = false;
 					} else {
 						System.out.println("REACHED X CORRECTION");
-						xSpeed = pidPosition(getPose().getX(), oldPoseX);
+						correctedXSpeed = pidPosition(getPose().getX(), oldPoseX);
+						correctX = true;
 					}
 
-					if (ySpeed != 0) {
+					if (ySpeedInput != 0) {
 						oldPoseY = getPose().getY();
+						correctY = false;
 					} else {
 						System.out.println("REACHED Y CORRECTION");
-						ySpeed = pidPosition(getPose().getY(), oldPoseY);
+						correctedYSpeed = pidPosition(getPose().getY(), oldPoseY);
+						correctY = true;
 					}
 				}
 
-				drive(xSpeed, ySpeed, rotSpeed, true);
+				drive(correctX ? correctedXSpeed : xSpeedInput,
+					correctY ? correctedYSpeed : ySpeedInput,
+					correctRot ? correctedRotSpeed : rotSpeedInput,
+					true);
 
 
 				if (input.isCrossButtonPressed()) {
