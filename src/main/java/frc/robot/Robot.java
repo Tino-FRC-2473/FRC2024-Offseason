@@ -11,7 +11,6 @@ import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoSink;
 import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.util.PixelFormat;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -24,12 +23,10 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 // Systems
-import frc.robot.systems.ClimberMechFSMLeft;
-import frc.robot.systems.ClimberMechFSMRight;
+import frc.robot.systems.ClimberMechFSM;
 import frc.robot.systems.DriveFSMSystem;
-import frc.robot.systems.IntakeFSMSystem;
 import frc.robot.systems.ShooterFSMSystem;
-// import frc.robot.systems.ShooterFSMSystem;
+import frc.robot.systems.IntakeFSMSystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -40,8 +37,7 @@ public class Robot extends TimedRobot {
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
 	private ShooterFSMSystem shooterFSM;
-	private ClimberMechFSMLeft chainLeftFSM;
-	private ClimberMechFSMRight chainRightFSM;
+	private ClimberMechFSM climberMechFSM;
 	private IntakeFSMSystem intakeFSM;
 
 	private SendableChooser<Command> autoChooser;
@@ -60,7 +56,6 @@ public class Robot extends TimedRobot {
 
 	private final int redSpeakerTagID = 4;
 	private final int blueSpeakerTagID = 7;
-	private Encoder throughBore;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -74,8 +69,7 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		driveFSMSystem = new DriveFSMSystem();
 		shooterFSM = new ShooterFSMSystem();
-		chainLeftFSM = new ClimberMechFSMLeft();
-		chainRightFSM = new ClimberMechFSMRight();
+		climberMechFSM = new ClimberMechFSM();
 		intakeFSM = new IntakeFSMSystem();
 
 		// IntakeFSM Commands
@@ -140,8 +134,7 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Teleop Init --------");
 		driveFSMSystem.reset();
 		shooterFSM.reset();
-		chainLeftFSM.reset();
-		chainRightFSM.reset();
+		climberMechFSM.reset();
 		intakeFSM.reset();
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
@@ -152,8 +145,7 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
 		shooterFSM.update(input);
-		chainLeftFSM.update(input);
-		chainRightFSM.update(input);
+		climberMechFSM.update(input);
 		intakeFSM.update(input);
 		mField.setRobotPose(driveFSMSystem.getPose());
 	}
