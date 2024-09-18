@@ -18,7 +18,7 @@ public class ClimberMechFSM {
 	public enum ClimberMechFSMState {
 		START_STATE,
 		LOWER_HOOK_AUTO,
-    	RAISE_HOOK_AUTO,
+		RAISE_HOOK_AUTO,
 		RAISE_HOOK_MANUAL,
 		LOWER_HOOK_MANUAL,
 		IDLE
@@ -45,7 +45,7 @@ public class ClimberMechFSM {
 	// be private to their owner system and may not be used elsewhere.
 	private CANSparkMax rightMotor;
 	private CANSparkMax leftMotor;
-    
+
 	private DigitalInput leftBottomSwitch;
 	private DigitalInput rightBottomSwitch;
 
@@ -61,11 +61,17 @@ public class ClimberMechFSM {
 	 */
 	public ClimberMechFSM() {
 		// Perform hardware init
-		rightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_LEFT_CLIMBER_MOTOR,CANSparkMax.MotorType.kBrushless);
+		rightMotor = new CANSparkMax(
+			HardwareMap.CAN_ID_SPARK_LEFT_CLIMBER_MOTOR,
+			CANSparkMax.MotorType.kBrushless);
+		
 		rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		rightMotor.getEncoder().setPosition(0);
 
-		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_LEFT_CLIMBER_MOTOR,CANSparkMax.MotorType.kBrushless);
+		leftMotor = new CANSparkMax(
+			HardwareMap.CAN_ID_SPARK_LEFT_CLIMBER_MOTOR,
+			CANSparkMax.MotorType.kBrushless);
+		
 		leftMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		leftMotor.getEncoder().setPosition(0);
 
@@ -109,7 +115,9 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
-		if (input == null) return;
+		if (input == null) {
+			return;
+		}
 		switch (currentState) {
 			case LOWER_HOOK_AUTO:
 				handleLowerHookAutoState(input);
@@ -152,13 +160,16 @@ public class ClimberMechFSM {
 		switch (currentState) {
 			case RAISE_HOOK_AUTO:
 				if (
-					rightMotor.getEncoder().getPosition() >= RIGHT_RAISED_POSITION && 
+					rightMotor.getEncoder().getPosition() >= RIGHT_RAISED_POSITION 
+					&& 
 					leftMotor.getEncoder().getPosition() <= LEFT_RAISED_POSITION
 				) {
 					next = ClimberMechFSMState.IDLE;
 				} else if (
-					rightMotor.getEncoder().getPosition() < RIGHT_RAISED_POSITION && 
-					leftMotor.getEncoder().getPosition() > LEFT_RAISED_POSITION && 
+					rightMotor.getEncoder().getPosition() < RIGHT_RAISED_POSITION 
+					&& 
+					leftMotor.getEncoder().getPosition() > LEFT_RAISED_POSITION 
+					&& 
 					input.isManualRaiseButtonPressed()
 				) {
 					next = ClimberMechFSMState.RAISE_HOOK_MANUAL;
@@ -169,9 +180,13 @@ public class ClimberMechFSM {
 
 			case LOWER_HOOK_AUTO:
 				if (
-					rightMotor.getEncoder().getPosition() <= RIGHT_DEFAULT_POSITION && 
-					leftMotor.getEncoder().getPosition() >= LEFT_DEFAULT_POSITION || 
-					leftBottomSwitch.get() && rightBottomSwitch.get()
+					rightMotor.getEncoder().getPosition() <= RIGHT_DEFAULT_POSITION 
+					&& 
+					leftMotor.getEncoder().getPosition() >= LEFT_DEFAULT_POSITION 
+					|| 
+					leftBottomSwitch.get() 
+					&& 
+					rightBottomSwitch.get()
 				) {
 					next = ClimberMechFSMState.IDLE;
 				} else if (	 
@@ -185,18 +200,28 @@ public class ClimberMechFSM {
 
 			case RAISE_HOOK_MANUAL:
 				if (
-					rightMotor.getEncoder().getPosition() >= RIGHT_RAISED_POSITION && 
-					leftMotor.getEncoder().getPosition() <= LEFT_RAISED_POSITION ||
-					!input.isManualRaiseButtonPressed() && 
-					!input.isManualLowerButtonPressed()) {
+					rightMotor.getEncoder().getPosition() >= RIGHT_RAISED_POSITION 
+					&& 
+					leftMotor.getEncoder().getPosition() <= LEFT_RAISED_POSITION 
+					||
+					!input.isManualRaiseButtonPressed() 
+					&& 
+					!input.isManualLowerButtonPressed()
+					) {
 					next =  ClimberMechFSMState.IDLE;
 				} else if (
 					(
-					rightMotor.getEncoder().getPosition() > RIGHT_FINAL_POSITION && 
-					leftMotor.getEncoder().getPosition() < LEFT_FINAL_POSITION ||
-					!rightBottomSwitch.get() && !leftBottomSwitch.get()
-					) && 
-					input.isManualLowerButtonPressed() && 
+					rightMotor.getEncoder().getPosition() > RIGHT_FINAL_POSITION 
+					&& 
+					leftMotor.getEncoder().getPosition() < LEFT_FINAL_POSITION 
+					||
+					!rightBottomSwitch.get() 
+					&& 
+					!leftBottomSwitch.get()
+					) 
+					&& 
+					input.isManualLowerButtonPressed() 
+					&& 
 					!input.isManualRaiseButtonPressed()
 				) {
 					next = ClimberMechFSMState.LOWER_HOOK_MANUAL;
@@ -209,18 +234,25 @@ public class ClimberMechFSM {
 				if (
 					(
 						rightMotor.getEncoder().getPosition() <= RIGHT_DEFAULT_POSITION 
-						&& leftMotor.getEncoder().getPosition() >= LEFT_DEFAULT_POSITION 
-						|| rightBottomSwitch.get() && leftBottomSwitch.get()
-					) || 
+						&& 
+						leftMotor.getEncoder().getPosition() >= LEFT_DEFAULT_POSITION 
+						|| 
+						rightBottomSwitch.get() && leftBottomSwitch.get()
+					) 
+					|| 
 					!input.isManualRaiseButtonPressed() 
-					&& !input.isManualLowerButtonPressed()
+					&& 
+					!input.isManualLowerButtonPressed()
 					) {
 					next = ClimberMechFSMState.IDLE;
 				} else if (
 					rightMotor.getEncoder().getPosition() <= RIGHT_DEFAULT_POSITION 
-					&& leftMotor.getEncoder().getPosition() >= LEFT_DEFAULT_POSITION 
-					&& !input.isManualLowerButtonPressed() 
-					&& input.isManualRaiseButtonPressed()
+					&& 
+					leftMotor.getEncoder().getPosition() >= LEFT_DEFAULT_POSITION 
+					&& 
+					!input.isManualLowerButtonPressed() 
+					&& 
+					input.isManualRaiseButtonPressed()
 					) {
 					next = ClimberMechFSMState.RAISE_HOOK_MANUAL;
 				} else {
@@ -231,28 +263,51 @@ public class ClimberMechFSM {
 			case IDLE:
 				if (
 					!input.isAutoRaiseButtonPressed() 
-					&& wasAutoRaised && (
+					&& wasAutoRaised 
+					&& 
+					(
 						rightMotor.getEncoder().getPosition() < RIGHT_FINAL_POSITION 
-						&& leftMotor.getEncoder().getPosition() > LEFT_FINAL_POSITION
-						|| rightBottomSwitch.get() && leftBottomSwitch.get())
+						&& 
+						leftMotor.getEncoder().getPosition() > LEFT_FINAL_POSITION
+						|| 
+						rightBottomSwitch.get() 
+						&& 
+						leftBottomSwitch.get()
+					)
 				) {
 					next = ClimberMechFSMState.RAISE_HOOK_AUTO;
 				} else if (
 					input.isManualRaiseButtonPressed() 
-					&& !input.isAutoLowerButtonPressed() 
-					&& !input.isAutoRaiseButtonPressed() && (
+					&& 
+					!input.isAutoLowerButtonPressed() 
+					&& 
+					!input.isAutoRaiseButtonPressed() 
+					&& 
+					(
 						rightMotor.getEncoder().getPosition() < RIGHT_FINAL_POSITION 
-						&& leftMotor.getEncoder().getPosition() > LEFT_FINAL_POSITION
-						|| rightBottomSwitch.get() && leftBottomSwitch.get()) 
+						&& 
+						leftMotor.getEncoder().getPosition() > LEFT_FINAL_POSITION
+						|| 
+						rightBottomSwitch.get() && leftBottomSwitch.get()
+					) 
 				) {
 					next = ClimberMechFSMState.RAISE_HOOK_MANUAL;
 				} else if (
 					input.isManualLowerButtonPressed()
-					&& !input.isAutoLowerButtonPressed()
-					&& !input.isAutoRaiseButtonPressed() && (
+					&& 
+					!input.isAutoLowerButtonPressed()
+					&& 
+					!input.isAutoRaiseButtonPressed() 
+					&& 
+					(
 						rightMotor.getEncoder().getPosition() > RIGHT_FINAL_POSITION
-						&& leftMotor.getEncoder().getPosition() < LEFT_FINAL_POSITION
-						|| rightBottomSwitch.get() && !leftBottomSwitch.get())
+						&& 
+						leftMotor.getEncoder().getPosition() < LEFT_FINAL_POSITION
+						|| 
+						rightBottomSwitch.get() 
+						&& 
+						!leftBottomSwitch.get()
+						)
 				) {
 					next = ClimberMechFSMState.LOWER_HOOK_MANUAL;
 				} else {
