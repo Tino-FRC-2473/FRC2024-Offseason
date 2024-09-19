@@ -105,6 +105,8 @@ public class DriveFSMSystem extends SubsystemBase {
 	private Rotation2d oldRotation;
 	private double oldPoseX;
 	private double oldPoseY;
+	private double oldRotSpeedInput;
+	private double rotSpeedInput;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -195,6 +197,8 @@ public class DriveFSMSystem extends SubsystemBase {
 		currentState = FSMState.TELEOP_STATE;
 		//led.turnOff();
 		resetPose(new Pose2d());
+		oldRotSpeedInput = 0;
+		rotSpeedInput = 0;
 
 		gyro.reset();
 		gyro.setAngleAdjustment(0);
@@ -340,9 +344,9 @@ public class DriveFSMSystem extends SubsystemBase {
 		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
 		SmartDashboard.putNumber("Gyro Yaw", gyro.getYaw());
 		SmartDashboard.putNumber("Gyro Fused Heading", gyro.getFusedHeading());
-		*/
+		
 
-		/*SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
+		SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
 			input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
@@ -389,13 +393,13 @@ public class DriveFSMSystem extends SubsystemBase {
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
 
-				double rotSpeedInput = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
+				rotSpeedInput = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
 
-				double correctedRotSpeed;
-				double correctedXSpeed;
-				double correctedYSpeed;
+				double correctedRotSpeed = .0;
+				double correctedXSpeed = .0;
+				double correctedYSpeed = .0;
 
 				boolean correctRot = false;
 				boolean correctX = false;
@@ -422,34 +426,37 @@ public class DriveFSMSystem extends SubsystemBase {
 				SmartDashboard.putNumber("get pose x", getPose().getX());
 				SmartDashboard.putNumber("get pose y", getPose().getY());
 
-				if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
-					if (xSpeedInput != 0) {
-						oldPoseX = getPose().getX();
-						correctX = false;
-					} else {
-						System.out.println("REACHED X CORRECTION");
-						correctedXSpeed = pidPosition(getPose().getX(), oldPoseX);
-						correctX = true;
-					}
+				oldRotSpeedInput = rotSpeedInput;
 
-					if (ySpeedInput != 0) {
-						oldPoseY = getPose().getY();
-						correctY = false;
-					} else {
-						System.out.println("REACHED Y CORRECTION");
-						correctedYSpeed = pidPosition(getPose().getY(), oldPoseY);
-						correctY = true;
-					}
-				}
+				// if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
+				// 	if (xSpeedInput != 0) {
+				// 		oldPoseX = getPose().getX();
+				// 		correctX = false;
+				// 	} else {
+				// 		System.out.println("REACHED X CORRECTION");
+				// 		correctedXSpeed = pidPosition(getPose().getX(), oldPoseX);
+				// 		correctX = true;
+				// 	}
 
-				drive(correctX ? correctedXSpeed : xSpeedInput,
-					correctY ? correctedYSpeed : ySpeedInput,
+				// 	if (ySpeedInput != 0) {
+				// 		oldPoseY = getPose().getY();
+				// 		correctY = false;
+				// 	} else {
+				// 		System.out.println("REACHED Y CORRECTION");
+				// 		correctedYSpeed = pidPosition(getPose().getY(), oldPoseY);
+				// 		correctY = true;
+				// 	}
+				// }
+
+				drive(xSpeedInput,
+					ySpeedInput,
 					correctRot ? correctedRotSpeed : rotSpeedInput,
 					true);
 
 
 				if (input.isCrossButtonPressed()) {
 					gyro.reset();
+					oldRotation = new Rotation2d(0);
 				}
 
 				if (input.isTriangleButtonPressed()) {
@@ -616,11 +623,17 @@ public class DriveFSMSystem extends SubsystemBase {
 		double arc2 = (expected - deviated);
 
 		double correction = Math.abs(arc1) > Math.abs(arc2)
-			? arc2 * MechConstants.PID_CONSTANT_ROTATION_SWERVE_P
-			: arc1 * MechConstants.PID_CONSTANT_ROTATION_SWERVE_P;
+			? arc2 : arc1;
+
+		correction *= ((Math.sqrt(1-oldRotSpeedInput*oldRotSpeedInput))
+			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
+
+		if (Math.abs(oldRotSpeedInput) > 0.3) {
+			correction *= 0;
+		}
 
 		SmartDashboard.putNumber("Saved Heading", deviated);
-		SmartDashboard.putNumber("Largest Arc", correction
+		SmartDashboard.putNumber("Smallest Arc", correction
 			/ MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
 
 		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED);
