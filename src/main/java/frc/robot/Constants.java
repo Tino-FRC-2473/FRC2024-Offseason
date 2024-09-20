@@ -28,7 +28,7 @@ public final class Constants {
 
 	// REV Color Sensor Constants
 	public static final int NOTE_FRAMES_MIN = 5;
-	public static final double PROXIMIIY_THRESHOLD = 200;
+	public static final double PROXIMIIY_THRESHOLD = 150;
 
 	public static final double GREEN_LOW = 0.18;
 	public static final double BLUE_LOW = 0.00;

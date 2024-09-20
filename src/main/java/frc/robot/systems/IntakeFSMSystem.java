@@ -84,7 +84,7 @@ public class IntakeFSMSystem {
 		bottomIntakeMotor = new TalonFX(HardwareMap.BOTTOM_INTAKE_MOTOR_ID);
 		bottomIntakeMotor.setNeutralMode(NeutralModeValue.Coast);
 
-		throughBore = new Encoder(0, 1);
+		throughBore = new Encoder(1, 2);
 		throughBore.reset();
 
 		pidpivot = new PIDController(Constants.PID_CONSTANT_PIVOT_P,
@@ -179,7 +179,7 @@ public class IntakeFSMSystem {
 			backIndexMotor.getVelocity().getValueAsDouble());
 		SmartDashboard.putNumber("Front Indexer Velocity",
 			frontIndexMotor.getVelocity().getValueAsDouble());
-		SmartDashboard.putBoolean("HASNOTE", hasNote);
+		SmartDashboard.putBoolean("HASNOTE", hasNote());
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
 	}
 
