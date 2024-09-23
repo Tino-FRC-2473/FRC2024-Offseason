@@ -14,8 +14,8 @@ public final class HardwareMap {
 	public static final int PIVOT_MOTOR_ID = 2;
 	public static final int TOP_INTAKE_MOTOR_ID = 3; //TODO: CHECK IF THIS IS CORRECT
 	public static final int BOTTOM_INTAKE_MOTOR_ID = 4; //TODO: CHECK IF THIS IS CORRECT
-	public static final int BACK_INDEXER_MOTOR_ID = 5;
-	public static final int FRONT_INDEXER_MOTOR_ID = 6;
+	public static final int BACK_INDEXER_MOTOR_ID = 3;
+	public static final int FRONT_INDEXER_MOTOR_ID = 5;
 
 	// NEW Chassis
 

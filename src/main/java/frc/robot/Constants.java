@@ -24,7 +24,7 @@ public final class Constants {
 	// TeleOp Intake Constants
 	public static final float INTAKE_VELOCITY = 8; //rps
 	public static final float OUTTAKE_VELOCITY = -8; //rps
-	public static final float FEED_SHOOTER_VELOCITY = 50; //rps
+	public static final float FEED_SHOOTER_VELOCITY = 30; //rps
 
 	// REV Color Sensor Constants
 	public static final int NOTE_FRAMES_MIN = 5;

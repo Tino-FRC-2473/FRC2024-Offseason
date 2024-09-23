@@ -180,6 +180,9 @@ public class IntakeFSMSystem {
 		SmartDashboard.putNumber("Front Indexer Velocity",
 			frontIndexMotor.getVelocity().getValueAsDouble());
 		SmartDashboard.putBoolean("HASNOTE", hasNote());
+		
+		SmartDashboard.putBoolean("Color Sensor in Range?", colorSensor.getProximity() >= Constants.PROXIMIIY_THRESHOLD);
+		SmartDashboard.putNumber("Frames with Note in View", noteColorFrames);
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
 	}
 
@@ -319,7 +322,12 @@ public class IntakeFSMSystem {
 		boolean isInRange = colorSensor.getProximity() >= Constants.PROXIMIIY_THRESHOLD;
 		SmartDashboard.putBoolean("is close enough", isInRange);
 
-		noteColorFrames = isInRange ? (noteColorFrames + 1) : 0;
+		//noteColorFrames = isInRange ? (noteColorFrames + 1) : 0;
+		if (isInRange) {
+			noteColorFrames++;
+		} else {
+			noteColorFrames = 0;
+		}
 		hasNote = noteColorFrames >= Constants.NOTE_FRAMES_MIN;
 
 		return hasNote;
