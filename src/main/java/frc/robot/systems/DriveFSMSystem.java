@@ -109,7 +109,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double rotRawInput;
 	private double rotSpeedInput;
 
-	private static final double ROT_RAW_DEADZONE = 0.2;
+	private static final double ROT_RAW_DEADZONE = 0.01;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -431,6 +431,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				SmartDashboard.putNumber("old pose y", oldPoseY);
 				SmartDashboard.putNumber("get pose x", getPose().getX());
 				SmartDashboard.putNumber("get pose y", getPose().getY());
+				SmartDashboard.putNumber("rot raw x", rotRawInput);
 
 				oldRotSpeedInput = rotSpeedInput;
 
@@ -638,7 +639,7 @@ public class DriveFSMSystem extends SubsystemBase {
 		correction *= ((Math.sqrt(1-oldRotSpeedInput*oldRotSpeedInput))
 			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
 
-		if (Math.abs(rotRawInput) > ROT_RAW_DEADZONE) {
+		if (Math.abs(rotRawInput) > 0.002) {
 			correction *= 0;
 		}
 
