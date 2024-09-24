@@ -202,7 +202,6 @@ public final class SwerveConstants {
 		public static final double ROT_MARGIN_TO_SOURCE = 0.04;
 		public static final double SOURCE_DRIVE_FORWARD_POWER = 0.35;
 
-
 		public static final double NOTE_TRANSLATIONAL_ACCEL_CONSTANT = 5;
 		public static final double NOTE_ROTATIONAL_ACCEL_CONSTANT = 70;
 		public static final double X_MARGIN_TO_NOTE = 0.03;

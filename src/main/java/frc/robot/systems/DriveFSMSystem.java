@@ -106,7 +106,10 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double oldPoseX;
 	private double oldPoseY;
 	private double oldRotSpeedInput;
+	private double rotRawInput;
 	private double rotSpeedInput;
+
+	private static final double ROT_RAW_DEADZONE = 0.2;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -198,6 +201,7 @@ public class DriveFSMSystem extends SubsystemBase {
 		//led.turnOff();
 		resetPose(new Pose2d());
 		oldRotSpeedInput = 0;
+		rotRawInput = 0;
 		rotSpeedInput = 0;
 
 		gyro.reset();
@@ -344,7 +348,7 @@ public class DriveFSMSystem extends SubsystemBase {
 		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
 		SmartDashboard.putNumber("Gyro Yaw", gyro.getYaw());
 		SmartDashboard.putNumber("Gyro Fused Heading", gyro.getFusedHeading());
-		
+
 
 		SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
 			input.getControllerLeftJoystickY()
@@ -385,6 +389,8 @@ public class DriveFSMSystem extends SubsystemBase {
 		switch (currentState) {
 			case TELEOP_STATE:
 
+				rotRawInput = input.getControllerRightJoystickX();
+
 				double xSpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
@@ -393,17 +399,17 @@ public class DriveFSMSystem extends SubsystemBase {
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
 
-				rotSpeedInput = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
+				rotSpeedInput = -MathUtil.applyDeadband((rotRawInput
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
 
 				double correctedRotSpeed = .0;
-				double correctedXSpeed = .0;
-				double correctedYSpeed = .0;
+				//double correctedXSpeed = .0;
+				//double correctedYSpeed = .0;
 
 				boolean correctRot = false;
-				boolean correctX = false;
-				boolean correctY = false;
+				//boolean correctX = false;
+				//boolean correctY = false;
 
 				if (rotSpeedInput != 0) {
 					oldRotation = Rotation2d.fromDegrees(getHeading());
@@ -454,18 +460,22 @@ public class DriveFSMSystem extends SubsystemBase {
 					true);
 
 
-				if (input.isCrossButtonPressed()) {
+				if (input.isBackButtonPressed()) {
 					gyro.reset();
+
 					oldRotation = new Rotation2d(0);
+					oldRotSpeedInput = 0;
+					rotRawInput = 0;
+					rotSpeedInput = 0;
 				}
 
-				if (input.isTriangleButtonPressed()) {
-					setForwardFormation();
-				}
+				//if (input.isTriangleButtonPressed()) {
+				//	setForwardFormation();
+				//}
 
-				if (input.isCircleButtonPressed()) {
-					setXFormation();
-				}
+				//if (input.isCircleButtonPressed()) {
+				//	setXFormation();
+				//}
 
 				break;
 
@@ -628,7 +638,7 @@ public class DriveFSMSystem extends SubsystemBase {
 		correction *= ((Math.sqrt(1-oldRotSpeedInput*oldRotSpeedInput))
 			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
 
-		if (Math.abs(oldRotSpeedInput) > 0.3) {
+		if (Math.abs(rotRawInput) > ROT_RAW_DEADZONE) {
 			correction *= 0;
 		}
 

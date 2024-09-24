@@ -25,7 +25,7 @@ import frc.robot.systems.ClimberMechFSMLeft;
 import frc.robot.systems.ClimberMechFSMRight;
 // Systems
 import frc.robot.systems.DriveFSMSystem;
-import frc.robot.systems.MBRFSMv2;
+//import frc.robot.systems.MBRFSMv2;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
-	private MBRFSMv2 mbrfsMv2;
+	//private MBRFSMv2 mbrfsMv2;
 	private ClimberMechFSMLeft chainLeftFSM;
 	private ClimberMechFSMRight chainRightFSM;
 	private SendableChooser<Command> autoChooser;
