@@ -21,8 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.systems.ClimberMechFSMLeft;
-import frc.robot.systems.ClimberMechFSMRight;
+import frc.robot.systems.ClimberMechFSM;
 // Systems
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.MBRFSMv2;
@@ -36,8 +35,7 @@ public class Robot extends TimedRobot {
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
 	private MBRFSMv2 mbrfsMv2;
-	private ClimberMechFSMLeft chainLeftFSM;
-	private ClimberMechFSMRight chainRightFSM;
+	private ClimberMechFSM chainFSM;
 	private SendableChooser<Command> autoChooser;
 	private Command autonomousCommand;
 	private final Field2d mField = new Field2d();
@@ -68,8 +66,7 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		driveFSMSystem = new DriveFSMSystem();
 		mbrfsMv2 = new MBRFSMv2();
-		chainLeftFSM = new ClimberMechFSMLeft();
-		chainRightFSM = new ClimberMechFSMRight();
+		chainFSM = new ClimberMechFSM();
 
 		NamedCommands.registerCommand("S_TIN", mbrfsMv2.new IntakeNoteCommand());
 		NamedCommands.registerCommand("S_TON", mbrfsMv2.new OuttakeNoteCommand());
@@ -132,8 +129,7 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Teleop Init --------");
 		driveFSMSystem.reset();
 		mbrfsMv2.reset();
-		chainLeftFSM.reset();
-		chainRightFSM.reset();
+		chainFSM.reset();
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
@@ -143,8 +139,7 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
 		mbrfsMv2.update(input);
-		chainLeftFSM.update(input);
-		chainRightFSM.update(input);
+		chainFSM.update(input);
 		mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
