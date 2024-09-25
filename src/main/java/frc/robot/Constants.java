@@ -11,7 +11,7 @@ public final class Constants {
 	// TeleOp Shooter Constants
 	public static final float SHOOTING_POWER = 0.8f;
 	public static final float TIMED_REVVING_DURATION = 2;
-	public static final float SHOOT_VELOCITY = 100; // rps
+	public static final float SHOOT_VELOCITY = -30; // rps
 
 	// Auto Intake Constants
 	public static final double AUTO_PIVOT_TIMER = 0.5;

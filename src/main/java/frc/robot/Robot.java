@@ -68,20 +68,20 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		//driveFSMSystem = new DriveFSMSystem();
-		//shooterFSM = new ShooterFSMSystem();
+		shooterFSM = new ShooterFSMSystem();
 		//climberMechFSM = new ClimberMechFSM();
-		intakeFSM = new IntakeFSMSystem();
+		//intakeFSM = new IntakeFSMSystem();
 
 		//IntakeFSM Commands
-		NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
-		NamedCommands.registerCommand("I_OTN", intakeFSM.new OuttakeNoteCommand());
-		NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
-		NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
-		NamedCommands.registerCommand("I_OTP", intakeFSM.new OuttakePreloadedCommand());
+		// NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
+		// NamedCommands.registerCommand("I_OTN", intakeFSM.new OuttakeNoteCommand());
+		// NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
+		// NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
+		// NamedCommands.registerCommand("I_OTP", intakeFSM.new OuttakePreloadedCommand());
 
-		// // ShooterFSM Commands
-		// NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand());
-		// NamedCommands.registerCommand("S_RSN", shooterFSM.new ShootNoteCommand());
+		// ShooterFSM Commands
+		NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand());
+		NamedCommands.registerCommand("S_RSN", shooterFSM.new ShootNoteCommand());
 
 		/*
 		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
@@ -133,9 +133,9 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		// System.out.println("-------- Teleop Init --------");
 		// driveFSMSystem.reset();
-		// shooterFSM.reset();
+		shooterFSM.reset();
 		// climberMechFSM.reset();
-		intakeFSM.reset();
+		// intakeFSM.reset();
 		// if (autonomousCommand != null) {
 		// 	autonomousCommand.cancel();
 		// }
@@ -144,9 +144,9 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		//driveFSMSystem.update(input);
-		//shooterFSM.update(input);
+		shooterFSM.update(input);
 		//climberMechFSM.update(input);
-		intakeFSM.update(input);
+		// intakeFSM.update(input);
 		//mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
