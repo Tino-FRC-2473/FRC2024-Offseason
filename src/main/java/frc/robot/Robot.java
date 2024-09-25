@@ -72,16 +72,17 @@ public class Robot extends TimedRobot {
 		climberMechFSM = new ClimberMechFSM();
 		intakeFSM = new IntakeFSMSystem();
 
+		//Label all named commands here
 		// IntakeFSM Commands
 		NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
-		NamedCommands.registerCommand("I_OTN", intakeFSM.new OuttakeNoteCommand());
+		NamedCommands.registerCommand("I_FXN", intakeFSM.new FeedNoteCommand());
 		NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
 		NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
-		NamedCommands.registerCommand("I_OTP", intakeFSM.new OuttakePreloadedCommand());
+		NamedCommands.registerCommand("I_FPN", intakeFSM.new FeedPreloadedCommand());
 
 		// ShooterFSM Commands
 		NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand());
-		NamedCommands.registerCommand("S_RSN", shooterFSM.new ShootNoteCommand());
+		NamedCommands.registerCommand("S_RXS", shooterFSM.new ShootNoteCommand());
 
 		/*
 		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
@@ -103,8 +104,6 @@ public class Robot extends TimedRobot {
 		driverCam.setVideoMode(videoMode);
 		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
 		driverCam.setResolution(streamWidth, streamHeight);
-
-		//Label all named commands here
 	}
 
 
@@ -121,6 +120,7 @@ public class Robot extends TimedRobot {
 			autonomousCommand.schedule();
 		}
 	}
+
 
 	@Override
 	public void autonomousPeriodic() {

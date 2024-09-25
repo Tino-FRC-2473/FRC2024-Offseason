@@ -11,7 +11,7 @@ public final class Constants {
 	// TeleOp Shooter Constants
 	public static final float SHOOTING_POWER = 0.8f;
 	public static final float TIMED_REVVING_DURATION = 2;
-	public static final float SHOOT_VELOCITY = 100; // rps
+	public static final float SHOOT_VELOCITY = 50; // rps
 
 	// Auto Intake Constants
 	public static final double AUTO_PIVOT_TIMER = 0.5;
@@ -21,10 +21,11 @@ public final class Constants {
 	public static final float AUTO_OUTTAKE_POWER = -0.2f;
 	public static final float AUTO_HOLDING_POWER = 0.05f;
 
+
 	// TeleOp Intake Constants
-	public static final float INTAKE_VELOCITY = 8; //rps
+	public static final float INTAKE_VELOCITY = 10; //rps
 	public static final float OUTTAKE_VELOCITY = -8; //rps
-	public static final float FEED_SHOOTER_VELOCITY = 50; //rps
+	public static final float FEED_SHOOTER_VELOCITY = 30; // rps
 
 	// REV Color Sensor Constants
 	public static final int NOTE_FRAMES_MIN = 5;
@@ -37,12 +38,11 @@ public final class Constants {
 	public static final double GREEN_HIGH = 0.35;
 	public static final double BLUE_HIGH = 0.1;
 	public static final double RED_HIGH = 0.8;
-// TODO: TESTS ALL CONSTANTS AND FIX
 	// PID Constants
 		// TeleOp
-	public static final double MIN_TURN_SPEED = -0.4;
-	public static final double MAX_TURN_SPEED = 0.4;
-	public static final double PID_CONSTANT_PIVOT_P = 0.00075;
+	public static final double MIN_TURN_SPEED = -0.6;
+	public static final double MAX_TURN_SPEED = 0.6;
+	public static final double PID_CONSTANT_PIVOT_P = 0.0008;
 	public static final double PID_CONSTANT_PIVOT_I = 0;
 	public static final double PID_CONSTANT_PIVOT_D = 0;
 		// Auto
@@ -52,7 +52,6 @@ public final class Constants {
 	public static final double INRANGE_VALUE = 20;
 
 	// Encoder Position Constants
-	// TODO: TEST ENCODER VALUES AND FIX
 	public static final double GROUND_ENCODER_COUNT = -618;
 	public static final double HOME_ENCODER_COUNT = 0;
 

@@ -54,8 +54,7 @@ public class IntakeFSMSystem {
 	// be private to their owner system and may not be used elsewhere.
 	private TalonFX frontIndexMotor;
 	private TalonFX backIndexMotor;
-	private TalonFX topIntakeMotor;
-	private TalonFX bottomIntakeMotor;
+	private TalonFX intakeMotor;
 	private TalonFX pivotMotor;
 
 	private Encoder throughBore;
@@ -78,11 +77,8 @@ public class IntakeFSMSystem {
 		pivotMotor = new TalonFX(HardwareMap.PIVOT_MOTOR_ID);
 		pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
-		topIntakeMotor = new TalonFX(HardwareMap.TOP_INTAKE_MOTOR_ID);
-		topIntakeMotor.setNeutralMode(NeutralModeValue.Coast);
-
-		bottomIntakeMotor = new TalonFX(HardwareMap.BOTTOM_INTAKE_MOTOR_ID);
-		bottomIntakeMotor.setNeutralMode(NeutralModeValue.Coast);
+		intakeMotor = new TalonFX(HardwareMap.INTAKE_MOTOR_ID);
+		intakeMotor.setNeutralMode(NeutralModeValue.Coast);
 
 		throughBore = new Encoder(1, 2);
 		throughBore.reset();
@@ -107,8 +103,7 @@ public class IntakeFSMSystem {
 
 		statusCode = frontIndexMotor.getConfigurator().apply(talonFXConfigs);
 		statusCode = backIndexMotor.getConfigurator().apply(talonFXConfigs);
-		statusCode = topIntakeMotor.getConfigurator().apply(talonFXConfigs);
-		statusCode = bottomIntakeMotor.getConfigurator().apply(talonFXConfigs);
+		statusCode = intakeMotor.getConfigurator().apply(talonFXConfigs);
 
 		// Reset state machine
 		reset();
@@ -224,7 +219,7 @@ public class IntakeFSMSystem {
 			case MOVE_TO_GROUND:
 				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)) {
 					if (input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
-						&& !hasNote && !input.isShootButtonPressed()) {
+						&& !input.isShootButtonPressed()) {
 						return IntakeFSMState.INTAKING;
 					} else if (input.isOuttakeButtonPressed() && !input.isIntakeButtonPressed()
 								&& input.isShootButtonPressed()) {
@@ -245,17 +240,16 @@ public class IntakeFSMSystem {
 
 			case INTAKING:
 				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)
-					&& input.isIntakeButtonPressed() && !hasNote
-					&& !input.isOuttakeButtonPressed() && !input.isShootButtonPressed()) {
+					&& input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
+					&& !input.isShootButtonPressed()) {
 					return IntakeFSMState.INTAKING;
 				}
 
-				if (input.isShootButtonPressed() || hasNote) {
+				if (input.isShootButtonPressed()) {
 					return IntakeFSMState.MOVE_TO_HOME;
 				}
 
-				if ((!input.isIntakeButtonPressed() && !hasNote)
-					|| input.isOuttakeButtonPressed()) {
+				if (input.isOuttakeButtonPressed() || !input.isIntakeButtonPressed()) {
 					return IntakeFSMState.MOVE_TO_GROUND;
 				}
 
@@ -342,8 +336,7 @@ public class IntakeFSMSystem {
 		pivotMotor.set(MathUtil.clamp(pidpivot.calculate(throughBore.getDistance(),
 			Constants.HOME_ENCODER_COUNT), Constants.MIN_TURN_SPEED, Constants.MAX_TURN_SPEED));
 
-		topIntakeMotor.setControl(mVoltage.withVelocity(0));
-		bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.setControl(mVoltage.withVelocity(0));
 		frontIndexMotor.setControl(mVoltage.withVelocity(0));
 		backIndexMotor.setControl(mVoltage.withVelocity(0));
 	}
@@ -357,8 +350,7 @@ public class IntakeFSMSystem {
 		led.orangeLight(false);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		topIntakeMotor.setControl(mVoltage.withVelocity(0));
-		bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.setControl(mVoltage.withVelocity(0));
 		backIndexMotor.setControl(mVoltage.withVelocity(0));
 		frontIndexMotor.setControl(mVoltage.withVelocity(0));
 	}
@@ -376,11 +368,17 @@ public class IntakeFSMSystem {
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		topIntakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
-		bottomIntakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
-		backIndexMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
-		// don't forget the "-"" sign
-		frontIndexMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
+		intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
+
+		if (hasNote()) {
+			backIndexMotor.setControl(mVoltage.withVelocity(0));
+			// don't forget the "-"" sign
+			frontIndexMotor.setControl(mVoltage.withVelocity(0));
+		} else {
+			backIndexMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
+			// don't forget the "-"" sign
+			frontIndexMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
+		}
 	}
 
 	/**
@@ -396,8 +394,7 @@ public class IntakeFSMSystem {
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
-		topIntakeMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.setControl(mVoltage.withVelocity(0));
 		backIndexMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
 		// don't forget the "-"" sign
 		frontIndexMotor.setControl(mVoltage.withVelocity(Constants.OUTTAKE_VELOCITY));
@@ -412,8 +409,7 @@ public class IntakeFSMSystem {
 		led.blueLight();
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		topIntakeMotor.setControl(mVoltage.withVelocity(0));
-		bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.setControl(mVoltage.withVelocity(0));
 		backIndexMotor.setControl(mVoltage.withVelocity(
 			-Constants.FEED_SHOOTER_VELOCITY));
 		// don't forget the "-"" sign
@@ -456,16 +452,14 @@ public class IntakeFSMSystem {
 		}
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		if (timer.get() > Constants.AUTO_SHOOTING_TIME) {
-			topIntakeMotor.setControl(mVoltage.withVelocity(0));
-			bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
 			frontIndexMotor.setControl(mVoltage.withVelocity(0));
 			backIndexMotor.setControl(mVoltage.withVelocity(0));
 			timer.stop();
 			timer.reset();
 			return true;
 		} else {
-			topIntakeMotor.setControl(mVoltage.withVelocity(0));
-			bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
 			backIndexMotor.setControl(mVoltage.withVelocity(
 				-Constants.FEED_SHOOTER_VELOCITY));
 			// don't forget the "-"" sign
@@ -480,8 +474,7 @@ public class IntakeFSMSystem {
 	 * @return if the action carried out has finished executing
 	 */
 	private boolean handleAutoIntake() {
-		bottomIntakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
-		topIntakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
+		intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
 		frontIndexMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
 		backIndexMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
 		return hasNote();
@@ -518,8 +511,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
-			topIntakeMotor.setControl(mVoltage.withVelocity(0));
-			bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
 			frontIndexMotor.setControl(mVoltage.withVelocity(0));
 			backIndexMotor.setControl(mVoltage.withVelocity(0));
 			timerSub.stop();
@@ -608,8 +600,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
-			topIntakeMotor.setControl(mVoltage.withVelocity(0));
-			bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
 			frontIndexMotor.setControl(mVoltage.withVelocity(0));
 			backIndexMotor.setControl(mVoltage.withVelocity(0));
 			timerSub.stop();
@@ -622,14 +613,14 @@ public class IntakeFSMSystem {
 		}
 	}
 
-	public class OuttakeNoteCommand extends Command {
+	public class FeedNoteCommand extends Command {
 
 		private Timer timerSub;
 
 		/**
 		 * Initializes a new OuttakeNoteCommand.
 		 */
-		public OuttakeNoteCommand() {
+		public FeedNoteCommand() {
 			timerSub = new Timer();
 		}
 
@@ -667,22 +658,21 @@ public class IntakeFSMSystem {
 			timerSub.stop();
 			timerSub.reset();
 
-			topIntakeMotor.setControl(mVoltage.withVelocity(0));
-			bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
 			frontIndexMotor.setControl(mVoltage.withVelocity(0));
 			backIndexMotor.setControl(mVoltage.withVelocity(0));
 			hasNote = false;
 		}
 	}
 
-	public class OuttakePreloadedCommand extends Command {
+	public class FeedPreloadedCommand extends Command {
 
 		private Timer timerSub;
 
 		/**
 		 * Initializes a new OuttakePreloadedCommand.
 		 */
-		public OuttakePreloadedCommand() {
+		public FeedPreloadedCommand() {
 			timerSub = new Timer();
 		}
 
@@ -701,13 +691,11 @@ public class IntakeFSMSystem {
 				Constants.HOME_ENCODER_COUNT));
 
 			if (timerSub.get() < Constants.AUTO_PRELOAD_REVVING_TIME) {
-				topIntakeMotor.setControl(mVoltage.withVelocity(0));
-				bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+				intakeMotor.setControl(mVoltage.withVelocity(0));
 				frontIndexMotor.setControl(mVoltage.withVelocity(0));
 				backIndexMotor.setControl(mVoltage.withVelocity(0));
 			} else if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
-				topIntakeMotor.setControl(mVoltage.withVelocity(0));
-				bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+				intakeMotor.setControl(mVoltage.withVelocity(0));
 				frontIndexMotor.setControl(mVoltage.withVelocity(
 					Constants.INTAKE_VELOCITY));
 				backIndexMotor.setControl(mVoltage.withVelocity(
@@ -720,8 +708,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
-			topIntakeMotor.setControl(mVoltage.withVelocity(0));
-			bottomIntakeMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
 			frontIndexMotor.setControl(mVoltage.withVelocity(0));
 			backIndexMotor.setControl(mVoltage.withVelocity(0));
 			timerSub.stop();
