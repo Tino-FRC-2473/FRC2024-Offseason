@@ -632,9 +632,11 @@ public class DriveFSMSystem extends SubsystemBase {
 			+ (ySpeed * Math.sin(Math.toRadians(tagOrientationAngles[id])));
 		double ySpeedField = (ySpeed * Math.cos(Math.toRadians(tagOrientationAngles[id])))
 			- (xSpeed * Math.sin(Math.toRadians(tagOrientationAngles[id])));
+
 		if (xSpeedField == 0 && ySpeedField == 0) {
 			isSpeakerPositionAligned = true;
 		}
+
 		if (!isSpeakerPositionAligned) {
 			drive(xSpeedField, ySpeedField, aSpeed, true);
 		} else {
