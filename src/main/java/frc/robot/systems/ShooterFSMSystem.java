@@ -221,10 +221,8 @@ public class ShooterFSMSystem {
 	 */
 	public void handleRevShooterState(TeleopInput input) {
 		// led.blueLight();
-		// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-		// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-		shooterLeftMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
-		shooterRightMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
+		shooterLeftMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
+		shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
 	}
 
 	/**
@@ -234,8 +232,8 @@ public class ShooterFSMSystem {
 	public boolean handleAutoRev() {
 		// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
 		// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-		shooterLeftMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
-		shooterRightMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
+		shooterLeftMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
+		shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
 		return true;
 	}
 
@@ -249,20 +247,16 @@ public class ShooterFSMSystem {
 		}
 
 		if (timer.get() < Constants.AUTO_PRELOAD_REVVING_TIME) {
-			// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-			// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 			shooterLeftMotor.setControl(mVoltage.withVelocity(
-				Constants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVoltage.withVelocity(
 				-Constants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(mVoltage.withVelocity(
+				Constants.SHOOT_VELOCITY));
 			return false;
 		} else if (timer.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
-			// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
-			// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 			shooterLeftMotor.setControl(mVoltage.withVelocity(
-				Constants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVoltage.withVelocity(
 				-Constants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(mVoltage.withVelocity(
+				Constants.SHOOT_VELOCITY));
 			return false;
 		} else {
 			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
@@ -298,8 +292,6 @@ public class ShooterFSMSystem {
 		public void execute() {
 			// led.rainbow();
 			if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
-				// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER);
-				// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
 				shooterLeftMotor.setControl(mVoltage.withVelocity(
 					-Constants.SHOOT_VELOCITY));
 				shooterRightMotor.setControl(mVoltage.withVelocity(
@@ -344,9 +336,9 @@ public class ShooterFSMSystem {
 		public void execute() {
 			if (timerSub.get() < Constants.AUTO_SHOOTING_TIME) {
 				shooterLeftMotor.setControl(mVoltage.withVelocity(
-					Constants.SHOOT_VELOCITY));
-				shooterRightMotor.setControl(mVoltage.withVelocity(
 					-Constants.SHOOT_VELOCITY));
+				shooterRightMotor.setControl(mVoltage.withVelocity(
+					Constants.SHOOT_VELOCITY));
 			}
 		}
 

@@ -9,8 +9,9 @@ public final class HardwareMap {
 	public static final int LEFT_CLIMBER_CAN_ID = 19;
 	public static final int RIGHT_CLIMBER_CAN_ID = 20;
 
-	public static final int RIGHT_SHOOTER_MOTOR_ID = 0; //TODO: CHECK IF THIS IS CORRECT
-	public static final int LEFT_SHOOTER_MOTOR_ID = 1; //TODO: CHECK IF THIS IS CORRECT
+	public static final int RIGHT_SHOOTER_MOTOR_ID = 4;
+	public static final int LEFT_SHOOTER_MOTOR_ID = 0;
+	
 	public static final int PIVOT_MOTOR_ID = 2;
 	public static final int INTAKE_MOTOR_ID = 6;
 	public static final int BACK_INDEXER_MOTOR_ID = 3;
