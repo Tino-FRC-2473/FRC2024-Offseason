@@ -111,7 +111,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double rotRawInput;
 	private double rotSpeedInput;
 
-	private static final double ROT_RAW_DEADZONE = 0.01;
+	private static final double ROT_DEADZONE = 0.03;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -420,8 +420,8 @@ public class DriveFSMSystem extends SubsystemBase {
 					// Do the course correction, calculate the deviation and lerp it back.
 					correctRot = true;
 					double thetaD = getHeading() % 360;
-					double thetaE = (oldRotation == null) ? (getHeading() % 360) :
-						(oldRotation.getDegrees() % 360);
+					double thetaE = (oldRotation == null) ? (getHeading() % 360)
+						: (oldRotation.getDegrees() % 360);
 
 					SmartDashboard.putNumber("Theta D", thetaD);
 					SmartDashboard.putNumber("Theta E", thetaE);
@@ -638,10 +638,10 @@ public class DriveFSMSystem extends SubsystemBase {
 		double correction = Math.abs(arc1) > Math.abs(arc2)
 			? arc2 : arc1;
 
-		correction *= ((Math.sqrt(1-oldRotSpeedInput*oldRotSpeedInput))
+		correction *= ((Math.sqrt(1 - oldRotSpeedInput * oldRotSpeedInput))
 			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
 
-		if (Math.abs(rotRawInput) > 0.002) {
+		if (Math.abs(rotSpeedInput - oldRotSpeedInput) > ROT_DEADZONE) {
 			correction *= 0;
 		}
 
@@ -652,21 +652,11 @@ public class DriveFSMSystem extends SubsystemBase {
 		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED);
 	}
 
-	public double pidPosition(double deviated, double expected) {
-		double diff = deviated - expected;
-		double correction = -diff * MechConstants.PID_CONSTANT_POSITION_SWERVE_P;
-		return clamp(correction, MechConstants.MIN_POS_SPEED, MechConstants.MAX_POS_SPEED);
-	}
-
-	/**
-	 * Checks if a value is approximately another value. 
-	 * @param expected value that is being compared to
-	 * @param current current value
-	 * @return (the absolute difference is under the epsilon)
-	 */
-	public boolean approxEquals(double expected, double current, double epsilon) {
-		return Math.abs(current - expected) < epsilon;
-	}
+	// public double pidPosition(double deviated, double expected) {
+	// 	double diff = deviated - expected;
+	// 	double correction = -diff * MechConstants.PID_CONSTANT_POSITION_SWERVE_P;
+	// 	return clamp(correction, MechConstants.MIN_POS_SPEED, MechConstants.MAX_POS_SPEED);
+	// }
 
 	/**
 	 * Drives the robot to a final odometry state.
@@ -950,8 +940,12 @@ public class DriveFSMSystem extends SubsystemBase {
 		private Timer timer = new Timer();
 		private int id;
 
-		public ATAlignmentCommand(int id) {
-			this.id = id;	
+		/**
+		 * Creates AT Alignment command during auto.
+		 * @param tagID the id of the tag to be aligned with
+		 */
+		public ATAlignmentCommand(int tagID) {
+			this.id = tagID;
 		}
 
 		@Override
@@ -967,14 +961,15 @@ public class DriveFSMSystem extends SubsystemBase {
 
 		@Override
 		public boolean isFinished() {
-			return isSpeakerAligned == true;
+			return isSpeakerAligned;
 		}
-	
+
 		@Override
 		public void end(boolean interrupted) {
 			timer.stop();
 			timer.reset();
 			isSpeakerAligned = false;
+			isSpeakerPositionAligned = false;
 		}
 	}
 
