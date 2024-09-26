@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 // Robot Imports
 import frc.robot.TeleopInput;
@@ -93,6 +94,7 @@ public class DriveFSMSystem extends SubsystemBase {
 			rearRight.getPosition()
 		});
 
+	private MBRFSMv2 mbrfsm;
 
 	private int lockedSpeakerId;
 	private boolean isSpeakerAligned;
@@ -496,7 +498,7 @@ public class DriveFSMSystem extends SubsystemBase {
 						}
 					}
 				} else {
-					alignToSpeaker(lockedSpeakerId);
+					alignToAT(lockedSpeakerId);
 				}
 
 				break;
@@ -734,7 +736,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * @param id Id of the tag we are positioning towards.
 	 * Positions the robot to the correct distance from the speaker to shoot
 	 */
-	public void alignToSpeaker(int id) {
+	public void alignToAT(int id) {
 		if (rpi.getAprilTagX(id) != VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
 			resetPose(new Pose2d(rpi.getAprilTagZ(id), rpi.getAprilTagX(id),
 				new Rotation2d(rpi.getAprilTagXInv(id))));
@@ -942,5 +944,63 @@ public class DriveFSMSystem extends SubsystemBase {
 	 */
 	public static double clamp(double value, double lowerBound, double upperBound) {
 		return Math.min(Math.max(value, lowerBound), upperBound);
+	}
+
+	public class ATAlignmentCommand extends Command {
+		private Timer timer = new Timer();
+		private int id;
+
+		public ATAlignmentCommand(int id) {
+			this.id = id;	
+		}
+
+		@Override
+		public void initialize() {
+			System.out.println("ALIGNMENT TO APRIL TAG INIT");
+			timer.start();
+		}
+
+		@Override
+		public void execute() {
+			alignToAT(id);
+		}
+
+		@Override
+		public boolean isFinished() {
+			return isSpeakerAligned == true;
+		}
+	
+		@Override
+		public void end(boolean interrupted) {
+			timer.stop();
+			timer.reset();
+			isSpeakerAligned = false;
+		}
+	}
+
+	public class NoteAlignmentCommand extends Command {
+		private Timer timer = new Timer();
+
+		@Override
+		public void initialize() {
+			System.out.println("ALIGNMENT INITIALIZED");
+			timer.start();
+		}
+
+		@Override
+		public void execute() {
+			alignToNote();
+		}
+
+		@Override
+		public boolean isFinished() {
+			return mbrfsm.hasNote();
+		}
+
+		@Override
+		public void end(boolean interrupted) {
+			timer.stop();
+			timer.reset();
+		}
 	}
 }
