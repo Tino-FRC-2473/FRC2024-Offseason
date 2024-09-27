@@ -290,33 +290,33 @@ public class DriveFSMSystem extends SubsystemBase {
 			return;
 		}
 
-		if (redAlliance) {
-			if (!(rpi.getAprilTagZInv(VisionConstants.RED_SOURCE_TAG1_ID)
-				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
-				&& rpi.getAprilTagZInv(VisionConstants.RED_SOURCE_TAG2_ID)
-				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
-				&& rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
-				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
-				//led.greenLight();
-				SmartDashboard.putBoolean("Can see tag", true);
-			} else {
-				//led.orangeLight();
-				SmartDashboard.putBoolean("Can see tag", false);
-			}
-		} else {
-			if (!(rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG1_ID)
-				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
-				&& rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG2_ID)
-				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
-				&& rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
-				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
-				//led.greenLight();
-				SmartDashboard.putBoolean("Can see tag", true);
-			} else {
-				//led.orangeLight();
-				SmartDashboard.putBoolean("Can see tag", false);
-			}
-		}
+		// if (redAlliance) {
+		// 	if (!(rpi.getAprilTagZInv(VisionConstants.RED_SOURCE_TAG1_ID)
+		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
+		// 		&& rpi.getAprilTagZInv(VisionConstants.RED_SOURCE_TAG2_ID)
+		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
+		// 		&& rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
+		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
+		// 		//led.greenLight();
+		// 		SmartDashboard.putBoolean("Can see tag", true);
+		// 	} else {
+		// 		//led.orangeLight();
+		// 		SmartDashboard.putBoolean("Can see tag", false);
+		// 	}
+		// } else {
+		// 	if (!(rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG1_ID)
+		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
+		// 		&& rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG2_ID)
+		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
+		// 		&& rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
+		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
+		// 		//led.greenLight();
+		// 		SmartDashboard.putBoolean("Can see tag", true);
+		// 	} else {
+		// 		//led.orangeLight();
+		// 		SmartDashboard.putBoolean("Can see tag", false);
+		// 	}
+		// }
 
 		SmartDashboard.putString("Drive State", getCurrentState().toString());
 		//SmartDashboard.putBoolean("Is Speaker Aligned", isSpeakerAligned);

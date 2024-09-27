@@ -35,11 +35,11 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
-	private MBRFSMv2 mbrfsMv2;
-	private ClimberMechFSMLeft chainLeftFSM;
-	private ClimberMechFSMRight chainRightFSM;
-	private SendableChooser<Command> autoChooser;
-	private Command autonomousCommand;
+	// private MBRFSMv2 mbrfsMv2;
+	// private ClimberMechFSMLeft chainLeftFSM;
+	// private ClimberMechFSMRight chainRightFSM;
+	// private SendableChooser<Command> autoChooser;
+	// private Command autonomousCommand;
 	private final Field2d mField = new Field2d();
 
 	private UsbCamera driverCam;
@@ -67,19 +67,19 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFSMSystem = new DriveFSMSystem();
-		mbrfsMv2 = new MBRFSMv2();
-		chainLeftFSM = new ClimberMechFSMLeft();
-		chainRightFSM = new ClimberMechFSMRight();
+		// mbrfsMv2 = new MBRFSMv2();
+		// chainLeftFSM = new ClimberMechFSMLeft();
+		// chainRightFSM = new ClimberMechFSMRight();
 
-		NamedCommands.registerCommand("S_TIN", mbrfsMv2.new IntakeNoteCommand());
-		NamedCommands.registerCommand("S_TON", mbrfsMv2.new OuttakeNoteCommand());
-		NamedCommands.registerCommand("S_PGS",
-			mbrfsMv2.new PivotGroundToShooterCommand());
-		NamedCommands.registerCommand("S_PSG",
-			mbrfsMv2.new PivotShooterToGroundCommand());
-		NamedCommands.registerCommand("S_TRS", mbrfsMv2.new RevShooterCommand());
-		NamedCommands.registerCommand("G_SPN", mbrfsMv2.new ShootPreloadedCommand());
-		NamedCommands.registerCommand("G_SSN", mbrfsMv2.new ShootNoteCommand());
+		// NamedCommands.registerCommand("S_TIN", mbrfsMv2.new IntakeNoteCommand());
+		// NamedCommands.registerCommand("S_TON", mbrfsMv2.new OuttakeNoteCommand());
+		// NamedCommands.registerCommand("S_PGS",
+		// 	mbrfsMv2.new PivotGroundToShooterCommand());
+		// NamedCommands.registerCommand("S_PSG",
+		// 	mbrfsMv2.new PivotShooterToGroundCommand());
+		// NamedCommands.registerCommand("S_TRS", mbrfsMv2.new RevShooterCommand());
+		// NamedCommands.registerCommand("G_SPN", mbrfsMv2.new ShootPreloadedCommand());
+		// NamedCommands.registerCommand("G_SSN", mbrfsMv2.new ShootNoteCommand());
 
 		/*
 		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
@@ -90,16 +90,16 @@ public class Robot extends TimedRobot {
 			0.5));
 		*/
 
-		autoChooser = AutoBuilder.buildAutoChooser();
+		//autoChooser = AutoBuilder.buildAutoChooser();
 
-		SmartDashboard.putData("Auto Chooser", autoChooser);
-		SmartDashboard.putData("Field", mField);
+		//SmartDashboard.putData("Auto Chooser", autoChooser);
+		//SmartDashboard.putData("Field", mField);
 
-		driverCam = CameraServer.startAutomaticCapture(0);
-		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
-			streamHeight, streamFPS);
-		driverCam.setVideoMode(videoMode);
-		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+		// driverCam = CameraServer.startAutomaticCapture(0);
+		// VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
+		// 	streamHeight, streamFPS);
+		// driverCam.setVideoMode(videoMode);
+		// driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
 		//driverCam.setResolution(streamWidth, streamHeight);
 
 		//Label all named commands here
@@ -110,14 +110,14 @@ public class Robot extends TimedRobot {
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
 		driveFSMSystem.resetAutonomus();
-		autonomousCommand = getAutonomousCommand();
-		if (autonomousCommand != null) {
-			autonomousCommand.cancel();
-		}
-		// schedule the autonomous command (example)
-		if (autonomousCommand != null) {
-			autonomousCommand.schedule();
-		}
+		// autonomousCommand = getAutonomousCommand();
+		// if (autonomousCommand != null) {
+		// 	autonomousCommand.cancel();
+		// }
+		// // schedule the autonomous command (example)
+		// if (autonomousCommand != null) {
+		// 	autonomousCommand.schedule();
+		// }
 	}
 
 	@Override
@@ -131,21 +131,21 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		driveFSMSystem.reset();
-		mbrfsMv2.reset();
-		chainLeftFSM.reset();
-		chainRightFSM.reset();
-		if (autonomousCommand != null) {
-			autonomousCommand.cancel();
-		}
+		// mbrfsMv2.reset();
+		// chainLeftFSM.reset();
+		// chainRightFSM.reset();
+		// if (autonomousCommand != null) {
+		// 	autonomousCommand.cancel();
+		// }
 	}
 
 	@Override
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
-		mbrfsMv2.update(input);
-		chainLeftFSM.update(input);
-		chainRightFSM.update(input);
-		mField.setRobotPose(driveFSMSystem.getPose());
+		// mbrfsMv2.update(input);
+		// chainLeftFSM.update(input);
+		// chainRightFSM.update(input);
+		// mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
 	@Override
@@ -176,6 +176,6 @@ public class Robot extends TimedRobot {
 	 * @return Returns the value selected by the auto chooser.
 	 */
 	public Command getAutonomousCommand() {
-		return autoChooser.getSelected();
+		return null; //autoChooser.getSelected();
 	}
 }
