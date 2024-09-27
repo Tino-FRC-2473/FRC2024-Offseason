@@ -195,26 +195,26 @@ public class DriveFSMSystem extends SubsystemBase {
 		gyro.reset();
 		gyro.setAngleAdjustment(0);
 
-		if (redAlliance) {
-			tagOrientationAngles = new Double[]
-				{null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
-					VisionConstants.SPEAKER_TAG_ANGLE_DEGREES, null, null, null, null,
-					-VisionConstants.SOURCE_TAG_ANGLE_DEGREES,
-					-VisionConstants.SOURCE_TAG_ANGLE_DEGREES, null, null,
-					null, null, null, null};
-		} else {
-			tagOrientationAngles = new Double[]
-				{null, VisionConstants.SOURCE_TAG_ANGLE_DEGREES,
-					VisionConstants.SOURCE_TAG_ANGLE_DEGREES, null,
-					null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
-					VisionConstants.SPEAKER_TAG_ANGLE_DEGREES, null, null, null,
-					null, null, null, null, null};
-		}
+		// if (redAlliance) {
+		// 	tagOrientationAngles = new Double[]
+		// 		{null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
+		// 			VisionConstants.SPEAKER_TAG_ANGLE_DEGREES, null, null, null, null,
+		// 			-VisionConstants.SOURCE_TAG_ANGLE_DEGREES,
+		// 			-VisionConstants.SOURCE_TAG_ANGLE_DEGREES, null, null,
+		// 			null, null, null, null};
+		// } else {
+		// 	tagOrientationAngles = new Double[]
+		// 		{null, VisionConstants.SOURCE_TAG_ANGLE_DEGREES,
+		// 			VisionConstants.SOURCE_TAG_ANGLE_DEGREES, null,
+		// 			null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
+		// 			VisionConstants.SPEAKER_TAG_ANGLE_DEGREES, null, null, null,
+		// 			null, null, null, null, null};
+		// }
 
-		lockedSpeakerId = -1;
-		isSpeakerAligned = false;
-		isNoteAligned = false;
-		isSpeakerPositionAligned = false;
+		// lockedSpeakerId = -1;
+		// isSpeakerAligned = false;
+		// isNoteAligned = false;
+		// isSpeakerPositionAligned = false;
 
 		update(null);
 	}
@@ -394,33 +394,33 @@ public class DriveFSMSystem extends SubsystemBase {
 
 				break;
 
-			case ALIGN_TO_SPEAKER_STATE:
-				if (lockedSpeakerId == -1) {
-					if (redAlliance) {
-						//id 4
-						if (rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
-							!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-							lockedSpeakerId = VisionConstants.RED_SPEAKER_TAG_ID;
-						}
-					} else {
-						//id 7
-						if (rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
-							!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-							lockedSpeakerId = VisionConstants.BLUE_SPEAKER_TAG_ID;
-						}
-					}
-				} else {
-					alignToSpeaker(lockedSpeakerId);
-				}
+			// case ALIGN_TO_SPEAKER_STATE:
+			// 	if (lockedSpeakerId == -1) {
+			// 		if (redAlliance) {
+			// 			//id 4
+			// 			if (rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
+			// 				!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
+			// 				lockedSpeakerId = VisionConstants.RED_SPEAKER_TAG_ID;
+			// 			}
+			// 		} else {
+			// 			//id 7
+			// 			if (rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
+			// 				!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
+			// 				lockedSpeakerId = VisionConstants.BLUE_SPEAKER_TAG_ID;
+			// 			}
+			// 		}
+			// 	} else {
+			// 		alignToSpeaker(lockedSpeakerId);
+			// 	}
 
-				break;
+			// 	break;
 
-			case ALIGN_TO_NOTE_STATE:
-				if (rpi.getNoteYaw() != VisionConstants.UNABLE_TO_SEE_NOTE_CONSTANT) {
-					alignToNote();
-				}
+			// case ALIGN_TO_NOTE_STATE:
+			// 	if (rpi.getNoteYaw() != VisionConstants.UNABLE_TO_SEE_NOTE_CONSTANT) {
+			// 		alignToNote();
+			// 	}
 
-				break;
+			// 	break;
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 
@@ -454,30 +454,30 @@ public class DriveFSMSystem extends SubsystemBase {
 	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case TELEOP_STATE:
-				if (input.isCircleButtonPressed()) {
-					return FSMState.ALIGN_TO_SPEAKER_STATE;
-				} else if (input.isCrossButtonPressed()) {
-					isNoteAligned = false;
-					return FSMState.ALIGN_TO_NOTE_STATE;
-				}
+				// if (input.isCircleButtonPressed()) {
+				// 	return FSMState.ALIGN_TO_SPEAKER_STATE;
+				// } else if (input.isCrossButtonPressed()) {
+				// 	isNoteAligned = false;
+				// 	return FSMState.ALIGN_TO_NOTE_STATE;
+				// }
 
 				return FSMState.TELEOP_STATE;
 
-			case ALIGN_TO_SPEAKER_STATE:
-				if (input.isCircleButtonReleased()) {
-					lockedSpeakerId = -1;
-					isSpeakerAligned = false;
-					isSpeakerPositionAligned = false;
-					return FSMState.TELEOP_STATE;
-				}
-				return FSMState.ALIGN_TO_SPEAKER_STATE;
+			// case ALIGN_TO_SPEAKER_STATE:
+			// 	if (input.isCircleButtonReleased()) {
+			// 		lockedSpeakerId = -1;
+			// 		isSpeakerAligned = false;
+			// 		isSpeakerPositionAligned = false;
+			// 		return FSMState.TELEOP_STATE;
+			// 	}
+			// 	return FSMState.ALIGN_TO_SPEAKER_STATE;
 
-			case ALIGN_TO_NOTE_STATE:
-				if (input.isCrossButtonReleased()) {
-					isNoteAligned = false;
-					return FSMState.TELEOP_STATE;
-				}
-				return FSMState.ALIGN_TO_NOTE_STATE;
+			// case ALIGN_TO_NOTE_STATE:
+			// 	if (input.isCrossButtonReleased()) {
+			// 		isNoteAligned = false;
+			// 		return FSMState.TELEOP_STATE;
+			// 	}
+			// 	return FSMState.ALIGN_TO_NOTE_STATE;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -502,9 +502,9 @@ public class DriveFSMSystem extends SubsystemBase {
 		double ySpeedDelivered = ySpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double rotDelivered = rot * DriveConstants.MAX_ANGULAR_SPEED;
 
-		//SmartDashboard.putNumber("x speed delivered", xSpeedDelivered);
-		//SmartDashboard.putNumber("y speed delivered", ySpeedDelivered);
-		//SmartDashboard.putNumber("rot speed delivered", rotDelivered);
+		SmartDashboard.putNumber("x speed delivered", xSpeedDelivered);
+		SmartDashboard.putNumber("y speed delivered", ySpeedDelivered);
+		SmartDashboard.putNumber("rot speed delivered", rotDelivered);
 
 
 		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
