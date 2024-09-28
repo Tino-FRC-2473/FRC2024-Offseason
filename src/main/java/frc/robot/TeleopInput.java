@@ -178,32 +178,15 @@ public class TeleopInput {
 	 * Get the value of the Cross  button.
 	 * @return if Cross button is pressed
 	 */
-	public boolean isAutoRaiseButtonPressed() {
-		return false;
-	}
-	/**
-	 * Get the value of the Options Button.
-	 * @return if Options Button is pressed
-	 */
-	public boolean isAutoLowerButtonPressed() {
-		return false;
-	}
-	/**
-	 * Get the value of the Cross  button.
-	 * @return if Cross button is pressed
-	 */
 	public boolean isManualRaiseButtonPressed() {
-		//return mechController.getCrossButton();
-		return false;
+		return getControllerLeftJoystickY() < -0.5;
 	}
-
 	/**
 	 * Get the value of the Options Button.
 	 * @return if Options Button is pressed
 	 */
 	public boolean isManualLowerButtonPressed() {
-		//return mechController.getOptionsButton();
-		return false;
+		return getControllerLeftJoystickY() > 0.5;
 	}
 
 

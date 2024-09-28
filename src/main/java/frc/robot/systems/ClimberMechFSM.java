@@ -23,10 +23,10 @@ public class ClimberMechFSM {
 		IDLE
 	}
 
-	private static final float MOTOR_POWER_UP = 0.1f;
-	private static final float MOTOR_POWER_DOWN = -0.1f;
+	private static final float MOTOR_POWER_UP = -0.5f;
+	private static final float MOTOR_POWER_DOWN = 0.5f;
 
-	private static final float RIGHT_RAISED_POSITION = 100f;
+	private static final float RIGHT_RAISED_POSITION = -80f;
 	private static final float RIGHT_FINAL_POSITION = 0f;
 
 	private static final float LEFT_RAISED_POSITION = -RIGHT_RAISED_POSITION;
@@ -52,7 +52,7 @@ public class ClimberMechFSM {
 	public ClimberMechFSM() {
 		// Perform hardware init
 		rightMotor = new CANSparkMax(
-			HardwareMap.CAN_ID_SPARK_LEFT_CLIMBER_MOTOR,
+			HardwareMap.CAN_ID_SPARK_RIGHT_CLIMBER_MOTOR,
 			CANSparkMax.MotorType.kBrushless);
 
 		rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
@@ -148,8 +148,7 @@ public class ClimberMechFSM {
 				break;
 
 			case LOWER_HOOK_MANUAL:
-				if ((!input.isManualRaiseButtonPressed() && input.isManualLowerButtonPressed())
-					&& !(leftBottomSwitch.isPressed() && rightBottomSwitch.isPressed())) {
+				if ((!input.isManualRaiseButtonPressed() && input.isManualLowerButtonPressed())) {
 					next = ClimberMechFSMState.LOWER_HOOK_MANUAL;
 				} else {
 					next = ClimberMechFSMState.IDLE;
@@ -160,8 +159,7 @@ public class ClimberMechFSM {
 				if (input.isManualRaiseButtonPressed() && !input.isManualLowerButtonPressed()) {
 					next = ClimberMechFSMState.RAISE_HOOK_MANUAL;
 				} else if (
-					(input.isManualLowerButtonPressed() && !input.isManualRaiseButtonPressed())
-						&& !(leftBottomSwitch.isPressed() && rightBottomSwitch.isPressed())) {
+					(input.isManualLowerButtonPressed() && !input.isManualRaiseButtonPressed())) {
 					next = ClimberMechFSMState.LOWER_HOOK_MANUAL;
 				} else {
 					next = ClimberMechFSMState.IDLE;
@@ -191,17 +189,15 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleRaiseHookManualState(TeleopInput input) {
-		if (rightMotor.getEncoder().getPosition() < RIGHT_RAISED_POSITION) {
-			rightMotor.set(MOTOR_POWER_UP);
-		} else {
-			rightMotor.set(0);
-		}
+		rightMotor.set(modifyPowerUP(
+			MOTOR_POWER_UP,
+			rightMotor.getEncoder().getPosition(),
+			RIGHT_RAISED_POSITION));
 
-		if (leftMotor.getEncoder().getPosition() > LEFT_RAISED_POSITION) {
-			leftMotor.set(-MOTOR_POWER_UP);
-		} else {
-			leftMotor.set(0);
-		}
+		leftMotor.set(-modifyPowerUP(
+			MOTOR_POWER_UP,
+			leftMotor.getEncoder().getPosition(),
+			LEFT_RAISED_POSITION));
 	}
 
 	/**
@@ -210,18 +206,59 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleLowerHookManualState(TeleopInput input) {
-		if (rightMotor.getEncoder().getPosition() > RIGHT_FINAL_POSITION
-			&& !rightBottomSwitch.isPressed()) {
-			rightMotor.set(MOTOR_POWER_DOWN);
-		} else {
-			rightMotor.set(0);
-		}
+		//relying on sparkmax firmware, remember to reconfigure if sparkmax is changed
+		rightMotor.set(MOTOR_POWER_DOWN);
+		leftMotor.set(-MOTOR_POWER_DOWN);
+		/*
+		rightMotor.set(modifyPowerDOWN(
+			MOTOR_POWER_DOWN,
+			rightMotor.getEncoder().getPosition(),
+			RIGHT_RAISED_POSITION));
 
-		if (leftMotor.getEncoder().getPosition() < LEFT_FINAL_POSITION
-			&& !leftBottomSwitch.isPressed()) {
-			leftMotor.set(-MOTOR_POWER_DOWN);
-		} else {
-			leftMotor.set(0);
+		leftMotor.set(-modifyPowerDOWN(
+			MOTOR_POWER_DOWN,
+			leftMotor.getEncoder().getPosition(),
+			LEFT_RAISED_POSITION));
+		*/
+		if (rightBottomSwitch.isPressed()) rightMotor.getEncoder().setPosition(0);
+		if (leftBottomSwitch.isPressed()) leftMotor.getEncoder().setPosition(0);
+	}
+	/**
+	 * modifies the power going up based on a step function
+	 * @param value the input value (should be positive), representing the requested motor power
+	 * @return the power to set to the motors based on the function modificatin
+	 */
+	private double modifyPowerUP(double value, double currentPosition, double raisedPosition) {
+		currentPosition = Math.abs(currentPosition);
+		raisedPosition = Math.abs(raisedPosition);
+		if (currentPosition >= raisedPosition) return 0;
+		switch ((int) (currentPosition/raisedPosition*10)) {
+			case 6:
+			case 7:
+				return value*0.7;
+			case 8:
+				return value*0.5;
+			case 9:
+				return value*0.3;
+			default:
+				return value;
 		}
 	}
+	/*
+	private double modifyPowerDOWN(double value, double currentPosition, double raisedPosition) {
+		currentPosition = Math.abs(currentPosition);
+		raisedPosition = Math.abs(raisedPosition);
+		if (currentPosition < 0) return value*0.2;
+		switch ((int) ((raisedPosition-currentPosition)/raisedPosition*10)) {
+			case 7:
+				return value*0.7;
+			case 8:
+				return value*0.5;
+			case 9:
+				return value*0.3;
+			default:
+				return value;
+		}
+	}
+	*/
 }
