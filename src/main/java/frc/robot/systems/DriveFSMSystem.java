@@ -24,10 +24,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
+import frc.robot.MechConstants;
 //import frc.robot.LED;
 import frc.robot.RaspberryPI;
 import frc.robot.SwerveConstants.AutoConstants;
@@ -92,15 +94,24 @@ public class DriveFSMSystem extends SubsystemBase {
 			rearRight.getPosition()
 		});
 
+	private MBRFSMv2 mbrfsm;
 
 	private int lockedSpeakerId;
 	private boolean isSpeakerAligned;
 	private boolean isNoteAligned;
 	private boolean isSpeakerPositionAligned;
 
-
 	private boolean redAlliance;
 	private Double[] tagOrientationAngles;
+
+	private Rotation2d oldRotation;
+	private double oldPoseX;
+	private double oldPoseY;
+	private double oldRotSpeedInput;
+	private double rotRawInput;
+	private double rotSpeedInput;
+
+	private static final double ROT_DEADZONE = 0.03;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -191,30 +202,37 @@ public class DriveFSMSystem extends SubsystemBase {
 		currentState = FSMState.TELEOP_STATE;
 		//led.turnOff();
 		resetPose(new Pose2d());
+		oldRotSpeedInput = 0;
+		rotRawInput = 0;
+		rotSpeedInput = 0;
 
 		gyro.reset();
 		gyro.setAngleAdjustment(0);
 
-		// if (redAlliance) {
-		// 	tagOrientationAngles = new Double[]
-		// 		{null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
-		// 			VisionConstants.SPEAKER_TAG_ANGLE_DEGREES, null, null, null, null,
-		// 			-VisionConstants.SOURCE_TAG_ANGLE_DEGREES,
-		// 			-VisionConstants.SOURCE_TAG_ANGLE_DEGREES, null, null,
-		// 			null, null, null, null};
-		// } else {
-		// 	tagOrientationAngles = new Double[]
-		// 		{null, VisionConstants.SOURCE_TAG_ANGLE_DEGREES,
-		// 			VisionConstants.SOURCE_TAG_ANGLE_DEGREES, null,
-		// 			null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
-		// 			VisionConstants.SPEAKER_TAG_ANGLE_DEGREES, null, null, null,
-		// 			null, null, null, null, null};
-		// }
+		oldRotation = new Rotation2d(getHeading());
+		oldPoseX = getPose().getX();
+		oldPoseY = getPose().getY();
 
-		// lockedSpeakerId = -1;
-		// isSpeakerAligned = false;
-		// isNoteAligned = false;
-		// isSpeakerPositionAligned = false;
+		if (redAlliance) {
+			tagOrientationAngles = new Double[]
+				{null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
+					VisionConstants.SPEAKER_TAG_ANGLE_DEGREES, null, null, null, null,
+					-VisionConstants.SOURCE_TAG_ANGLE_DEGREES,
+					-VisionConstants.SOURCE_TAG_ANGLE_DEGREES, null, null,
+					null, null, null, null};
+		} else {
+			tagOrientationAngles = new Double[]
+				{null, VisionConstants.SOURCE_TAG_ANGLE_DEGREES,
+					VisionConstants.SOURCE_TAG_ANGLE_DEGREES, null,
+					null, null, null, VisionConstants.SPEAKER_TAG_ANGLE_DEGREES,
+					VisionConstants.SPEAKER_TAG_ANGLE_DEGREES, null, null, null,
+					null, null, null, null, null};
+		}
+
+		lockedSpeakerId = -1;
+		isSpeakerAligned = false;
+		isNoteAligned = false;
+		isSpeakerPositionAligned = false;
 
 		update(null);
 	}
@@ -270,6 +288,9 @@ public class DriveFSMSystem extends SubsystemBase {
 					rearRight.getPosition()
 				},
 				pose);
+
+		oldPoseX = pose.getX();
+		oldPoseY = pose.getY();
 	}
 
 	/**
@@ -290,48 +311,48 @@ public class DriveFSMSystem extends SubsystemBase {
 			return;
 		}
 
-		// if (redAlliance) {
-		// 	if (!(rpi.getAprilTagZInv(VisionConstants.RED_SOURCE_TAG1_ID)
-		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
-		// 		&& rpi.getAprilTagZInv(VisionConstants.RED_SOURCE_TAG2_ID)
-		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
-		// 		&& rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
-		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
-		// 		//led.greenLight();
-		// 		SmartDashboard.putBoolean("Can see tag", true);
-		// 	} else {
-		// 		//led.orangeLight();
-		// 		SmartDashboard.putBoolean("Can see tag", false);
-		// 	}
-		// } else {
-		// 	if (!(rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG1_ID)
-		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
-		// 		&& rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG2_ID)
-		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
-		// 		&& rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
-		// 		== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
-		// 		//led.greenLight();
-		// 		SmartDashboard.putBoolean("Can see tag", true);
-		// 	} else {
-		// 		//led.orangeLight();
-		// 		SmartDashboard.putBoolean("Can see tag", false);
-		// 	}
-		// }
+		if (redAlliance) {
+			if (!(rpi.getAprilTagZInv(VisionConstants.RED_SOURCE_TAG1_ID)
+				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
+				&& rpi.getAprilTagZInv(VisionConstants.RED_SOURCE_TAG2_ID)
+				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
+				&& rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
+				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
+				//led.greenLight();
+				SmartDashboard.putBoolean("Can see tag", true);
+			} else {
+				//led.orangeLight();
+				SmartDashboard.putBoolean("Can see tag", false);
+			}
+		} else {
+			if (!(rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG1_ID)
+				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
+				&& rpi.getAprilTagZInv(VisionConstants.BLUE_SOURCE_TAG2_ID)
+				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT
+				&& rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
+				== VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT)) {
+				//led.greenLight();
+				SmartDashboard.putBoolean("Can see tag", true);
+			} else {
+				//led.orangeLight();
+				SmartDashboard.putBoolean("Can see tag", false);
+			}
+		}
 
 		SmartDashboard.putString("Drive State", getCurrentState().toString());
 		//SmartDashboard.putBoolean("Is Speaker Aligned", isSpeakerAligned);
 
 		//SmartDashboard.putNumber("X Pos", getPose().getX());
 		//SmartDashboard.putNumber("Y Pos", getPose().getY());
-		//SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
+		SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
 
 		/*
 		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
 		SmartDashboard.putNumber("Gyro Yaw", gyro.getYaw());
 		SmartDashboard.putNumber("Gyro Fused Heading", gyro.getFusedHeading());
-		*/
 
-		/*SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
+
+		SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
 			input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
@@ -369,58 +390,125 @@ public class DriveFSMSystem extends SubsystemBase {
 
 		switch (currentState) {
 			case TELEOP_STATE:
-				drive(-MathUtil.applyDeadband((input.getControllerLeftJoystickY()
+
+				rotRawInput = input.getControllerRightJoystickX();
+
+				double xSpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
-					-MathUtil.applyDeadband((input.getControllerLeftJoystickX()
+					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
+
+				double ySpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickX()
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
-					-MathUtil.applyDeadband((input.getControllerRightJoystickX()
+					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
+
+				rotSpeedInput = -MathUtil.applyDeadband((rotRawInput
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND),
+					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
+
+				double correctedRotSpeed = .0;
+				//double correctedXSpeed = .0;
+				//double correctedYSpeed = .0;
+
+				boolean correctRot = false;
+				//boolean correctX = false;
+				//boolean correctY = false;
+
+				if (rotSpeedInput != 0) {
+					oldRotation = Rotation2d.fromDegrees(getHeading());
+					correctRot = false;
+				} else {
+					// Do the course correction, calculate the deviation and lerp it back.
+					correctRot = true;
+					double thetaD = getHeading() % 360;
+					double thetaE = (oldRotation == null) ? (getHeading() % 360)
+						: (oldRotation.getDegrees() % 360);
+
+					SmartDashboard.putNumber("Theta D", thetaD);
+					SmartDashboard.putNumber("Theta E", thetaE);
+
+					correctedRotSpeed = pidRotation(thetaD, thetaE);
+				}
+
+				SmartDashboard.putNumber("old Pose x", oldPoseX);
+				SmartDashboard.putNumber("old pose y", oldPoseY);
+				SmartDashboard.putNumber("get pose x", getPose().getX());
+				SmartDashboard.putNumber("get pose y", getPose().getY());
+				SmartDashboard.putNumber("rot raw x", rotRawInput);
+
+				oldRotSpeedInput = rotSpeedInput;
+
+				// if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
+				// 	if (xSpeedInput != 0) {
+				// 		oldPoseX = getPose().getX();
+				// 		correctX = false;
+				// 	} else {
+				// 		System.out.println("REACHED X CORRECTION");
+				// 		correctedXSpeed = pidPosition(getPose().getX(), oldPoseX);
+				// 		correctX = true;
+				// 	}
+
+				// 	if (ySpeedInput != 0) {
+				// 		oldPoseY = getPose().getY();
+				// 		correctY = false;
+				// 	} else {
+				// 		System.out.println("REACHED Y CORRECTION");
+				// 		correctedYSpeed = pidPosition(getPose().getY(), oldPoseY);
+				// 		correctY = true;
+				// 	}
+				// }
+
+				drive(xSpeedInput,
+					ySpeedInput,
+					correctRot ? correctedRotSpeed : rotSpeedInput,
 					true);
 
-				if (input.isCrossButtonPressed()) {
+
+				if (input.isBackButtonPressed()) {
 					gyro.reset();
+
+					oldRotation = new Rotation2d(0);
+					oldRotSpeedInput = 0;
+					rotRawInput = 0;
+					rotSpeedInput = 0;
 				}
 
-				if (input.isTriangleButtonPressed()) {
-					setForwardFormation();
-				}
+				//if (input.isTriangleButtonPressed()) {
+				//	setForwardFormation();
+				//}
 
-				if (input.isCircleButtonPressed()) {
-					setXFormation();
+				//if (input.isCircleButtonPressed()) {
+				//	setXFormation();
+				//}
+
+				break;
+
+			case ALIGN_TO_SPEAKER_STATE:
+				if (lockedSpeakerId == -1) {
+					if (redAlliance) {
+						//id 4
+						if (rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
+							!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
+							lockedSpeakerId = VisionConstants.RED_SPEAKER_TAG_ID;
+						}
+					} else {
+						//id 7
+						if (rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
+							!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
+							lockedSpeakerId = VisionConstants.BLUE_SPEAKER_TAG_ID;
+						}
+					}
+				} else {
+					alignToAT(lockedSpeakerId);
 				}
 
 				break;
 
-			// case ALIGN_TO_SPEAKER_STATE:
-			// 	if (lockedSpeakerId == -1) {
-			// 		if (redAlliance) {
-			// 			//id 4
-			// 			if (rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
-			// 				!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-			// 				lockedSpeakerId = VisionConstants.RED_SPEAKER_TAG_ID;
-			// 			}
-			// 		} else {
-			// 			//id 7
-			// 			if (rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
-			// 				!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-			// 				lockedSpeakerId = VisionConstants.BLUE_SPEAKER_TAG_ID;
-			// 			}
-			// 		}
-			// 	} else {
-			// 		alignToSpeaker(lockedSpeakerId);
-			// 	}
+			case ALIGN_TO_NOTE_STATE:
+				if (rpi.getNoteYaw() != VisionConstants.UNABLE_TO_SEE_NOTE_CONSTANT) {
+					alignToNote();
+				}
 
-			// 	break;
-
-			// case ALIGN_TO_NOTE_STATE:
-			// 	if (rpi.getNoteYaw() != VisionConstants.UNABLE_TO_SEE_NOTE_CONSTANT) {
-			// 		alignToNote();
-			// 	}
-
-			// 	break;
+				break;
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 
@@ -454,30 +542,30 @@ public class DriveFSMSystem extends SubsystemBase {
 	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case TELEOP_STATE:
-				// if (input.isCircleButtonPressed()) {
-				// 	return FSMState.ALIGN_TO_SPEAKER_STATE;
-				// } else if (input.isCrossButtonPressed()) {
-				// 	isNoteAligned = false;
-				// 	return FSMState.ALIGN_TO_NOTE_STATE;
-				// }
+				if (input.isCircleButtonPressed()) {
+					return FSMState.ALIGN_TO_SPEAKER_STATE;
+				} else if (input.isCrossButtonPressed()) {
+					isNoteAligned = false;
+					return FSMState.ALIGN_TO_NOTE_STATE;
+				}
 
 				return FSMState.TELEOP_STATE;
 
-			// case ALIGN_TO_SPEAKER_STATE:
-			// 	if (input.isCircleButtonReleased()) {
-			// 		lockedSpeakerId = -1;
-			// 		isSpeakerAligned = false;
-			// 		isSpeakerPositionAligned = false;
-			// 		return FSMState.TELEOP_STATE;
-			// 	}
-			// 	return FSMState.ALIGN_TO_SPEAKER_STATE;
+			case ALIGN_TO_SPEAKER_STATE:
+				if (input.isCircleButtonReleased()) {
+					lockedSpeakerId = -1;
+					isSpeakerAligned = false;
+					isSpeakerPositionAligned = false;
+					return FSMState.TELEOP_STATE;
+				}
+				return FSMState.ALIGN_TO_SPEAKER_STATE;
 
-			// case ALIGN_TO_NOTE_STATE:
-			// 	if (input.isCrossButtonReleased()) {
-			// 		isNoteAligned = false;
-			// 		return FSMState.TELEOP_STATE;
-			// 	}
-			// 	return FSMState.ALIGN_TO_NOTE_STATE;
+			case ALIGN_TO_NOTE_STATE:
+				if (input.isCrossButtonReleased()) {
+					isNoteAligned = false;
+					return FSMState.TELEOP_STATE;
+				}
+				return FSMState.ALIGN_TO_NOTE_STATE;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -537,6 +625,38 @@ public class DriveFSMSystem extends SubsystemBase {
 		//System.out.println("S4" + swerveModuleStates[(2 + 1)]);
 	}
 
+	/**
+	 * Returns a clamped correction speed to correct deviated values.
+	 * @param deviated deviated value that is being "pidded"
+	 * @param expected the value that should be pid towards.
+	 * @return clamped correction value for angular speed
+	 */
+	public double pidRotation(double deviated, double expected) {
+		double arc1 = 360 + (expected - deviated);
+		double arc2 = (expected - deviated);
+
+		double correction = Math.abs(arc1) > Math.abs(arc2)
+			? arc2 : arc1;
+
+		correction *= ((Math.sqrt(1 - oldRotSpeedInput * oldRotSpeedInput))
+			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
+
+		if (Math.abs(rotSpeedInput - oldRotSpeedInput) > ROT_DEADZONE) {
+			correction *= 0;
+		}
+
+		SmartDashboard.putNumber("Saved Heading", deviated);
+		SmartDashboard.putNumber("Smallest Arc", correction
+			/ MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
+
+		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED);
+	}
+
+	// public double pidPosition(double deviated, double expected) {
+	// 	double diff = deviated - expected;
+	// 	double correction = -diff * MechConstants.PID_CONSTANT_POSITION_SWERVE_P;
+	// 	return clamp(correction, MechConstants.MIN_POS_SPEED, MechConstants.MAX_POS_SPEED);
+	// }
 
 	/**
 	 * Drives the robot to a final odometry state.
@@ -606,7 +726,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * @param id Id of the tag we are positioning towards.
 	 * Positions the robot to the correct distance from the speaker to shoot
 	 */
-	public void alignToSpeaker(int id) {
+	public void alignToAT(int id) {
 		if (rpi.getAprilTagX(id) != VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
 			resetPose(new Pose2d(rpi.getAprilTagZ(id), rpi.getAprilTagX(id),
 				new Rotation2d(rpi.getAprilTagXInv(id))));
@@ -814,5 +934,68 @@ public class DriveFSMSystem extends SubsystemBase {
 	 */
 	public static double clamp(double value, double lowerBound, double upperBound) {
 		return Math.min(Math.max(value, lowerBound), upperBound);
+	}
+
+	public class ATAlignmentCommand extends Command {
+		private Timer timer = new Timer();
+		private int id;
+
+		/**
+		 * Creates AT Alignment command during auto.
+		 * @param tagID the id of the tag to be aligned with
+		 */
+		public ATAlignmentCommand(int tagID) {
+			this.id = tagID;
+		}
+
+		@Override
+		public void initialize() {
+			System.out.println("ALIGNMENT TO APRIL TAG INIT");
+			timer.start();
+		}
+
+		@Override
+		public void execute() {
+			alignToAT(id);
+		}
+
+		@Override
+		public boolean isFinished() {
+			return isSpeakerAligned;
+		}
+
+		@Override
+		public void end(boolean interrupted) {
+			timer.stop();
+			timer.reset();
+			isSpeakerAligned = false;
+			isSpeakerPositionAligned = false;
+		}
+	}
+
+	public class NoteAlignmentCommand extends Command {
+		private Timer timer = new Timer();
+
+		@Override
+		public void initialize() {
+			System.out.println("ALIGNMENT INITIALIZED");
+			timer.start();
+		}
+
+		@Override
+		public void execute() {
+			alignToNote();
+		}
+
+		@Override
+		public boolean isFinished() {
+			return mbrfsm.hasNote();
+		}
+
+		@Override
+		public void end(boolean interrupted) {
+			timer.stop();
+			timer.reset();
+		}
 	}
 }
