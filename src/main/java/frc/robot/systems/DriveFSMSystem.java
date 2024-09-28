@@ -111,7 +111,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double rotRawInput;
 	private double rotSpeedInput;
 
-	private static final double ROT_DEADZONE = 0.03;
+	private static final double ROT_DEADZONE = 0.01;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -209,9 +209,10 @@ public class DriveFSMSystem extends SubsystemBase {
 		gyro.reset();
 		gyro.setAngleAdjustment(0);
 
-		oldRotation = new Rotation2d(getHeading());
+		oldRotation = Rotation2d.fromDegrees(getHeading());
 		oldPoseX = getPose().getX();
 		oldPoseY = getPose().getY();
+
 
 		if (redAlliance) {
 			tagOrientationAngles = new Double[]
@@ -392,6 +393,7 @@ public class DriveFSMSystem extends SubsystemBase {
 			case TELEOP_STATE:
 
 				rotRawInput = input.getControllerRightJoystickX();
+				SmartDashboard.putNumber( "Raw Rot Input", rotRawInput);
 
 				double xSpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
@@ -401,9 +403,11 @@ public class DriveFSMSystem extends SubsystemBase {
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
 
-				rotSpeedInput = -MathUtil.applyDeadband((rotRawInput
+				rotSpeedInput = -MathUtil.applyDeadband(
+					(rotRawInput
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
+					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), 
+					OIConstants.DRIVE_DEADBAND);
 
 				double correctedRotSpeed = .0;
 				//double correctedXSpeed = .0;
@@ -433,7 +437,8 @@ public class DriveFSMSystem extends SubsystemBase {
 				SmartDashboard.putNumber("old pose y", oldPoseY);
 				SmartDashboard.putNumber("get pose x", getPose().getX());
 				SmartDashboard.putNumber("get pose y", getPose().getY());
-				SmartDashboard.putNumber("rot raw x", rotRawInput);
+				SmartDashboard.putNumber("Rot SPeed INput", rotSpeedInput);
+				SmartDashboard.putNumber("Old Rot Speed Input", oldRotSpeedInput);
 
 				oldRotSpeedInput = rotSpeedInput;
 
@@ -503,12 +508,6 @@ public class DriveFSMSystem extends SubsystemBase {
 
 				break;
 
-			case ALIGN_TO_NOTE_STATE:
-				if (rpi.getNoteYaw() != VisionConstants.UNABLE_TO_SEE_NOTE_CONSTANT) {
-					alignToNote();
-				}
-
-				break;
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 
@@ -544,10 +543,7 @@ public class DriveFSMSystem extends SubsystemBase {
 			case TELEOP_STATE:
 				if (input.isCircleButtonPressed()) {
 					return FSMState.ALIGN_TO_SPEAKER_STATE;
-				} else if (input.isCrossButtonPressed()) {
-					isNoteAligned = false;
-					return FSMState.ALIGN_TO_NOTE_STATE;
-				}
+				} 
 
 				return FSMState.TELEOP_STATE;
 
@@ -559,13 +555,6 @@ public class DriveFSMSystem extends SubsystemBase {
 					return FSMState.TELEOP_STATE;
 				}
 				return FSMState.ALIGN_TO_SPEAKER_STATE;
-
-			case ALIGN_TO_NOTE_STATE:
-				if (input.isCrossButtonReleased()) {
-					isNoteAligned = false;
-					return FSMState.TELEOP_STATE;
-				}
-				return FSMState.ALIGN_TO_NOTE_STATE;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -632,16 +621,18 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * @return clamped correction value for angular speed
 	 */
 	public double pidRotation(double deviated, double expected) {
+		System.out.println("PID ROT IS RUNNING!");
+		
 		double arc1 = 360 + (expected - deviated);
 		double arc2 = (expected - deviated);
 
 		double correction = Math.abs(arc1) > Math.abs(arc2)
 			? arc2 : arc1;
 
-		correction *= ((Math.sqrt(1 - oldRotSpeedInput * oldRotSpeedInput))
+		correction *= ((Math.sqrt(1-oldRotSpeedInput*oldRotSpeedInput))
 			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
 
-		if (Math.abs(rotSpeedInput - oldRotSpeedInput) > ROT_DEADZONE) {
+		if (Math.abs(rotRawInput) > 0.03) {
 			correction *= 0;
 		}
 
