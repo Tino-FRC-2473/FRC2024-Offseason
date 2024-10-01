@@ -11,7 +11,7 @@ public final class Constants {
 	// TeleOp Shooter Constants
 	public static final float SHOOTING_POWER = 0.8f;
 	public static final float TIMED_REVVING_DURATION = 2;
-	public static final float SHOOT_VELOCITY = 30; // rps
+	public static final float SHOOT_VELOCITY = 50; //must be <=89rps
 
 	// Auto Intake Constants
 	public static final double AUTO_PIVOT_TIMER = 0.5;
@@ -23,9 +23,9 @@ public final class Constants {
 
 
 	// TeleOp Intake Constants
-	public static final float INTAKE_VELOCITY = 10; //rps
-	public static final float OUTTAKE_VELOCITY = -8; //rps
-	public static final float FEED_SHOOTER_VELOCITY = 30; // rps
+	public static final float INTAKE_VELOCITY = 10; //must be <=89rps
+	public static final float OUTTAKE_VELOCITY = -8; //must be >=-89rps
+	public static final float FEED_SHOOTER_VELOCITY = 30; //must be <=89rps
 
 	// REV Color Sensor Constants
 	public static final int NOTE_FRAMES_MIN = 2;
@@ -56,11 +56,12 @@ public final class Constants {
 	public static final double HOME_ENCODER_COUNT = 0;
 
 	// Motion Magic Constants
-	public static final double MM_CONSTANT_S = 0.25; //Voltage required to overcome static friction
-	public static final double MM_CONSTANT_V = 0.114; //Voltage for velocity of 1rps
+	public static final double MM_CONSTANT_S = 0.15; //Voltage required to overcome static friction
+	public static final double MM_CONSTANT_V = 0.014; //Voltage for velocity of 1rps
 	public static final double MM_CONSTANT_A = 0.01; //Voltage for acceleration of 1rps/s
-	public static final double MM_CONSTANT_P = 0.11; //Voltgae for Proportional error of 1 rps
-	public static final double MM_CONSTANT_I = 0.002; //Voltage for Integrated error of 1 rps
+	public static final double MM_CONSTANT_P = 0.10; //Voltgae for Proportional error of 1 rps
+	public static final double MM_CONSTANT_I = 0.001; //Voltage for Integrated error of 1 rps
+	public static final double MM_CONSTANT_D = 0.001; //Voltage for Integrated error of 1 rps
 
 	public static final double CONFIG_CONSTANT_A = 400; //max acceleration in rps/s
 	public static final double CONFIG_CONSTANT_J = 4000; //target jerk in rps/s/s

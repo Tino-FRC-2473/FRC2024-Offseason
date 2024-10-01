@@ -66,7 +66,7 @@ public class ShooterFSMSystem {
 
 		slot0Configs.kP = Constants.MM_CONSTANT_P;
 		slot0Configs.kI = Constants.MM_CONSTANT_I;
-		slot0Configs.kD = 0;
+		slot0Configs.kD = Constants.MM_CONSTANT_D;
 
 		motionMagicConfigs.MotionMagicAcceleration = Constants.CONFIG_CONSTANT_A;
 		// Target acceleration 400 rps/s (0.25 seconds to max)
