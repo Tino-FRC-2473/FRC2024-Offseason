@@ -336,6 +336,8 @@ public class IntakeFSMSystem {
 
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(0));
+
+		input.mechBothRumble(0);
 	}
 
 	/**
@@ -349,6 +351,8 @@ public class IntakeFSMSystem {
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(0));
+
+		input.mechBothRumble(0);
 	}
 
 	/**
@@ -368,6 +372,7 @@ public class IntakeFSMSystem {
 
 		if (hasNote()) {
 			indexerMotor.setControl(mVoltage.withVelocity(0));
+			input.mechRightRumble(TeleopInput.SOFT_RUMBLE);
 		} else {
 			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
 		}
@@ -402,6 +407,8 @@ public class IntakeFSMSystem {
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(
 			-Constants.FEED_SHOOTER_VELOCITY));
+
+		input.mechBothRumble(TeleopInput.HARD_RUMBLE);
 	}
 
 	/**

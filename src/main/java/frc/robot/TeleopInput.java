@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 // WPILib Imports
 import edu.wpi.first.wpilibj.PS4Controller;
 
@@ -16,6 +17,9 @@ public class TeleopInput {
 	private static final int DRIVER_CONTROLLER_PORT = 0;
 
 	private static final float JOYSTICK_TO_BOOLEAN_SENSITIVITY = 0.5f;
+
+	public static final float SOFT_RUMBLE = 0.5f;
+	public static final float HARD_RUMBLE = 1.0f;
 
 	/* ======================== Private variables ======================== */
 	// Input objects
@@ -135,6 +139,31 @@ public class TeleopInput {
 	}
 
 
+	/**
+	 * Sets the rumble for the left side of the driver controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void driverLeftRumble(double value) {
+		driverController.setRumble(RumbleType.kLeftRumble, value);
+	}
+
+	/**
+	 * Sets the rumble for the right side of the driver controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void driverRightRumble(double value) {
+		driverController.setRumble(RumbleType.kRightRumble, value);
+	}
+
+	/**
+	 * Sets the rumble for both sides of the driver controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void driverBothRumble(double value) {
+		driverController.setRumble(RumbleType.kBothRumble, value);
+	}
+
+
 	/* ------------------------ Mech Controller ------------------------ */
 
 	/**
@@ -207,5 +236,29 @@ public class TeleopInput {
 	 */
 	public boolean isManualOuttakeButtonPressed() {
 		return mechController.getR2Button();
+	}
+
+	/**
+	 * Sets the rumble for the left side of the mech controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void mechLeftRumble(double value) {
+		mechController.setRumble(RumbleType.kLeftRumble, value);
+	}
+
+	/**
+	 * Sets the rumble for the right side of the mech controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void mechRightRumble(double value) {
+		mechController.setRumble(RumbleType.kRightRumble, value);
+	}
+
+	/**
+	 * Sets the rumble for both sides of the mech controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void mechBothRumble(double value) {
+		mechController.setRumble(RumbleType.kBothRumble, value);
 	}
 }

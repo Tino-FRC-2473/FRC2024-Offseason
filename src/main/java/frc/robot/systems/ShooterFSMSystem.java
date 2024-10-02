@@ -213,6 +213,8 @@ public class ShooterFSMSystem {
 		// led.purpleLight();
 		shooterLeftMotor.setControl(mVoltage.withVelocity(0));
 		shooterRightMotor.setControl(mVoltage.withVelocity(0));
+
+		input.mechLeftRumble(0);
 	}
 
 	/**
@@ -223,6 +225,8 @@ public class ShooterFSMSystem {
 		// led.blueLight();
 		shooterLeftMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
 		shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
+
+		input.mechLeftRumble(TeleopInput.HARD_RUMBLE);
 	}
 
 	/**
