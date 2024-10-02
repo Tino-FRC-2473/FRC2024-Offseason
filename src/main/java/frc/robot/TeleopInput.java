@@ -15,6 +15,8 @@ public class TeleopInput {
 	private static final int MECH_CONTROLLER_PORT = 1;
 	private static final int DRIVER_CONTROLLER_PORT = 0;
 
+	private static final float JOYSTICK_TO_BOOLEAN_SENSITIVITY = 0.5f;
+
 	/* ======================== Private variables ======================== */
 	// Input objects
 	private PS4Controller mechController;
@@ -180,7 +182,7 @@ public class TeleopInput {
 	 * @return if Cross button is pressed
 	 */
 	public boolean isManualRaiseButtonPressed() {
-		return getControllerLeftJoystickY() < -0.5;
+		return getControllerLeftJoystickY() < -JOYSTICK_TO_BOOLEAN_SENSITIVITY;
 	}
 
 	/**
@@ -188,9 +190,9 @@ public class TeleopInput {
 	 * @return if Options Button is pressed
 	 */
 	public boolean isManualLowerButtonPressed() {
-		return getControllerLeftJoystickY() > 0.5;
+		return getControllerLeftJoystickY() > JOYSTICK_TO_BOOLEAN_SENSITIVITY;
 	}
-	
+
 	/**
 	 * Get the value of the L2 button.
 	 * @return if L2 button is pressed
