@@ -27,10 +27,8 @@ public class ClimberMechFSM {
 	private static final float MOTOR_POWER_DOWN = 0.5f;
 
 	private static final float RIGHT_RAISED_POSITION = -80f;
-	private static final float RIGHT_FINAL_POSITION = 0f;
 
-	private static final float LEFT_RAISED_POSITION = -RIGHT_RAISED_POSITION;
-	private static final float LEFT_FINAL_POSITION = -RIGHT_FINAL_POSITION;
+	private static final float LEFT_RAISED_POSITION = 80f;
 
 	/* ======================== Private variables ======================== */
 	private ClimberMechFSMState currentState;
@@ -189,12 +187,12 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleRaiseHookManualState(TeleopInput input) {
-		rightMotor.set(modifyPowerUP(
+		rightMotor.set(modifyPower(
 			MOTOR_POWER_UP,
 			rightMotor.getEncoder().getPosition(),
 			RIGHT_RAISED_POSITION));
 
-		leftMotor.set(-modifyPowerUP(
+		leftMotor.set(-modifyPower(
 			MOTOR_POWER_UP,
 			leftMotor.getEncoder().getPosition(),
 			LEFT_RAISED_POSITION));
@@ -207,19 +205,16 @@ public class ClimberMechFSM {
 	 */
 	private void handleLowerHookManualState(TeleopInput input) {
 		//relying on sparkmax firmware, remember to reconfigure if sparkmax is changed
-		rightMotor.set(MOTOR_POWER_DOWN);
-		leftMotor.set(-MOTOR_POWER_DOWN);
-		/*
-		rightMotor.set(modifyPowerDOWN(
+		
+		rightMotor.set(modifyPower(
 			MOTOR_POWER_DOWN,
-			rightMotor.getEncoder().getPosition(),
+			RIGHT_RAISED_POSITION-rightMotor.getEncoder().getPosition(),
 			RIGHT_RAISED_POSITION));
 
-		leftMotor.set(-modifyPowerDOWN(
+		leftMotor.set(-modifyPower(
 			MOTOR_POWER_DOWN,
-			leftMotor.getEncoder().getPosition(),
+			LEFT_RAISED_POSITION-leftMotor.getEncoder().getPosition(),
 			LEFT_RAISED_POSITION));
-		*/
 		if (rightBottomSwitch.isPressed()) rightMotor.getEncoder().setPosition(0);
 		if (leftBottomSwitch.isPressed()) leftMotor.getEncoder().setPosition(0);
 	}
@@ -228,37 +223,13 @@ public class ClimberMechFSM {
 	 * @param value the input value (should be positive), representing the requested motor power
 	 * @return the power to set to the motors based on the function modificatin
 	 */
-	private double modifyPowerUP(double value, double currentPosition, double raisedPosition) {
+	private static double modifyPower(double value, double currentPosition, double raisedPosition) {
 		currentPosition = Math.abs(currentPosition);
 		raisedPosition = Math.abs(raisedPosition);
 		if (currentPosition >= raisedPosition) return 0;
-		switch ((int) (currentPosition/raisedPosition*10)) {
-			case 6:
-			case 7:
-				return value*0.7;
-			case 8:
-				return value*0.5;
-			case 9:
-				return value*0.3;
-			default:
-				return value;
-		}
+		if (currentPosition >= 9*raisedPosition/10) return 0.3*value;
+		if (currentPosition >= 4*raisedPosition/5) return 0.5*value;
+		if (currentPosition >= 2*raisedPosition/3) return 0.7*value;
+		return value;
 	}
-	/*
-	private double modifyPowerDOWN(double value, double currentPosition, double raisedPosition) {
-		currentPosition = Math.abs(currentPosition);
-		raisedPosition = Math.abs(raisedPosition);
-		if (currentPosition < 0) return value*0.2;
-		switch ((int) ((raisedPosition-currentPosition)/raisedPosition*10)) {
-			case 7:
-				return value*0.7;
-			case 8:
-				return value*0.5;
-			case 9:
-				return value*0.3;
-			default:
-				return value;
-		}
-	}
-	*/
 }
