@@ -23,6 +23,9 @@ public class ClimberMechFSM {
 		IDLE
 	}
 
+	// The ranges for different powers for the step function as a set of x, y pairs
+	private static final double[][] STEPS = {{0.9, 0.7}, {0.8, 0.5}, {0.7, 0.3}};
+
 	private static final float MOTOR_POWER_UP = -0.5f;
 	private static final float MOTOR_POWER_DOWN = 0.5f;
 
@@ -208,35 +211,38 @@ public class ClimberMechFSM {
 		if (rightBottomSwitch.isPressed()) {
 			rightMotor.getEncoder().setPosition(0);
 			rightMotor.set(0);
-		}
-		else {
+		} else {
 			rightMotor.set(modifyPower(
-			MOTOR_POWER_DOWN,
-			RIGHT_RAISED_POSITION-rightMotor.getEncoder().getPosition(),
-			RIGHT_RAISED_POSITION));
+				MOTOR_POWER_DOWN,
+				RIGHT_RAISED_POSITION - rightMotor.getEncoder().getPosition(),
+				RIGHT_RAISED_POSITION));
 		}
 		if (leftBottomSwitch.isPressed()) {
 			leftMotor.getEncoder().setPosition(0);
 			leftMotor.set(0);
-		}
-		else {
+		} else {
 			leftMotor.set(-modifyPower(
-			MOTOR_POWER_DOWN,
-			LEFT_RAISED_POSITION-leftMotor.getEncoder().getPosition(),
-			LEFT_RAISED_POSITION));
+				MOTOR_POWER_DOWN,
+				LEFT_RAISED_POSITION - leftMotor.getEncoder().getPosition(),
+				LEFT_RAISED_POSITION));
 		}
 	}
+
 	/**
-	 * modifies the power going up based on a step function
+	 * modifies the power going up based on a step function.
 	 * @param value the input value (should be positive), representing the requested motor power
+	 * @param currentPosition the current encoder value of the motor
+	 * @param raisedPosition the encoder value when the mech is fully extended
 	 * @return the power to set to the motors based on the function modificatin
 	 */
 	private static double modifyPower(double value, double currentPosition, double raisedPosition) {
 		currentPosition = Math.abs(currentPosition);
 		raisedPosition = Math.abs(raisedPosition);
-		if (currentPosition >= 9*raisedPosition/10) return 0.3*value;
-		else if (currentPosition >= 4*raisedPosition/5) return 0.5*value;
-		else if (currentPosition >= 2*raisedPosition/3) return 0.7*value;
-		else return value;
+		for (double[] pair : STEPS) {
+			if (currentPosition >= pair[0] * raisedPosition) {
+				return pair[1] * value;
+			}
+		}
+		return value;
 	}
 }
