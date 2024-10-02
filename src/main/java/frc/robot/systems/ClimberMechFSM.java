@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkLimitSwitch;
+import com.revrobotics.SparkLimitSwitch.Type;
 
 // Robot Imports
 import frc.robot.TeleopInput;
@@ -12,26 +14,32 @@ import frc.robot.HardwareMap;
 
 public class ClimberMechFSM {
 	/* ======================== Constants ======================== */
+
 	// FSM state definitions
 	public enum ClimberMechFSMState {
-		IDLE_STOP,
-		CLIMBING,
-		HOOKS_UP
+		START_STATE,
+		RAISE_HOOK_MANUAL,
+		LOWER_HOOK_MANUAL,
+		IDLE
 	}
 
-	private static final float SYNCH_MOTOR_POWER = 0.2f; //0.25
-	private static final float UP_MOTOR_POWER = 0.25f;
-	private static final float HOOKS_UP_ENCODER = 11.00f;
-	private static final float CHAIN_ENCODER = 35.57f;
+	private static final float MOTOR_POWER_UP = -0.5f;
+	private static final float MOTOR_POWER_DOWN = 0.5f;
 
+	private static final float RIGHT_RAISED_POSITION = -70f;
+
+	private static final float LEFT_RAISED_POSITION = 70f;
 
 	/* ======================== Private variables ======================== */
 	private ClimberMechFSMState currentState;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
-	private CANSparkMax motorLeft;
-	private CANSparkMax motorRight;
+	private CANSparkMax rightMotor;
+	private CANSparkMax leftMotor;
+
+	private SparkLimitSwitch leftBottomSwitch;
+	private SparkLimitSwitch rightBottomSwitch;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -41,13 +49,22 @@ public class ClimberMechFSM {
 	 */
 	public ClimberMechFSM() {
 		// Perform hardware init
-		motorLeft = new CANSparkMax(HardwareMap.LEFT_CLIMBER_CAN_ID,
-						CANSparkMax.MotorType.kBrushless);
-		motorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
+		rightMotor = new CANSparkMax(
+			HardwareMap.LEFT_CLIMBER_CAN_ID,
+			CANSparkMax.MotorType.kBrushless);
 
-		motorRight = new CANSparkMax(HardwareMap.RIGHT_CLIMBER_CAN_ID,
-						CANSparkMax.MotorType.kBrushless);
-		motorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
+		rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+		rightMotor.getEncoder().setPosition(0);
+
+		leftMotor = new CANSparkMax(
+			HardwareMap.RIGHT_CLIMBER_CAN_ID,
+			CANSparkMax.MotorType.kBrushless);
+
+		leftMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+		leftMotor.getEncoder().setPosition(0);
+
+		leftBottomSwitch = leftMotor.getReverseLimitSwitch(Type.kNormallyClosed);
+		rightBottomSwitch = rightMotor.getForwardLimitSwitch(Type.kNormallyClosed);
 
 		// Reset state machine
 		reset();
@@ -70,9 +87,7 @@ public class ClimberMechFSM {
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
 	public void reset() {
-		currentState = ClimberMechFSMState.IDLE_STOP;
-		motorLeft.getEncoder().setPosition(0);
-		motorRight.getEncoder().setPosition(0);
+		currentState = ClimberMechFSMState.IDLE;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
@@ -84,31 +99,27 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
-
 		if (input == null) {
 			return;
 		}
-
 		switch (currentState) {
-			case IDLE_STOP:
+			case RAISE_HOOK_MANUAL:
+				handleRaiseHookManualState(input);
+				break;
+			case LOWER_HOOK_MANUAL:
+				handleLowerHookManualState(input);
+				break;
+			case IDLE:
 				handleIdleState(input);
-				break;
-			case CLIMBING:
-				handleClimbingState(input);
-				break;
-			case HOOKS_UP:
-				handleHooksUpState(input);
 				break;
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
 		SmartDashboard.putString("Climber State", currentState.toString());
+		SmartDashboard.putNumber("left encoder position", leftMotor.getEncoder().getPosition());
+		SmartDashboard.putNumber("right encoder position", rightMotor.getEncoder().getPosition());
 
 		currentState = nextState(input);
-		// SmartDashboard.putNumber("left output", motor.getAppliedOutput());
-		// SmartDashboard.putNumber("left motor applied", motor.get());
-		SmartDashboard.putNumber("left encoder position", motorLeft.getEncoder().getPosition());
-		SmartDashboard.putNumber("right encoder position", motorRight.getEncoder().getPosition());
 	}
 
 
@@ -123,40 +134,41 @@ public class ClimberMechFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private ClimberMechFSMState nextState(TeleopInput input) {
-		double currentEncoderLeft = -motorLeft.getEncoder().getPosition();
-		double currentEncoderRight = motorRight.getEncoder().getPosition();
+		ClimberMechFSMState next;
 
 		switch (currentState) {
-			case IDLE_STOP:
-				if (input.synchClimberTrigger() && (HOOKS_UP_ENCODER <= currentEncoderLeft
-					&& currentEncoderLeft < CHAIN_ENCODER)
-					&& (HOOKS_UP_ENCODER <= currentEncoderRight
-					&& currentEncoderRight < CHAIN_ENCODER)) {
-					return ClimberMechFSMState.CLIMBING;
-				} else if (input.isHooksUpButtonPressed()
-					&& (currentEncoderLeft <= HOOKS_UP_ENCODER
-					&& currentEncoderRight <= HOOKS_UP_ENCODER)) {
-					return ClimberMechFSMState.HOOKS_UP;
+			case RAISE_HOOK_MANUAL:
+				if (input.isManualRaiseButtonPressed() && !input.isManualLowerButtonPressed()) {
+					next = ClimberMechFSMState.RAISE_HOOK_MANUAL;
 				} else {
-					return ClimberMechFSMState.IDLE_STOP;
+					next = ClimberMechFSMState.IDLE;
 				}
-			case CLIMBING:
-				if (input.synchClimberTrigger() && (currentEncoderLeft <= CHAIN_ENCODER
-					&& currentEncoderRight <= CHAIN_ENCODER)) {
-					return ClimberMechFSMState.CLIMBING;
+				break;
+
+			case LOWER_HOOK_MANUAL:
+				if ((!input.isManualRaiseButtonPressed() && input.isManualLowerButtonPressed())) {
+					next = ClimberMechFSMState.LOWER_HOOK_MANUAL;
 				} else {
-					return ClimberMechFSMState.IDLE_STOP;
+					next = ClimberMechFSMState.IDLE;
 				}
-			case HOOKS_UP:
-				if (input.isHooksUpButtonPressed() && (currentEncoderLeft <= HOOKS_UP_ENCODER
-					&& currentEncoderRight <= HOOKS_UP_ENCODER)) {
-					return ClimberMechFSMState.HOOKS_UP;
+				break;
+
+			case IDLE:
+				if (input.isManualRaiseButtonPressed() && !input.isManualLowerButtonPressed()) {
+					next = ClimberMechFSMState.RAISE_HOOK_MANUAL;
+				} else if (
+					(input.isManualLowerButtonPressed() && !input.isManualRaiseButtonPressed())) {
+					next = ClimberMechFSMState.LOWER_HOOK_MANUAL;
 				} else {
-					return ClimberMechFSMState.IDLE_STOP;
+					next = ClimberMechFSMState.IDLE;
 				}
+				break;
+
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
+
+		return next;
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
@@ -166,43 +178,65 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIdleState(TeleopInput input) {
-		motorLeft.set(0);
-		motorRight.set(0);
+		leftMotor.set(0);
+		rightMotor.set(0);
 	}
 	/**
-	 * Handle behavior in CLIMBING state.
+	 * Handle behavior in RAISE_HOOK_MANUAL state.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleClimbingState(TeleopInput input) {
-		if (motorLeft.getEncoder().getPosition() <= CHAIN_ENCODER) {
-			motorLeft.set(-SYNCH_MOTOR_POWER);
-		} else {
-			motorLeft.set(0);
-		}
+	private void handleRaiseHookManualState(TeleopInput input) {
+		rightMotor.set(modifyPower(
+			MOTOR_POWER_UP,
+			rightMotor.getEncoder().getPosition(),
+			RIGHT_RAISED_POSITION));
 
-		if (motorRight.getEncoder().getPosition() <= CHAIN_ENCODER) {
-			motorRight.set(SYNCH_MOTOR_POWER);
-		} else {
-			motorRight.set(0);
-		}
+		leftMotor.set(-modifyPower(
+			MOTOR_POWER_UP,
+			leftMotor.getEncoder().getPosition(),
+			LEFT_RAISED_POSITION));
 	}
+
 	/**
-	 * Handle behavior in HOOKS_UP state.
+	 * Handle behavior in LOWER_HOOK_MANUAL state.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleHooksUpState(TeleopInput input) {
-		if (motorLeft.getEncoder().getPosition() <= HOOKS_UP_ENCODER) {
-			motorLeft.set(-UP_MOTOR_POWER);
-		} else {
-			motorLeft.set(0);
+	private void handleLowerHookManualState(TeleopInput input) {
+		//relying on sparkmax firmware, software redundancy exists
+		if (rightBottomSwitch.isPressed()) {
+			rightMotor.getEncoder().setPosition(0);
+			rightMotor.set(0);
 		}
-
-		if (motorRight.getEncoder().getPosition() <= HOOKS_UP_ENCODER) {
-			motorRight.set(UP_MOTOR_POWER);
-		} else {
-			motorRight.set(0);
+		else {
+			rightMotor.set(modifyPower(
+			MOTOR_POWER_DOWN,
+			RIGHT_RAISED_POSITION-rightMotor.getEncoder().getPosition(),
+			RIGHT_RAISED_POSITION));
 		}
+		if (leftBottomSwitch.isPressed()) {
+			leftMotor.getEncoder().setPosition(0);
+			leftMotor.set(0);
+		}
+		else {
+			leftMotor.set(-modifyPower(
+			MOTOR_POWER_DOWN,
+			LEFT_RAISED_POSITION-leftMotor.getEncoder().getPosition(),
+			LEFT_RAISED_POSITION));
+		}
+	}
+	/**
+	 * modifies the power going up based on a step function
+	 * @param value the input value (should be positive), representing the requested motor power
+	 * @return the power to set to the motors based on the function modificatin
+	 */
+	private static double modifyPower(double value, double currentPosition, double raisedPosition) {
+		currentPosition = Math.abs(currentPosition);
+		raisedPosition = Math.abs(raisedPosition);
+		if (currentPosition >= 9*raisedPosition/10) return 0.3*value;
+		else if (currentPosition >= 4*raisedPosition/5) return 0.5*value;
+		else if (currentPosition >= 2*raisedPosition/3) return 0.7*value;
+		else return value;
 	}
 }

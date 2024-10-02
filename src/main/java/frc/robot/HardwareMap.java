@@ -6,8 +6,8 @@ package frc.robot;
  */
 public final class HardwareMap {
 	// ID numbers for devices on the CAN bus
-	public static final int LEFT_CLIMBER_CAN_ID = 19;
-	public static final int RIGHT_CLIMBER_CAN_ID = 20;
+	public static final int LEFT_CLIMBER_CAN_ID = 16;
+	public static final int RIGHT_CLIMBER_CAN_ID = 15;
 
 	public static final int RIGHT_SHOOTER_MOTOR_ID = 4;
 	public static final int LEFT_SHOOTER_MOTOR_ID = 0;
