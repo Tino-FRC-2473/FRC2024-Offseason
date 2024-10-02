@@ -179,18 +179,18 @@ public class TeleopInput {
 	 * Get the value of the Cross  button.
 	 * @return if Cross button is pressed
 	 */
-	public boolean synchClimberTrigger() {
-		return mechController.getCrossButton();
+	public boolean isManualRaiseButtonPressed() {
+		return getControllerLeftJoystickY() < -0.5;
 	}
 
 	/**
 	 * Get the value of the Options Button.
 	 * @return if Options Button is pressed
 	 */
-	public boolean isHooksUpButtonPressed() {
-		return mechController.getOptionsButton();
+	public boolean isManualLowerButtonPressed() {
+		return getControllerLeftJoystickY() > 0.5;
 	}
-
+	
 	/**
 	 * Get the value of the L2 button.
 	 * @return if L2 button is pressed
