@@ -26,9 +26,9 @@ public class ClimberMechFSM {
 	private static final float MOTOR_POWER_UP = -0.5f;
 	private static final float MOTOR_POWER_DOWN = 0.5f;
 
-	private static final float RIGHT_RAISED_POSITION = -80f;
+	private static final float RIGHT_RAISED_POSITION = -70f;
 
-	private static final float LEFT_RAISED_POSITION = 80f;
+	private static final float LEFT_RAISED_POSITION = 70f;
 
 	/* ======================== Private variables ======================== */
 	private ClimberMechFSMState currentState;
@@ -64,7 +64,7 @@ public class ClimberMechFSM {
 		leftMotor.getEncoder().setPosition(0);
 
 		leftBottomSwitch = leftMotor.getReverseLimitSwitch(Type.kNormallyClosed);
-		rightBottomSwitch = rightMotor.getReverseLimitSwitch(Type.kNormallyClosed);
+		rightBottomSwitch = rightMotor.getForwardLimitSwitch(Type.kNormallyClosed);
 
 		// Reset state machine
 		reset();
@@ -204,19 +204,27 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleLowerHookManualState(TeleopInput input) {
-		//relying on sparkmax firmware, remember to reconfigure if sparkmax is changed
-		
-		rightMotor.set(modifyPower(
+		//relying on sparkmax firmware, software redundancy exists
+		if (rightBottomSwitch.isPressed()) {
+			rightMotor.getEncoder().setPosition(0);
+			rightMotor.set(0);
+		}
+		else {
+			rightMotor.set(modifyPower(
 			MOTOR_POWER_DOWN,
 			RIGHT_RAISED_POSITION-rightMotor.getEncoder().getPosition(),
 			RIGHT_RAISED_POSITION));
-
-		leftMotor.set(-modifyPower(
+		}
+		if (leftBottomSwitch.isPressed()) {
+			leftMotor.getEncoder().setPosition(0);
+			leftMotor.set(0);
+		}
+		else {
+			leftMotor.set(-modifyPower(
 			MOTOR_POWER_DOWN,
 			LEFT_RAISED_POSITION-leftMotor.getEncoder().getPosition(),
 			LEFT_RAISED_POSITION));
-		if (rightBottomSwitch.isPressed()) rightMotor.getEncoder().setPosition(0);
-		if (leftBottomSwitch.isPressed()) leftMotor.getEncoder().setPosition(0);
+		}
 	}
 	/**
 	 * modifies the power going up based on a step function
@@ -226,10 +234,9 @@ public class ClimberMechFSM {
 	private static double modifyPower(double value, double currentPosition, double raisedPosition) {
 		currentPosition = Math.abs(currentPosition);
 		raisedPosition = Math.abs(raisedPosition);
-		if (currentPosition >= raisedPosition) return 0;
 		if (currentPosition >= 9*raisedPosition/10) return 0.3*value;
-		if (currentPosition >= 4*raisedPosition/5) return 0.5*value;
-		if (currentPosition >= 2*raisedPosition/3) return 0.7*value;
-		return value;
+		else if (currentPosition >= 4*raisedPosition/5) return 0.5*value;
+		else if (currentPosition >= 2*raisedPosition/3) return 0.7*value;
+		else return value;
 	}
 }
