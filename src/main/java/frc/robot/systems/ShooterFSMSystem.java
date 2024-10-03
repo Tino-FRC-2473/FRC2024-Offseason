@@ -188,6 +188,8 @@ public class ShooterFSMSystem {
 
 				if (input.isRevButtonPressed()) {
 					return ShooterFSMState.REV_UP_SHOOTER;
+				} else {
+					return ShooterFSMState.IDLE_STOP;
 				}
 
 			case REV_UP_SHOOTER:

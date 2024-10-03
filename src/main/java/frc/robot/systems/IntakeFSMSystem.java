@@ -165,12 +165,14 @@ public class IntakeFSMSystem {
 			indexerMotor.getVelocity().getValueAsDouble());
 		// SmartDashboard.putNumber("Front Indexer Velocity",
 		// 	frontIndexMotor.getVelocity().getValueAsDouble());
-		SmartDashboard.putBoolean("HASNOTE", hasNote());
+		SmartDashboard.putBoolean("HASNOTE", hasNote);
 
 		SmartDashboard.putBoolean("Color Sensor in Range?", colorSensor.getProximity()
 			>= Constants.PROXIMIIY_THRESHOLD);
 		SmartDashboard.putNumber("Frames with Note in View", noteColorFrames);
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
+
+		hasNote = hasNote();
 	}
 
 	/* ======================== Private methods ======================== */
@@ -190,61 +192,53 @@ public class IntakeFSMSystem {
 					return IntakeFSMState.MOVE_TO_HOME;
 				}
 
-				if ((input.isIntakeButtonPressed() || input.isOuttakeButtonPressed())
-					&& !input.isShootButtonPressed()) {
-					return IntakeFSMState.MOVE_TO_GROUND;
-				}
-
-				if (input.isShootButtonPressed() && !(input.isIntakeButtonPressed()
-					|| input.isOuttakeButtonPressed())) {
-					return IntakeFSMState.FEED_SHOOTER;
+				if (input.isIntakeButtonPressed() || input.isOuttakeButtonPressed()) {
+					if (input.isShootButtonPressed()) {
+						return IntakeFSMState.FEED_SHOOTER;
+					} else {
+						return IntakeFSMState.MOVE_TO_GROUND;
+					}
+				} else {
+					return IntakeFSMState.MOVE_TO_HOME;
 				}
 
 			case FEED_SHOOTER:
 				if (input.isShootButtonPressed() && !(input.isIntakeButtonPressed()
 					|| input.isOuttakeButtonPressed())) {
 					return IntakeFSMState.FEED_SHOOTER;
-				}
-
-				if (!input.isShootButtonPressed() || input.isIntakeButtonPressed()
-					|| input.isOuttakeButtonPressed()) {
+				} else {
 					return IntakeFSMState.MOVE_TO_HOME;
 				}
 
 			case MOVE_TO_GROUND:
-				if (inRange(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT)) {
+				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)) {
 					if (input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
 						&& !input.isShootButtonPressed()) {
 						return IntakeFSMState.INTAKING;
 					} else if (input.isOuttakeButtonPressed() && !input.isIntakeButtonPressed()
-								&& input.isShootButtonPressed()) {
+								&& !input.isShootButtonPressed()) {
 						return IntakeFSMState.OUTTAKING;
-					}
-				} else if (!inRange(throughBore.getDistance(),
-					Constants.GROUND_ENCODER_COUNT)) {
-					if ((input.isIntakeButtonPressed() || input.isOuttakeButtonPressed())
-						&& !input.isShootButtonPressed()) {
-						return IntakeFSMState.MOVE_TO_GROUND;
 					}
 				}
 
-				if ((!input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed())
-					|| input.isShootButtonPressed()) {
+				if ((input.isIntakeButtonPressed() || input.isOuttakeButtonPressed())
+					&& !input.isShootButtonPressed()) {
+					return IntakeFSMState.MOVE_TO_GROUND;
+				} else {
 					return IntakeFSMState.MOVE_TO_HOME;
 				}
 
 			case INTAKING:
-				if (inRange(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT)
+				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)
 					&& input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
 					&& !input.isShootButtonPressed()) {
 					return IntakeFSMState.INTAKING;
 				}
 
-				if (input.isShootButtonPressed()) {
+				if (input.isShootButtonPressed()
+					&& !(input.isOuttakeButtonPressed() || input.isIntakeButtonPressed())) {
 					return IntakeFSMState.MOVE_TO_HOME;
-				}
-
-				if (input.isOuttakeButtonPressed() || !input.isIntakeButtonPressed()) {
+				} else {
 					return IntakeFSMState.MOVE_TO_GROUND;
 				}
 
@@ -255,11 +249,10 @@ public class IntakeFSMSystem {
 					return IntakeFSMState.OUTTAKING;
 				}
 
-				if (input.isShootButtonPressed()) {
+				if (input.isShootButtonPressed()
+					&& !(input.isOuttakeButtonPressed() || input.isIntakeButtonPressed())) {
 					return IntakeFSMState.MOVE_TO_HOME;
-				}
-
-				if (!input.isOuttakeButtonPressed() || input.isIntakeButtonPressed()) {
+				} else {
 					return IntakeFSMState.MOVE_TO_GROUND;
 				}
 
@@ -333,7 +326,6 @@ public class IntakeFSMSystem {
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(0));
 
@@ -368,13 +360,17 @@ public class IntakeFSMSystem {
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		intakeMotor.setControl(mVoltage.withVelocity(0));
 
-		if (hasNote()) {
+		if (hasNote) {
 			indexerMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
+
 			input.mechRightRumble(TeleopInput.SOFT_RUMBLE);
 		} else {
 			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
+
+			input.mechRightRumble(0);
 		}
 	}
 
@@ -384,14 +380,17 @@ public class IntakeFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleOuttakingState(TeleopInput input) {
-		if (hasNote()) {
+		if (hasNote) {
 			led.orangeLight(false);
+			input.mechLeftRumble(0);
 		} else {
 			led.redLight(false);
+			input.mechLeftRumble(TeleopInput.SOFT_RUMBLE);
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		intakeMotor.setControl(mVoltage.withVelocity(0));
+
+		intakeMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
 		indexerMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
 	}
 
@@ -440,11 +439,11 @@ public class IntakeFSMSystem {
 	 * Performs action for auto STATE3.
 	 * @return if the action carried out has finished executing
 	 */
-	private boolean handleAutoOuttake() {
+	private boolean handleAutoFeedShooter() {
 		if (timer.get() == 0) {
 			timer.start();
 		}
-		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
+		//pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		if (timer.get() > Constants.AUTO_SHOOTING_TIME) {
 			intakeMotor.setControl(mVoltage.withVelocity(0));
 			indexerMotor.setControl(mVoltage.withVelocity(0));
@@ -466,7 +465,7 @@ public class IntakeFSMSystem {
 	private boolean handleAutoIntake() {
 		intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
 		indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
-		return hasNote();
+		return hasNote;
 	}
 
 	/*------------------------- COMMAND CLASSES -------------------------- */
@@ -625,7 +624,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void execute() {
-			handleAutoOuttake();
+			handleAutoFeedShooter();
 			System.out.println("OUTTAKING" + timerSub.get());
 		}
 
@@ -634,7 +633,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public boolean isFinished() {
-			return handleAutoOuttake() || timerSub.get() >= Constants.OUTTAKE_AUTO_TIMER;
+			return handleAutoFeedShooter() || timerSub.get() >= Constants.OUTTAKE_AUTO_TIMER;
 		}
 
 		/**
