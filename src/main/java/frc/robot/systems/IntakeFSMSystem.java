@@ -301,7 +301,6 @@ public class IntakeFSMSystem {
 		boolean isInRange = colorSensor.getProximity() >= Constants.PROXIMIIY_THRESHOLD;
 		SmartDashboard.putBoolean("is close enough", isInRange);
 
-		//noteColorFrames = isInRange ? (noteColorFrames + 1) : 0;
 		if (isInRange) {
 			noteColorFrames++;
 		} else {
@@ -348,7 +347,7 @@ public class IntakeFSMSystem {
 	}
 
 	/**
-	 * Handle behavior in MOVE_TO_HOME.
+	 * Handle behavior in INTAKING.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
@@ -375,7 +374,7 @@ public class IntakeFSMSystem {
 	}
 
 	/**
-	 * Handle behavior in MOVE_TO_HOME.
+	 * Handle behavior in OUTTAKING.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
@@ -395,7 +394,7 @@ public class IntakeFSMSystem {
 	}
 
 	/**
-	 * Handle behavior in MOVE_TO_HOME.
+	 * Handle behavior in FEED_SHOOTER.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
@@ -421,7 +420,7 @@ public class IntakeFSMSystem {
 	}
 
 	/**
-	 * Performs action for auto STATE2.
+	 * Performs action for auto Move to Home.
 	 * @return if the action carried out has finished executing
 	 */
 	private boolean handleAutoMoveHome() {
@@ -436,7 +435,7 @@ public class IntakeFSMSystem {
 	}
 
 	/**
-	 * Performs action for auto STATE3.
+	 * Performs action for auto Feed Shooter.
 	 * @return if the action carried out has finished executing
 	 */
 	private boolean handleAutoFeedShooter() {
