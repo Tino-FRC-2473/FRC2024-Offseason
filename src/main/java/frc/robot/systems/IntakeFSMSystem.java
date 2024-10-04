@@ -193,13 +193,13 @@ public class IntakeFSMSystem {
 				}
 
 				if (input.isIntakeButtonPressed() || input.isOuttakeButtonPressed()) {
+					return IntakeFSMState.MOVE_TO_GROUND;
+				} else {
 					if (input.isShootButtonPressed()) {
 						return IntakeFSMState.FEED_SHOOTER;
 					} else {
-						return IntakeFSMState.MOVE_TO_GROUND;
+						return IntakeFSMState.MOVE_TO_HOME;
 					}
-				} else {
-					return IntakeFSMState.MOVE_TO_HOME;
 				}
 
 			case FEED_SHOOTER:
