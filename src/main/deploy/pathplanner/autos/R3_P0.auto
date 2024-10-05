@@ -12,9 +12,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "G_SPN"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "S_SPN"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "I_FPN"
+                }
+              }
+            ]
           }
         }
       ]

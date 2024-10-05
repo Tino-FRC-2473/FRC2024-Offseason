@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 16.009611124767865,
-        "y": 3.6420492161198994
+        "x": 16.097725218706252,
+        "y": 3.568620804504579
       },
       "isLocked": false,
       "linkedName": null
@@ -36,8 +36,8 @@
         "y": 4.391019014596169
       },
       "prevControl": {
-        "x": 16.02429680709093,
-        "y": 3.6420492161198994
+        "x": 14.364814704584687,
+        "y": 4.170733779750208
       },
       "nextControl": null,
       "isLocked": false,
@@ -54,7 +54,7 @@
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "New Event Marker",
+      "name": "Ground",
       "waypointRelativePos": 0.1,
       "command": {
         "type": "sequential",
@@ -63,7 +63,7 @@
             {
               "type": "named",
               "data": {
-                "name": "S_PSG"
+                "name": "I_PTG"
               }
             }
           ]
@@ -71,7 +71,7 @@
       }
     },
     {
-      "name": "New Event Marker",
+      "name": "Intake",
       "waypointRelativePos": 0.35,
       "command": {
         "type": "sequential",
@@ -80,7 +80,7 @@
             {
               "type": "named",
               "data": {
-                "name": "S_TIN"
+                "name": "I_ITN"
               }
             }
           ]
@@ -88,7 +88,7 @@
       }
     },
     {
-      "name": "New Event Marker",
+      "name": "Home",
       "waypointRelativePos": 1.2,
       "command": {
         "type": "sequential",
@@ -97,7 +97,7 @@
             {
               "type": "named",
               "data": {
-                "name": "S_PGS"
+                "name": "I_PTH"
               }
             }
           ]
@@ -105,7 +105,7 @@
       }
     },
     {
-      "name": "New Event Marker",
+      "name": "Shoot",
       "waypointRelativePos": 1.05,
       "command": {
         "type": "parallel",
@@ -114,7 +114,13 @@
             {
               "type": "named",
               "data": {
-                "name": "S_TRS"
+                "name": "S_RXS"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "I_FXN"
               }
             }
           ]
