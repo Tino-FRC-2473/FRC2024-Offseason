@@ -252,13 +252,13 @@ public class ShooterFSMSystem {
 			timer.start();
 		}
 
-		if (timer.get() < Constants.AUTO_PRELOAD_REVVING_TIME) {
+		if (timer.get() < Constants.AUTO_PRELOAD_REVVING_SECS) {
 			shooterLeftMotor.setControl(mVoltage.withVelocity(
 				-Constants.SHOOT_VELOCITY));
 			shooterRightMotor.setControl(mVoltage.withVelocity(
 				Constants.SHOOT_VELOCITY));
 			return false;
-		} else if (timer.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
+		} else if (timer.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
 			shooterLeftMotor.setControl(mVoltage.withVelocity(
 				-Constants.SHOOT_VELOCITY));
 			shooterRightMotor.setControl(mVoltage.withVelocity(
@@ -297,7 +297,7 @@ public class ShooterFSMSystem {
 		@Override
 		public void execute() {
 			// led.rainbow();
-			if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
+			if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
 				shooterLeftMotor.setControl(mVoltage.withVelocity(
 					-Constants.SHOOT_VELOCITY));
 				shooterRightMotor.setControl(mVoltage.withVelocity(
@@ -316,7 +316,7 @@ public class ShooterFSMSystem {
 		// Returns true when the command should end.
 		@Override
 		public boolean isFinished() {
-			return timerSub.get() >= Constants.AUTO_PRELOAD_SHOOTING_TIME;
+			return timerSub.get() >= Constants.AUTO_PRELOAD_SHOOTING_SECS;
 		}
 	}
 
@@ -340,7 +340,7 @@ public class ShooterFSMSystem {
 		// Called every time the scheduler runs while the command is scheduled.
 		@Override
 		public void execute() {
-			if (timerSub.get() < Constants.AUTO_SHOOTING_TIME) {
+			if (timerSub.get() < Constants.AUTO_SHOOTING_SECS) {
 				shooterLeftMotor.setControl(mVoltage.withVelocity(
 					-Constants.SHOOT_VELOCITY));
 				shooterRightMotor.setControl(mVoltage.withVelocity(
@@ -361,7 +361,7 @@ public class ShooterFSMSystem {
 		// Returns true when the command should end.
 		@Override
 		public boolean isFinished() {
-			return timerSub.get() >= Constants.AUTO_SHOOTING_TIME;
+			return timerSub.get() >= Constants.AUTO_SHOOTING_SECS;
 		}
 	}
 }

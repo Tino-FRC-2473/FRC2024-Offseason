@@ -5,6 +5,11 @@ package frc.robot;
  * configuration of the robot.
  */
 public final class HardwareMap {
+
+	// RoboRIO Ports
+	public static final int ENCODER_CHANNEL_A = 1;
+	public static final int ENCODER_CHANNEL_B = 2;
+
 	// ID numbers for devices on the CAN bus
 	public static final int LEFT_CLIMBER_CAN_ID = 16;
 	public static final int RIGHT_CLIMBER_CAN_ID = 15;

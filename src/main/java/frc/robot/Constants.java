@@ -3,10 +3,10 @@ package frc.robot;
 public final class Constants {
 
 	// Auto Shooter Constants
-	public static final double AUTO_REVVING_TIME = 0.5;
-	public static final double AUTO_SHOOTING_TIME = 1.0;
-	public static final double AUTO_PRELOAD_SHOOTING_TIME = 1.9;
-	public static final double AUTO_PRELOAD_REVVING_TIME = 1.3;
+	public static final double AUTO_REVVING_SECS = 0.5;
+	public static final double AUTO_SHOOTING_SECS = 1.0;
+	public static final double AUTO_PRELOAD_SHOOTING_SECS = 1.9;
+	public static final double AUTO_PRELOAD_REVVING_SECS = 1.3;
 
 	// TeleOp Shooter Constants
 	public static final float SHOOTING_POWER = 0.8f;

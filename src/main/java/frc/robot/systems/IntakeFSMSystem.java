@@ -76,7 +76,7 @@ public class IntakeFSMSystem {
 		intakeMotor = new TalonFX(HardwareMap.INTAKE_MOTOR_ID);
 		intakeMotor.setNeutralMode(NeutralModeValue.Brake);
 
-		throughBore = new Encoder(1, 2);
+		throughBore = new Encoder(HardwareMap.ENCODER_CHANNEL_A, HardwareMap.ENCODER_CHANNEL_B);
 		throughBore.reset();
 
 		colorSensor = new ColorSensorV3(Port.kOnboard);
@@ -211,7 +211,7 @@ public class IntakeFSMSystem {
 				}
 
 			case MOVE_TO_GROUND:
-				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)) {
+				if (approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)) {
 					if (input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
 						&& !input.isShootButtonPressed()) {
 						return IntakeFSMState.INTAKING;
@@ -229,7 +229,7 @@ public class IntakeFSMSystem {
 				}
 
 			case INTAKING:
-				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)
+				if (approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)
 					&& input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
 					&& !input.isShootButtonPressed()) {
 					return IntakeFSMState.INTAKING;
@@ -243,7 +243,7 @@ public class IntakeFSMSystem {
 				}
 
 			case OUTTAKING:
-				if (inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)
+				if (approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)
 					&& input.isOuttakeButtonPressed() && !input.isIntakeButtonPressed()
 					&& !input.isShootButtonPressed()) {
 					return IntakeFSMState.OUTTAKING;
@@ -263,12 +263,12 @@ public class IntakeFSMSystem {
 
 /* ------------------------ Command handlers ------------------------ */
 
-	private boolean inRange(double targetEncoder, double currentEncoder) {
+	private boolean approxEquals(double targetEncoder, double currentEncoder) {
 		return Math.abs(targetEncoder - currentEncoder) < Constants.INRANGE_VALUE;
 	}
 
 	/**
-	 * A PID controller for the pivot motor.
+	 * A Proportional controller for the pivot motor.
 	 * @param currentEncoderPID The current position of the pivot motor in encoder units.
 	 * @param targetEncoder The target position of the pivot motor in encoder units.
 	 * @return The correct power to send to the pivot motor to achieve the target position.
@@ -416,7 +416,7 @@ public class IntakeFSMSystem {
 	private boolean handleAutoMoveGround() {
 		led.orangeLight(false);
 		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		return inRange(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT);
+		return approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT);
 	}
 
 	/**
@@ -431,7 +431,7 @@ public class IntakeFSMSystem {
 		}
 
 		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		return inRange(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT);
+		return approxEquals(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT);
 	}
 
 	/**
@@ -443,7 +443,7 @@ public class IntakeFSMSystem {
 			timer.start();
 		}
 		//pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		if (timer.get() > Constants.AUTO_SHOOTING_TIME) {
+		if (timer.get() > Constants.AUTO_SHOOTING_SECS) {
 			intakeMotor.setControl(mVoltage.withVelocity(0));
 			indexerMotor.setControl(mVoltage.withVelocity(0));
 			timer.stop();
@@ -674,10 +674,10 @@ public class IntakeFSMSystem {
 			pivotMotor.set(pidAuto(throughBore.getDistance(),
 				Constants.HOME_ENCODER_COUNT));
 
-			if (timerSub.get() < Constants.AUTO_PRELOAD_REVVING_TIME) {
+			if (timerSub.get() < Constants.AUTO_PRELOAD_REVVING_SECS) {
 				intakeMotor.setControl(mVoltage.withVelocity(0));
 				indexerMotor.setControl(mVoltage.withVelocity(0));
-			} else if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_TIME) {
+			} else if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
 				intakeMotor.setControl(mVoltage.withVelocity(0));
 				indexerMotor.setControl(mVoltage.withVelocity(
 						-Constants.INTAKE_VELOCITY));
@@ -700,7 +700,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public boolean isFinished() {
-			return timerSub.get() >= Constants.AUTO_PRELOAD_SHOOTING_TIME;
+			return timerSub.get() >= Constants.AUTO_PRELOAD_SHOOTING_SECS;
 		}
 	}
 }
