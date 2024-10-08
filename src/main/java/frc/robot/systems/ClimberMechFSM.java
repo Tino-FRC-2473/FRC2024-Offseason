@@ -23,15 +23,15 @@ public class ClimberMechFSM {
 		IDLE
 	}
 
-	// The ranges for different powers for the step function as a set of x, y pairs
-	private static final double[][] STEPS = {{0.9, 0.7}, {0.8, 0.5}, {0.7, 0.3}};
-
 	private static final float MOTOR_POWER_UP = -0.5f;
 	private static final float MOTOR_POWER_DOWN = 0.5f;
 
 	private static final float RIGHT_RAISED_POSITION = -70f;
 
 	private static final float LEFT_RAISED_POSITION = 70f;
+
+	private static final float[] THRESHOLDS = new float[] {0.9f, 0.8f, 0.7f};
+	private static final float[] MODIFIERS = new float[] {0.3f, 0.5f, 0.7f};
 
 	/* ======================== Private variables ======================== */
 	private ClimberMechFSMState currentState;
@@ -190,15 +190,8 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleRaiseHookManualState(TeleopInput input) {
-		rightMotor.set(modifyPower(
-			MOTOR_POWER_UP,
-			rightMotor.getEncoder().getPosition(),
-			RIGHT_RAISED_POSITION));
-
-		leftMotor.set(-modifyPower(
-			MOTOR_POWER_UP,
-			leftMotor.getEncoder().getPosition(),
-			LEFT_RAISED_POSITION));
+		rightMotor.set(calculatePower(true, true));
+		leftMotor.set(calculatePower(true, false));
 	}
 
 	/**
@@ -212,36 +205,42 @@ public class ClimberMechFSM {
 			rightMotor.getEncoder().setPosition(0);
 			rightMotor.set(0);
 		} else {
-			rightMotor.set(modifyPower(
-				MOTOR_POWER_DOWN,
-				RIGHT_RAISED_POSITION - rightMotor.getEncoder().getPosition(),
-				RIGHT_RAISED_POSITION));
+			rightMotor.set(calculatePower(false, true));
 		}
 		if (leftBottomSwitch.isPressed()) {
 			leftMotor.getEncoder().setPosition(0);
 			leftMotor.set(0);
 		} else {
-			leftMotor.set(-modifyPower(
-				MOTOR_POWER_DOWN,
-				LEFT_RAISED_POSITION - leftMotor.getEncoder().getPosition(),
-				LEFT_RAISED_POSITION));
+			leftMotor.set(calculatePower(false, false));
 		}
 	}
 
 	/**
 	 * modifies the power going up based on a step function.
-	 * @param value the input value (should be positive), representing the requested motor power
-	 * @param currentPosition the current encoder value of the motor
-	 * @param raisedPosition the encoder value when the mech is fully extended
+	 * @param goingUp whether or not the motor is going up
+	 * @param right whether it gets the encoder information from the right or left motor
 	 * @return the power to set to the motors based on the function modificatin
 	 */
-	private static double modifyPower(double value, double currentPosition, double raisedPosition) {
+	private double calculatePower(boolean goingUp, boolean right) {
+		double value = goingUp ? MOTOR_POWER_UP : MOTOR_POWER_DOWN;
+		double raisedPosition;
+		double currentPosition;
+		if (right) {
+			raisedPosition = goingUp ? RIGHT_RAISED_POSITION : RIGHT_RAISED_POSITION;
+			currentPosition = rightMotor.getEncoder().getPosition();
+		} else {
+			value *= -1;
+			raisedPosition = goingUp ? LEFT_RAISED_POSITION : LEFT_RAISED_POSITION;
+			currentPosition = leftMotor.getEncoder().getPosition();
+		}
 		currentPosition = Math.abs(currentPosition);
 		raisedPosition = Math.abs(raisedPosition);
-		for (double[] pair : STEPS) {
-			if (currentPosition >= pair[0] * raisedPosition) {
-				return pair[1] * value;
-			}
+		if (currentPosition >= THRESHOLDS[0] * raisedPosition) {
+			return MODIFIERS[0] * value;
+		} else if (currentPosition >= THRESHOLDS[1] * raisedPosition) {
+			return MODIFIERS[1] * value;
+		} else if (currentPosition >= THRESHOLDS[2] * raisedPosition) {
+			return MODIFIERS[2] * value;
 		}
 		return value;
 	}
