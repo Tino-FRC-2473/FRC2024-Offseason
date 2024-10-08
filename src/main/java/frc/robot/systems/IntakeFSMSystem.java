@@ -46,6 +46,7 @@ public class IntakeFSMSystem {
 	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
 	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
+	private TeleopInput tInput;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -64,8 +65,6 @@ public class IntakeFSMSystem {
 	 */
 	public IntakeFSMSystem() {
 		// Perform hardware init
-		// frontIndexMotor = new TalonFX(HardwareMap.FRONT_INDEXER_MOTOR_ID);
-		// frontIndexMotor.setNeutralMode(NeutralModeValue.Brake);
 
 		indexerMotor = new TalonFX(HardwareMap.INDEXER_MOTOR_ID);
 		indexerMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -95,6 +94,8 @@ public class IntakeFSMSystem {
 
 		statusCode = indexerMotor.getConfigurator().apply(talonFXConfigs);
 		statusCode = intakeMotor.getConfigurator().apply(talonFXConfigs);
+
+		tInput = new TeleopInput();
 
 		// Reset state machine
 		reset();
@@ -159,19 +160,17 @@ public class IntakeFSMSystem {
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
 		currentState = nextState(input);
+		hasNote = hasNote();
 
 		SmartDashboard.putString("CURRENT STATE", currentState.toString());
 		SmartDashboard.putNumber("Back Indexer Velocity",
 			indexerMotor.getVelocity().getValueAsDouble());
-		// SmartDashboard.putNumber("Front Indexer Velocity",
-		// 	frontIndexMotor.getVelocity().getValueAsDouble());
 
 		SmartDashboard.putBoolean("Color Sensor in Range?", colorSensor.getProximity()
 			>= Constants.PROXIMIIY_THRESHOLD);
 		SmartDashboard.putNumber("Frames with Note in View", noteColorFrames);
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
 
-		hasNote = hasNote();
 		SmartDashboard.putBoolean("HASNOTE", hasNote);
 	}
 
@@ -327,8 +326,6 @@ public class IntakeFSMSystem {
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(0));
-
-		input.mechBothRumble(0);
 	}
 
 	/**
@@ -342,8 +339,6 @@ public class IntakeFSMSystem {
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(0));
-
-		input.mechBothRumble(0);
 	}
 
 	/**
@@ -363,13 +358,11 @@ public class IntakeFSMSystem {
 		if (hasNote) {
 			indexerMotor.setControl(mVoltage.withVelocity(0));
 			intakeMotor.setControl(mVoltage.withVelocity(0));
-
-			input.mechRightRumble(TeleopInput.SOFT_RUMBLE);
+			tInput.mechRightRumble(Constants.SOFT_RUMBLE);
 		} else {
 			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
 			intakeMotor.setControl(mVoltage.withVelocity(0));
-
-			input.mechRightRumble(0);
+			tInput.mechRightRumble(0);
 		}
 	}
 
@@ -381,10 +374,10 @@ public class IntakeFSMSystem {
 	private void handleOuttakingState(TeleopInput input) {
 		if (hasNote) {
 			led.orangeLight(false);
-			input.mechLeftRumble(0);
+			tInput.mechLeftRumble(0);
 		} else {
 			led.redLight(false);
-			input.mechLeftRumble(TeleopInput.SOFT_RUMBLE);
+			tInput.mechLeftRumble(Constants.SOFT_RUMBLE);
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
@@ -400,13 +393,12 @@ public class IntakeFSMSystem {
 	 */
 	private void handleFeedShooterState(TeleopInput input) {
 		led.blueLight();
+		tInput.mechBothRumble(Constants.HARD_RUMBLE);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(
 			-Constants.FEED_SHOOTER_VELOCITY));
-
-		input.mechBothRumble(TeleopInput.HARD_RUMBLE);
 	}
 
 	/**

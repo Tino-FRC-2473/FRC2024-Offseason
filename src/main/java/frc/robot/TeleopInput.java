@@ -18,9 +18,6 @@ public class TeleopInput {
 
 	private static final float JOYSTICK_TO_BOOLEAN_SENSITIVITY = 0.5f;
 
-	public static final float SOFT_RUMBLE = 0.5f;
-	public static final float HARD_RUMBLE = 1.0f;
-
 	/* ======================== Private variables ======================== */
 	// Input objects
 	private PS4Controller mechController;

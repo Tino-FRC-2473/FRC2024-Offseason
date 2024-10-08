@@ -65,4 +65,8 @@ public final class Constants {
 
 	public static final double CONFIG_CONSTANT_A = 400; //max acceleration in rps/s
 	public static final double CONFIG_CONSTANT_J = 4000; //target jerk in rps/s/s
+
+	// Controller Rumble Power
+	public static final float SOFT_RUMBLE = 0.5f;
+	public static final float HARD_RUMBLE = 1.0f;
 }

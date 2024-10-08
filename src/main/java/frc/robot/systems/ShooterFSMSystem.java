@@ -38,6 +38,7 @@ public class ShooterFSMSystem {
 	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
 	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
+	private TeleopInput tInput;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -75,6 +76,8 @@ public class ShooterFSMSystem {
 
 		statusCode = shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
 		statusCode = shooterRightMotor.getConfigurator().apply(talonFXConfigs);
+
+		tInput = new TeleopInput();
 
 		// Reset state machine
 		reset();
@@ -228,7 +231,7 @@ public class ShooterFSMSystem {
 		shooterLeftMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
 		shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
 
-		input.mechLeftRumble(TeleopInput.HARD_RUMBLE);
+		tInput.mechBothRumble(Constants.SOFT_RUMBLE);
 	}
 
 	/**
