@@ -165,7 +165,6 @@ public class IntakeFSMSystem {
 			indexerMotor.getVelocity().getValueAsDouble());
 		// SmartDashboard.putNumber("Front Indexer Velocity",
 		// 	frontIndexMotor.getVelocity().getValueAsDouble());
-		SmartDashboard.putBoolean("HASNOTE", hasNote);
 
 		SmartDashboard.putBoolean("Color Sensor in Range?", colorSensor.getProximity()
 			>= Constants.PROXIMIIY_THRESHOLD);
@@ -173,6 +172,7 @@ public class IntakeFSMSystem {
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
 
 		hasNote = hasNote();
+		SmartDashboard.putBoolean("HASNOTE", hasNote);
 	}
 
 	/* ======================== Private methods ======================== */
