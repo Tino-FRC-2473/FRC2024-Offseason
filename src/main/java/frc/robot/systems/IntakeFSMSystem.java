@@ -46,7 +46,6 @@ public class IntakeFSMSystem {
 	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
 	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
-	private TeleopInput tInput;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -94,8 +93,6 @@ public class IntakeFSMSystem {
 
 		statusCode = indexerMotor.getConfigurator().apply(talonFXConfigs);
 		statusCode = intakeMotor.getConfigurator().apply(talonFXConfigs);
-
-		tInput = new TeleopInput();
 
 		// Reset state machine
 		reset();
@@ -317,11 +314,11 @@ public class IntakeFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleMoveHomeState(TeleopInput input) {
-		// if (hasNote) {
-			// led.blueLight();
-		// } else {
-			// led.rainbow();
-		// }
+		if (hasNote) {
+			led.greenLight(false);
+		} else {
+			led.purpleLight();
+		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
@@ -334,7 +331,7 @@ public class IntakeFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleMoveGroundState(TeleopInput input) {
-		// led.orangeLight(false);
+		led.orangeLight(false);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
@@ -347,22 +344,22 @@ public class IntakeFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIntakingState(TeleopInput input) {
-		// if (!hasNote) {
-			// led.orangeLight(false);
-		// } else {
-			// led.greenLight(true);
-		// }
+		if (!hasNote) {
+			led.yellowLight(true);
+		} else {
+			led.greenLight(true);
+		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 
 		if (hasNote) {
 			indexerMotor.setControl(mVoltage.withVelocity(0));
 			intakeMotor.setControl(mVoltage.withVelocity(0));
-			tInput.mechRightRumble(Constants.SOFT_RUMBLE);
+			input.mechRightRumble(Constants.SOFT_RUMBLE);
 		} else {
 			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
 			intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
-			tInput.mechRightRumble(0);
+			input.mechRightRumble(0);
 		}
 	}
 
@@ -374,10 +371,10 @@ public class IntakeFSMSystem {
 	private void handleOuttakingState(TeleopInput input) {
 		if (hasNote) {
 			led.orangeLight(false);
-			tInput.mechLeftRumble(0);
+			input.mechLeftRumble(0);
 		} else {
 			led.redLight(false);
-			tInput.mechLeftRumble(Constants.SOFT_RUMBLE);
+			input.mechLeftRumble(Constants.SOFT_RUMBLE);
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
@@ -393,7 +390,7 @@ public class IntakeFSMSystem {
 	 */
 	private void handleFeedShooterState(TeleopInput input) {
 		led.blueLight();
-		tInput.mechBothRumble(Constants.HARD_RUMBLE);
+		input.mechBothRumble(Constants.HARD_RUMBLE);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));

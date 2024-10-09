@@ -17,7 +17,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
-// import frc.robot.LED;
 import frc.robot.Constants;
 
 public class ShooterFSMSystem {
@@ -32,13 +31,11 @@ public class ShooterFSMSystem {
 
 	/* ======================== Private variables ======================== */
 	private ShooterFSMState currentState;
-	// private LED led = new LED();
 	private Timer timer = new Timer();
 	private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
 	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
-	private TeleopInput tInput;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -77,8 +74,6 @@ public class ShooterFSMSystem {
 		statusCode = shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
 		statusCode = shooterRightMotor.getConfigurator().apply(talonFXConfigs);
 
-		tInput = new TeleopInput();
-
 		// Reset state machine
 		reset();
 	}
@@ -100,7 +95,6 @@ public class ShooterFSMSystem {
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
 	public void reset() {
-		// led.greenLight(false);
 		currentState = ShooterFSMState.IDLE_STOP;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
@@ -215,7 +209,6 @@ public class ShooterFSMSystem {
 	 * @param input action input by driver on the mech controller
 	 */
 	public void handleIdleState(TeleopInput input) {
-		// led.purpleLight();
 		shooterLeftMotor.setControl(mVoltage.withVelocity(0));
 		shooterRightMotor.setControl(mVoltage.withVelocity(0));
 
@@ -227,11 +220,10 @@ public class ShooterFSMSystem {
 	 * @param input action input by driver on the mech controller
 	 */
 	public void handleRevShooterState(TeleopInput input) {
-		// led.blueLight();
 		shooterLeftMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
 		shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
 
-		tInput.mechBothRumble(Constants.SOFT_RUMBLE);
+		input.mechBothRumble(Constants.SOFT_RUMBLE);
 	}
 
 	/**
@@ -299,7 +291,6 @@ public class ShooterFSMSystem {
 
 		@Override
 		public void execute() {
-			// led.rainbow();
 			if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
 				shooterLeftMotor.setControl(mVoltage.withVelocity(
 					-Constants.SHOOT_VELOCITY));

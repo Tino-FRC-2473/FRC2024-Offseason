@@ -46,6 +46,10 @@ public class LED {
 	private static final int RAINBOW_S = 255;
 	private static final int RAIBOW_V = 128;
 
+	private static final int YELLOW_RGB_R = 252;
+	private static final int YELLOW_RGB_G = 186;
+	private static final int YELLOW_RGB_B = 3;
+
 	private static final int FLASH_INTERVAL = 12;
 	/**
 	 * Constructs LED object.
@@ -133,6 +137,28 @@ public class LED {
 			ledBuffer.setRGB(i, GREEN_RGB_R, GREEN_RGB_G, GREEN_RGB_B);
 		}
 		led.setData(ledBuffer);
+	}
+
+	/**
+	 * Changes the LED color to yellow.
+	 * @param flash if you want the LEDs to flash with this color.
+	 */
+	public void yellowLight(boolean flash) {
+		for (var i = 0; i < ledBuffer.getLength(); i++) {
+			if (flash) {
+				ledBuffer.setRGB(i, flashingOn ? YELLOW_RGB_R : 0, flashingOn
+					? YELLOW_RGB_G : 0, flashingOn ? YELLOW_RGB_B : 0);
+			} else {
+				ledBuffer.setRGB(i, YELLOW_RGB_R, YELLOW_RGB_G, YELLOW_RGB_B);
+			}
+		}
+		led.setData(ledBuffer);
+		if (flash) {
+			tick++;
+			if (tick % FLASH_INTERVAL == 0) {
+				flashingOn = !flashingOn;
+			}
+		}
 	}
 
 	/**
