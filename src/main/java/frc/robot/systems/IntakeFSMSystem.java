@@ -382,7 +382,7 @@ public class IntakeFSMSystem {
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 
-		intakeMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
+		intakeMotor.setControl(mVoltage.withVelocity(+Constants.OUTTAKE_VELOCITY));
 		indexerMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
 	}
 
