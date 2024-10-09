@@ -108,6 +108,8 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double rotSpeedInput;
 	private double oldRotRawInput;
 	private double rotRawInput;
+	private double oldAngleDiff;
+	private double angleDiff;
 
 	private static final double ROT_DEADZONE = 0.01;
 
@@ -204,6 +206,8 @@ public class DriveFSMSystem extends SubsystemBase {
 		rotSpeedInput = 0;
 		oldRotRawInput = 0;
 		rotRawInput = 0;
+		oldAngleDiff = 0;
+		angleDiff = 0;
 
 
 		gyro.reset();
@@ -432,6 +436,7 @@ public class DriveFSMSystem extends SubsystemBase {
 
 				oldRotSpeedInput = rotSpeedInput;
 				oldRotRawInput = rotRawInput;
+				oldAngleDiff = angleDiff;
 
 				// if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
 				// 	if (xSpeedInput != 0) {
@@ -466,6 +471,8 @@ public class DriveFSMSystem extends SubsystemBase {
 					rotSpeedInput = 0;
 					rotRawInput = 0;
 					oldRotRawInput = 0;
+					angleDiff = 0;
+					oldAngleDiff = 0;
 				}
 
 				//if (input.isTriangleButtonPressed()) {
@@ -617,13 +624,14 @@ public class DriveFSMSystem extends SubsystemBase {
 		double arc1 = 360 + (expected - deviated);
 		double arc2 = (expected - deviated);
 
-		double angleDiff = (Math.abs(arc1) > Math.abs(arc2)
+		angleDiff = (Math.abs(arc1) > Math.abs(arc2)
 			? arc2 : arc1);
 
 		double correction =
-			(1 - Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
-			* (Math.abs(angleDiff) / angleDiff) //transfer sign
-			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P; //scale to max: -Kc -> +Kc
+			((1 - Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
+			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P //scale to max: -Kc -> +Kc
+			- Math.abs(angleDiff - oldAngleDiff) * MechConstants.PID_CONSTANT_ROTATION_SWERVE_D)
+			* (Math.abs(angleDiff) / angleDiff); //transfer sign
 
 		SmartDashboard.putNumber("Saved Heading", deviated);
 		SmartDashboard.putNumber("Minor Arc", angleDiff);
