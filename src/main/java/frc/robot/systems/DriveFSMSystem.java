@@ -645,7 +645,8 @@ public class DriveFSMSystem extends SubsystemBase {
 		double correction =
 			((1 - Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
 			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P //scale to max: -Kc -> +Kc
-			- Math.abs(angleDiff - oldAngleDiff) * MechConstants.PID_CONSTANT_ROTATION_SWERVE_D)
+			- Math.abs((angleDiff - oldAngleDiff) / 180) //scaled differential
+			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_D) 
 			* (Math.abs(angleDiff) / angleDiff); //transfer sign
 
 		SmartDashboard.putNumber("Saved Heading", deviated);
