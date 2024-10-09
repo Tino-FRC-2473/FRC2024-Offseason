@@ -108,8 +108,9 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double oldPoseX;
 	private double oldPoseY;
 	private double oldRotSpeedInput;
-	private double rotRawInput;
 	private double rotSpeedInput;
+	private double oldRotRawInput;
+	private double rotRawInput;
 
 	private static final double ROT_DEADZONE = 0.01;
 
@@ -203,8 +204,10 @@ public class DriveFSMSystem extends SubsystemBase {
 		//led.turnOff();
 		resetPose(new Pose2d());
 		oldRotSpeedInput = 0;
-		rotRawInput = 0;
 		rotSpeedInput = 0;
+		oldRotRawInput = 0;
+		rotRawInput = 0;
+
 
 		gyro.reset();
 		gyro.setAngleAdjustment(0);
@@ -393,7 +396,8 @@ public class DriveFSMSystem extends SubsystemBase {
 			case TELEOP_STATE:
 
 				rotRawInput = input.getControllerRightJoystickX();
-				SmartDashboard.putNumber( "Raw Rot Input", rotRawInput);
+				SmartDashboard.putNumber("Raw Rot Input", rotRawInput);
+				SmartDashboard.putNumber("Old Raw Rot Input", oldRotRawInput);
 
 				double xSpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
@@ -406,7 +410,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				rotSpeedInput = -MathUtil.applyDeadband(
 					(rotRawInput
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), 
+					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT),
 					OIConstants.DRIVE_DEADBAND);
 
 				double correctedRotSpeed = .0;
@@ -441,6 +445,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				SmartDashboard.putNumber("Old Rot Speed Input", oldRotSpeedInput);
 
 				oldRotSpeedInput = rotSpeedInput;
+				oldRotRawInput = rotRawInput;
 
 				// if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
 				// 	if (xSpeedInput != 0) {
@@ -473,8 +478,9 @@ public class DriveFSMSystem extends SubsystemBase {
 
 					oldRotation = new Rotation2d(0);
 					oldRotSpeedInput = 0;
-					rotRawInput = 0;
 					rotSpeedInput = 0;
+					rotRawInput = 0;
+					oldRotRawInput = 0;
 				}
 
 				//if (input.isTriangleButtonPressed()) {
@@ -543,7 +549,7 @@ public class DriveFSMSystem extends SubsystemBase {
 			case TELEOP_STATE:
 				if (input.isCircleButtonPressed()) {
 					return FSMState.ALIGN_TO_SPEAKER_STATE;
-				} 
+				}
 
 				return FSMState.TELEOP_STATE;
 
@@ -622,25 +628,23 @@ public class DriveFSMSystem extends SubsystemBase {
 	 */
 	public double pidRotation(double deviated, double expected) {
 		System.out.println("PID ROT IS RUNNING!");
-		
+
 		double arc1 = 360 + (expected - deviated);
 		double arc2 = (expected - deviated);
 
-		double correction = Math.abs(arc1) > Math.abs(arc2)
-			? arc2 : arc1;
+		double angleDiff = (Math.abs(arc1) > Math.abs(arc2)
+			? arc2 : arc1);
 
-		correction *= ((Math.sqrt(1-oldRotSpeedInput*oldRotSpeedInput))
-			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
-
-		if (Math.abs(rotRawInput) > 0.03) {
-			correction *= 0;
-		}
+		double correction =
+			(1 - Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
+			* (Math.abs(angleDiff) / angleDiff) //transfer sign
+			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P; //scale to max: -Kc -> +Kc
 
 		SmartDashboard.putNumber("Saved Heading", deviated);
-		SmartDashboard.putNumber("Smallest Arc", correction
-			/ MechConstants.PID_CONSTANT_ROTATION_SWERVE_P);
+		SmartDashboard.putNumber("Minor Arc", angleDiff);
+		SmartDashboard.putNumber("Scaled Correction", correction);
 
-		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED);
+		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED); //redundant clamp, but keep just in case?
 	}
 
 	// public double pidPosition(double deviated, double expected) {
