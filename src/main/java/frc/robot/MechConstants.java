@@ -47,7 +47,7 @@ public final class MechConstants {
 	public static final double BLUE_HIGH = 0.1;
 	public static final double RED_HIGH = 0.8;
 
-	public static final double PID_CONSTANT_ROTATION_SWERVE_P = 0.07;
+	public static final double PID_CONSTANT_ROTATION_SWERVE_P = 0.1;
 	public static final double PID_CONSTANT_ROTATION_SWERVE_D = 0.0;
 
 	public static final double MIN_POS_SPEED = -0.1;
