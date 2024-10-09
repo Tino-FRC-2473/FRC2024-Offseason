@@ -101,6 +101,16 @@ public class DriveFSMSystem extends SubsystemBase {
 	private boolean redAlliance;
 	private Double[] tagOrientationAngles;
 
+	private Rotation2d oldRotation;
+	private double oldPoseX;
+	private double oldPoseY;
+	private double oldRotSpeedInput;
+	private double rotSpeedInput;
+	private double oldRotRawInput;
+	private double rotRawInput;
+
+	private static final double ROT_DEADZONE = 0.01;
+
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
 		SwerveModuleState.struct).publish();
@@ -190,6 +200,11 @@ public class DriveFSMSystem extends SubsystemBase {
 		currentState = FSMState.TELEOP_STATE;
 		//led.turnOff();
 		resetPose(new Pose2d());
+		oldRotSpeedInput = 0;
+		rotSpeedInput = 0;
+		oldRotRawInput = 0;
+		rotRawInput = 0;
+
 
 		gyro.reset();
 		gyro.setAngleAdjustment(0);
@@ -368,7 +383,12 @@ public class DriveFSMSystem extends SubsystemBase {
 
 		switch (currentState) {
 			case TELEOP_STATE:
-				drive(-MathUtil.applyDeadband((input.getControllerLeftJoystickY()
+
+				rotRawInput = input.getControllerRightJoystickX();
+				SmartDashboard.putNumber("Raw Rot Input", rotRawInput);
+				SmartDashboard.putNumber("Old Raw Rot Input", oldRotRawInput);
+
+				double xSpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
 					-MathUtil.applyDeadband((input.getControllerLeftJoystickX()
@@ -376,12 +396,85 @@ public class DriveFSMSystem extends SubsystemBase {
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
 					-MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND),
+					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT),
+					OIConstants.DRIVE_DEADBAND);
+
+				double correctedRotSpeed = .0;
+				//double correctedXSpeed = .0;
+				//double correctedYSpeed = .0;
+
+				boolean correctRot = false;
+				//boolean correctX = false;
+				//boolean correctY = false;
+
+				if (rotSpeedInput != 0) {
+					oldRotation = Rotation2d.fromDegrees(getHeading());
+					correctRot = false;
+				} else {
+					// Do the course correction, calculate the deviation and lerp it back.
+					correctRot = true;
+					double thetaD = getHeading() % 360;
+					double thetaE = (oldRotation == null) ? (getHeading() % 360)
+						: (oldRotation.getDegrees() % 360);
+
+					SmartDashboard.putNumber("Theta D", thetaD);
+					SmartDashboard.putNumber("Theta E", thetaE);
+
+					correctedRotSpeed = pidRotation(thetaD, thetaE);
+				}
+
+				SmartDashboard.putNumber("old Pose x", oldPoseX);
+				SmartDashboard.putNumber("old pose y", oldPoseY);
+				SmartDashboard.putNumber("get pose x", getPose().getX());
+				SmartDashboard.putNumber("get pose y", getPose().getY());
+				SmartDashboard.putNumber("Rot SPeed INput", rotSpeedInput);
+				SmartDashboard.putNumber("Old Rot Speed Input", oldRotSpeedInput);
+
+				oldRotSpeedInput = rotSpeedInput;
+				oldRotRawInput = rotRawInput;
+
+				// if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
+				// 	if (xSpeedInput != 0) {
+				// 		oldPoseX = getPose().getX();
+				// 		correctX = false;
+				// 	} else {
+				// 		System.out.println("REACHED X CORRECTION");
+				// 		correctedXSpeed = pidPosition(getPose().getX(), oldPoseX);
+				// 		correctX = true;
+				// 	}
+
+				// 	if (ySpeedInput != 0) {
+				// 		oldPoseY = getPose().getY();
+				// 		correctY = false;
+				// 	} else {
+				// 		System.out.println("REACHED Y CORRECTION");
+				// 		correctedYSpeed = pidPosition(getPose().getY(), oldPoseY);
+				// 		correctY = true;
+				// 	}
+				// }
+
+				drive(xSpeedInput,
+					ySpeedInput,
+					correctRot ? correctedRotSpeed : rotSpeedInput,
 					true);
 
 				if (input.isOptionsButtonPressed()) {
 					gyro.reset();
+
+					oldRotation = new Rotation2d(0);
+					oldRotSpeedInput = 0;
+					rotSpeedInput = 0;
+					rotRawInput = 0;
+					oldRotRawInput = 0;
 				}
+
+				//if (input.isTriangleButtonPressed()) {
+				//	setForwardFormation();
+				//}
+
+				//if (input.isCircleButtonPressed()) {
+				//	setXFormation();
+				//}
 
 				break;
 
@@ -512,6 +605,38 @@ public class DriveFSMSystem extends SubsystemBase {
 		//System.out.println("S4" + swerveModuleStates[(2 + 1)]);
 	}
 
+	/**
+	 * Returns a clamped correction speed to correct deviated values.
+	 * @param deviated deviated value that is being "pidded"
+	 * @param expected the value that should be pid towards.
+	 * @return clamped correction value for angular speed
+	 */
+	public double pidRotation(double deviated, double expected) {
+		System.out.println("PID ROT IS RUNNING!");
+
+		double arc1 = 360 + (expected - deviated);
+		double arc2 = (expected - deviated);
+
+		double angleDiff = (Math.abs(arc1) > Math.abs(arc2)
+			? arc2 : arc1);
+
+		double correction =
+			(1 - Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
+			* (Math.abs(angleDiff) / angleDiff) //transfer sign
+			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P; //scale to max: -Kc -> +Kc
+
+		SmartDashboard.putNumber("Saved Heading", deviated);
+		SmartDashboard.putNumber("Minor Arc", angleDiff);
+		SmartDashboard.putNumber("Scaled Correction", correction);
+
+		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED); //redundant clamp, but keep just in case?
+	}
+
+	// public double pidPosition(double deviated, double expected) {
+	// 	double diff = deviated - expected;
+	// 	double correction = -diff * MechConstants.PID_CONSTANT_POSITION_SWERVE_P;
+	// 	return clamp(correction, MechConstants.MIN_POS_SPEED, MechConstants.MAX_POS_SPEED);
+	// }
 
 	/**
 	 * Drives the robot to a final odometry state.
