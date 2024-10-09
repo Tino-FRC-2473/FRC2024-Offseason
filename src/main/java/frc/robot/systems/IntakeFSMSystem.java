@@ -73,7 +73,7 @@ public class IntakeFSMSystem {
 		pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
 		intakeMotor = new TalonFX(HardwareMap.INTAKE_MOTOR_ID);
-		intakeMotor.setNeutralMode(NeutralModeValue.Brake);
+		intakeMotor.setNeutralMode(NeutralModeValue.Coast);
 
 		throughBore = new Encoder(HardwareMap.ENCODER_CHANNEL_A, HardwareMap.ENCODER_CHANNEL_B);
 		throughBore.reset();
@@ -118,7 +118,7 @@ public class IntakeFSMSystem {
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
 	public void reset() {
-		led.greenLight(false);
+		// led.greenLight(false);
 		currentState = IntakeFSMState.MOVE_TO_HOME;
 		hasNote = false;
 
@@ -317,11 +317,11 @@ public class IntakeFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleMoveHomeState(TeleopInput input) {
-		if (hasNote) {
-			led.blueLight();
-		} else {
-			led.rainbow();
-		}
+		// if (hasNote) {
+			// led.blueLight();
+		// } else {
+			// led.rainbow();
+		// }
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
@@ -334,7 +334,7 @@ public class IntakeFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleMoveGroundState(TeleopInput input) {
-		led.orangeLight(false);
+		// led.orangeLight(false);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
@@ -347,11 +347,11 @@ public class IntakeFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIntakingState(TeleopInput input) {
-		if (!hasNote) {
-			led.orangeLight(false);
-		} else {
-			led.greenLight(true);
-		}
+		// if (!hasNote) {
+			// led.orangeLight(false);
+		// } else {
+			// led.greenLight(true);
+		// }
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 
@@ -361,7 +361,7 @@ public class IntakeFSMSystem {
 			tInput.mechRightRumble(Constants.SOFT_RUMBLE);
 		} else {
 			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
-			intakeMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
 			tInput.mechRightRumble(0);
 		}
 	}
@@ -434,7 +434,7 @@ public class IntakeFSMSystem {
 		if (timer.get() == 0) {
 			timer.start();
 		}
-		//pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
+		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		if (timer.get() > Constants.AUTO_SHOOTING_SECS) {
 			intakeMotor.setControl(mVoltage.withVelocity(0));
 			indexerMotor.setControl(mVoltage.withVelocity(0));
