@@ -642,19 +642,24 @@ public class DriveFSMSystem extends SubsystemBase {
 		angleDiff = (Math.abs(arc1) > Math.abs(arc2)
 			? arc2 : arc1);
 
-		double correction =
-			((Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
-			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P //scale to max: -Kp -> +Kp
-			- Math.abs((oldAngleDiff - angleDiff) / 180) //scaled differential
-			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_D) //scale to max: -Kd -> +Kd
-			* (Math.abs(angleDiff) / angleDiff); //transfer sign
+		double correction = 0;
+
+		if (Math.abs(angleDiff) > MechConstants.ANGLE_EPSILON) {
+			correction =
+				((Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
+				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P //scale to max: -Kp -> +Kp
+				- Math.abs((oldAngleDiff - angleDiff) / 180) //scaled differential
+				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_D) //scale to max: -Kd -> +Kd
+				* (Math.abs(angleDiff) / angleDiff); //transfer sign
+		}
 
 		SmartDashboard.putNumber("Saved Heading", deviated);
 		SmartDashboard.putNumber("Minor Arc", angleDiff);
 		SmartDashboard.putNumber("Angle Diff", oldAngleDiff - angleDiff);
 		SmartDashboard.putNumber("Scaled Correction", correction);
 
-		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED); //redundant clamp, but keep just in case?
+		return clamp(correction, MechConstants.MIN_TURN_SPEED,
+			MechConstants.MAX_TURN_SPEED); //redundant clamp, but keep just in case?
 	}
 
 	// public double pidPosition(double deviated, double expected) {
