@@ -273,12 +273,15 @@ public class ShooterFSMSystem {
 	public class ShootPreloadedCommand extends Command {
 
 		private Timer timerSub;
+		private IntakeFSMSystem intakeFSM;
 
 		/**
-		 * ShootPreloadedNoteCommand command.
-		 */
-		public ShootPreloadedCommand() {
+		 * Creates a new ShootPreloadedCommand.
+		 * @param intake the IntakeFSMSystem
+		*/
+		public ShootPreloadedCommand(IntakeFSMSystem intake) {
 			timerSub = new Timer();
+			this.intakeFSM = intake;
 		}
 
 		/**
@@ -291,11 +294,18 @@ public class ShooterFSMSystem {
 
 		@Override
 		public void execute() {
-			if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
+			if (timerSub.get() < Constants.AUTO_PRELOAD_REVVING_SECS) {
 				shooterLeftMotor.setControl(mVoltage.withVelocity(
 					-Constants.SHOOT_VELOCITY));
 				shooterRightMotor.setControl(mVoltage.withVelocity(
 					Constants.SHOOT_VELOCITY));
+				intakeFSM.setIndexerMotor(0);
+			} else if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
+				shooterLeftMotor.setControl(mVoltage.withVelocity(
+					-Constants.SHOOT_VELOCITY));
+				shooterRightMotor.setControl(mVoltage.withVelocity(
+					Constants.SHOOT_VELOCITY));
+				intakeFSM.setIndexerMotor(Constants.FEED_SHOOTER_VELOCITY);
 			}
 		}
 
@@ -303,6 +313,7 @@ public class ShooterFSMSystem {
 		public void end(boolean interrupted) {
 			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
 			shooterRightMotor.setControl(mVoltage.withVelocity(0));
+			intakeFSM.setIndexerMotor(0);
 			timerSub.stop();
 			timerSub.reset();
 		}
@@ -317,12 +328,15 @@ public class ShooterFSMSystem {
 	public class ShootNoteCommand extends Command {
 
 		private Timer timerSub;
+		private IntakeFSMSystem intakeFSM;
 
 		/**
 		 * Initializes a new ShootNoteCommand.
+		 * @param intake the IntakeFSMSystem
 		 */
-		public ShootNoteCommand() {
+		public ShootNoteCommand(IntakeFSMSystem intake) {
 			timerSub = new Timer();
+			this.intakeFSM = intake;
 		}
 
 		// Called when the command is initially scheduled.
@@ -339,6 +353,7 @@ public class ShooterFSMSystem {
 					-Constants.SHOOT_VELOCITY));
 				shooterRightMotor.setControl(mVoltage.withVelocity(
 					Constants.SHOOT_VELOCITY));
+				intakeFSM.setIndexerMotor(Constants.FEED_SHOOTER_VELOCITY);
 			}
 		}
 
@@ -347,6 +362,7 @@ public class ShooterFSMSystem {
 		public void end(boolean interrupted) {
 			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
 			shooterRightMotor.setControl(mVoltage.withVelocity(0));
+			intakeFSM.setIndexerMotor(0);
 
 			timerSub.stop();
 			timerSub.reset();
@@ -356,6 +372,55 @@ public class ShooterFSMSystem {
 		@Override
 		public boolean isFinished() {
 			return timerSub.get() >= Constants.AUTO_SHOOTING_SECS;
+		}
+	}
+
+	public class RevCommand extends Command {
+		private Timer timerSub;
+		private IntakeFSMSystem intakeFSM;
+
+		/**
+		 * Initializes a new RevCommand.
+		 * @param intake the IntakeFSMSystem
+		 */
+		public RevCommand(IntakeFSMSystem intake) {
+			timerSub = new Timer();
+			this.intakeFSM = intake;
+		}
+
+		// Called when the command is initially scheduled.
+		@Override
+		public void initialize() {
+			timerSub.start();
+		}
+
+		// Called every time the scheduler runs while the command is scheduled.
+		@Override
+		public void execute() {
+			if (timerSub.get() < Constants.AUTO_REVVING_SECS) {
+				shooterLeftMotor.setControl(mVoltage.withVelocity(
+					-Constants.SHOOT_VELOCITY));
+				shooterRightMotor.setControl(mVoltage.withVelocity(
+					Constants.SHOOT_VELOCITY));
+				intakeFSM.setIndexerMotor(0);
+			}
+		}
+
+		// Called once the command ends or is interrupted.
+		@Override
+		public void end(boolean interrupted) {
+			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
+			shooterRightMotor.setControl(mVoltage.withVelocity(0));
+			intakeFSM.setIndexerMotor(0);
+
+			timerSub.stop();
+			timerSub.reset();
+		}
+
+		// Returns true when the command should end.
+		@Override
+		public boolean isFinished() {
+			return timerSub.get() >= Constants.AUTO_REVVING_SECS;
 		}
 	}
 }

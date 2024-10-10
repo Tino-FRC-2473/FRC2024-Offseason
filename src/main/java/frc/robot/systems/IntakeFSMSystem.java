@@ -307,6 +307,14 @@ public class IntakeFSMSystem {
 		return hasNote;
 	}
 
+	/**
+	 * Feed a note to the shooter by setting the indexer motor to the correct power.
+	 * @param rpsVelocity The power to send to the indexer motor.
+	 */
+	public void setIndexerMotor(float rpsVelocity) {
+		indexerMotor.setControl(mVoltage.withVelocity(-rpsVelocity));
+	}
+
 	/* ------------------------ FSM state handlers ------------------------ */
 	/**
 	 * Handle behavior in MOVE_TO_HOME.
@@ -584,112 +592,6 @@ public class IntakeFSMSystem {
 		@Override
 		public boolean isFinished() {
 			return handleAutoMoveHome();
-		}
-	}
-
-	public class FeedNoteCommand extends Command {
-
-		private Timer timerSub;
-
-		/**
-		 * Initializes a new OuttakeNoteCommand.
-		 */
-		public FeedNoteCommand() {
-			timerSub = new Timer();
-		}
-
-		/**
-		 * Called when the command is initially scheduled.
-		 */
-		@Override
-		public void initialize() {
-			led.blueLight();
-			timerSub.start();
-		}
-
-		/**
-		 * Called every time the scheduler runs while the command is scheduled.
-		 */
-		@Override
-		public void execute() {
-			handleAutoFeedShooter();
-			System.out.println("OUTTAKING" + timerSub.get());
-		}
-
-		/**
-		 * Returns true when the command should end.
-		 */
-		@Override
-		public boolean isFinished() {
-			return handleAutoFeedShooter() || timerSub.get() >= Constants.OUTTAKE_AUTO_TIMER;
-		}
-
-		/**
-		 * Called once the command ends or is interrupted.
-		 */
-		@Override
-		public void end(boolean interrupted) {
-			timerSub.stop();
-			timerSub.reset();
-
-			intakeMotor.setControl(mVoltage.withVelocity(0));
-			indexerMotor.setControl(mVoltage.withVelocity(0));
-			hasNote = false;
-		}
-	}
-
-	public class FeedPreloadedCommand extends Command {
-
-		private Timer timerSub;
-
-		/**
-		 * Initializes a new OuttakePreloadedCommand.
-		 */
-		public FeedPreloadedCommand() {
-			timerSub = new Timer();
-		}
-
-		@Override
-		public void initialize() {
-			timerSub.start();
-		}
-
-		/**
-		 * Called every time the scheduler runs while the command is scheduled.
-		 */
-		@Override
-		public void execute() {
-			led.rainbow();
-			pivotMotor.set(pidAuto(throughBore.getDistance(),
-				Constants.HOME_ENCODER_COUNT));
-
-			if (timerSub.get() < Constants.AUTO_PRELOAD_REVVING_SECS) {
-				intakeMotor.setControl(mVoltage.withVelocity(0));
-				indexerMotor.setControl(mVoltage.withVelocity(0));
-			} else if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
-				intakeMotor.setControl(mVoltage.withVelocity(0));
-				indexerMotor.setControl(mVoltage.withVelocity(
-						-Constants.INTAKE_VELOCITY));
-			}
-		}
-
-		/**
-		 * Called once the command ends or is interrupted.
-		 */
-		@Override
-		public void end(boolean interrupted) {
-			intakeMotor.setControl(mVoltage.withVelocity(0));
-			indexerMotor.setControl(mVoltage.withVelocity(0));
-			timerSub.stop();
-			timerSub.reset();
-		}
-
-		/**
-		 * Returns true when the command should end.
-		 */
-		@Override
-		public boolean isFinished() {
-			return timerSub.get() >= Constants.AUTO_PRELOAD_SHOOTING_SECS;
 		}
 	}
 }

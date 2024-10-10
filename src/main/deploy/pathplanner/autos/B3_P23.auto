@@ -12,19 +12,13 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
                 "type": "named",
                 "data": {
                   "name": "S_SPN"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "I_FPN"
                 }
               }
             ]
@@ -39,6 +33,12 @@
                 "data": {
                   "pathName": "B3_C3"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "I_FXN"
+                }
               }
             ]
           }
@@ -51,6 +51,12 @@
                 "type": "path",
                 "data": {
                   "pathName": "B3_C2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "I_FXN"
                 }
               }
             ]

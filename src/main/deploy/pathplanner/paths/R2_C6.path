@@ -160,19 +160,13 @@
       "name": "Shoot",
       "waypointRelativePos": 3.4,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
                 "name": "S_RXS"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "I_FXN"
               }
             }
           ]

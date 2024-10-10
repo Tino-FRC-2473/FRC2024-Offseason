@@ -75,14 +75,13 @@ public class Robot extends TimedRobot {
 		//Label all named commands here
 		// IntakeFSM Commands
 		NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
-		NamedCommands.registerCommand("I_FXN", intakeFSM.new FeedNoteCommand());
 		NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
 		NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
-		NamedCommands.registerCommand("I_FPN", intakeFSM.new FeedPreloadedCommand());
 
 		// ShooterFSM Commands
-		NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand());
-		NamedCommands.registerCommand("S_RXS", shooterFSM.new ShootNoteCommand());
+		NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand(intakeFSM));
+		NamedCommands.registerCommand("S_RXS", shooterFSM.new RevCommand(intakeFSM));
+		NamedCommands.registerCommand("I_FXN", shooterFSM.new ShootNoteCommand(intakeFSM));
 
 		/*
 		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
