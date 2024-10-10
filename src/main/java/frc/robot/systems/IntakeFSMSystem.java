@@ -391,6 +391,11 @@ public class IntakeFSMSystem {
 		indexerMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
 	}
 
+	/**
+	 * Set the hasNote state variable, and return the new state.
+	 * @param setHasNote the new state of the hasNote variable
+	 * @return the new state of the hasNote variable
+	 */
 	public boolean setHasNote(boolean setHasNote) {
 		hasNote = setHasNote;
 		return hasNote;
@@ -531,6 +536,9 @@ public class IntakeFSMSystem {
 			timerSub = new Timer();
 		}
 
+		/**
+		 * Called when the command is initially scheduled.
+		 */
 		public void initialize() {
 			led.orangeLight(false);
 			timerSub.start();
@@ -575,6 +583,9 @@ public class IntakeFSMSystem {
 			timerSub = new Timer();
 		}
 
+		/**
+		 * Called when the command is initially scheduled.
+		 */
 		public void initialize() {
 			timerSub.start();
 		}

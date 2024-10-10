@@ -97,12 +97,12 @@ public class Robot extends TimedRobot {
 		SmartDashboard.putData("Auto Chooser", autoChooser);
 		SmartDashboard.putData("Field", mField);
 
-		// driverCam = CameraServer.startAutomaticCapture(0);
-		// VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
-		// 	streamHeight, streamFPS);
-		// driverCam.setVideoMode(videoMode);
-		// driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-		// driverCam.setResolution(streamWidth, streamHeight);
+		driverCam = CameraServer.startAutomaticCapture(0);
+		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
+			streamHeight, streamFPS);
+		driverCam.setVideoMode(videoMode);
+		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+		driverCam.setResolution(streamWidth, streamHeight);
 	}
 
 
