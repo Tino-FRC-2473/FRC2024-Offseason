@@ -208,7 +208,7 @@ public class TeleopInput {
 	 * @return if Cross button is pressed
 	 */
 	public boolean isManualRaiseButtonPressed() {
-		return getControllerLeftJoystickY() < -JOYSTICK_TO_BOOLEAN_SENSITIVITY;
+		return mechController.getL2Button();
 	}
 
 	/**
@@ -216,7 +216,7 @@ public class TeleopInput {
 	 * @return if Options Button is pressed
 	 */
 	public boolean isManualLowerButtonPressed() {
-		return getControllerLeftJoystickY() > JOYSTICK_TO_BOOLEAN_SENSITIVITY;
+		return mechController.getR2Button();
 	}
 
 	/**
