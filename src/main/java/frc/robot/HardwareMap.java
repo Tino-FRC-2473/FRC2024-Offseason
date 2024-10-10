@@ -9,9 +9,6 @@ public final class HardwareMap {
 	// RoboRIO Ports
 	public static final int DRIVER_CAM_USB = 0;
 
-	// ID numbers for devices on the CAN bus
-	// public static final int CAN_ID_SPARK_SHOOTER_UPPER = 33;
-	// public static final int CAN_ID_SPARK_SHOOTER_LOWER = 34;
 
 	// RoboRIO Ports
 	public static final int ENCODER_CHANNEL_A = 0;
@@ -22,8 +19,8 @@ public final class HardwareMap {
 	public static final int PIVOT_MOTOR_ID = 17; //17
 	public static final int INDEXER_MOTOR_ID = 11; //11
 
-	public static final int LEFT_SHOOTER_MOTOR_ID = 12; //0
-	public static final int RIGHT_SHOOTER_MOTOR_ID = 13; //4
+	public static final int LEFT_SHOOTER_MOTOR_ID = 12; //12
+	public static final int RIGHT_SHOOTER_MOTOR_ID = 13; //13
 
 	public static final int RIGHT_CLIMBER_CAN_ID = 15;
 	public static final int LEFT_CLIMBER_CAN_ID = 16;
