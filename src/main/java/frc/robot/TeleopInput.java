@@ -208,7 +208,7 @@ public class TeleopInput {
 	 * @return if Cross button is pressed
 	 */
 	public boolean isManualRaiseButtonPressed() {
-		return mechController.getR1Button();
+		return mechController.getL2Button();
 	}
 
 	/**
@@ -216,7 +216,7 @@ public class TeleopInput {
 	 * @return if Options Button is pressed
 	 */
 	public boolean isManualLowerButtonPressed() {
-		return mechController.getL1Button();
+		return mechController.getR2Button();
 	}
 
 	/**
