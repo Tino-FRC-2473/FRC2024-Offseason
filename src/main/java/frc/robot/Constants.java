@@ -42,7 +42,7 @@ public final class Constants {
 		// TeleOp
 	public static final double MIN_TURN_SPEED = -0.6;
 	public static final double MAX_TURN_SPEED = 0.6;
-	public static final double PID_CONSTANT_PIVOT_P = 0.0005;
+	public static final double PID_CONSTANT_PIVOT_P = 0.0007;
 	public static final double PID_CONSTANT_PIVOT_I = 0;
 	public static final double PID_CONSTANT_PIVOT_D = 0;
 		// Auto

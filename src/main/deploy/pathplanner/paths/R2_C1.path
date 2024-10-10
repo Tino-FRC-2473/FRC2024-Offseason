@@ -64,14 +64,7 @@
       "command": {
         "type": "sequential",
         "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "I_PTG"
-              }
-            }
-          ]
+          "commands": []
         }
       }
     },
@@ -98,14 +91,7 @@
       "command": {
         "type": "sequential",
         "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "I_PTH"
-              }
-            }
-          ]
+          "commands": []
         }
       }
     },

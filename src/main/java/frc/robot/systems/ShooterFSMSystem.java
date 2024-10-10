@@ -314,6 +314,8 @@ public class ShooterFSMSystem {
 			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
 			shooterRightMotor.setControl(mVoltage.withVelocity(0));
 			intakeFSM.setIndexerMotor(0);
+			intakeFSM.setHasNote(false);
+
 			timerSub.stop();
 			timerSub.reset();
 		}

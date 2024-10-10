@@ -391,6 +391,11 @@ public class IntakeFSMSystem {
 		indexerMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
 	}
 
+	public boolean setHasNote(boolean setHasNote) {
+		hasNote = setHasNote;
+		return hasNote;
+	}
+
 	/**
 	 * Handle behavior in FEED_SHOOTER.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
@@ -413,6 +418,9 @@ public class IntakeFSMSystem {
 	private boolean handleAutoMoveGround() {
 		led.orangeLight(false);
 		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
+		intakeMotor.setControl(mVoltage.withVelocity(0));
+		indexerMotor.setControl(mVoltage.withVelocity(0));
+
 		return approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT);
 	}
 
@@ -461,7 +469,8 @@ public class IntakeFSMSystem {
 	private boolean handleAutoIntake() {
 		intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
 		indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
-		return hasNote;
+		pivotMotor.set(0);
+		return hasNote();
 	}
 
 	/*------------------------- COMMAND CLASSES -------------------------- */
@@ -497,6 +506,7 @@ public class IntakeFSMSystem {
 		public void end(boolean interrupted) {
 			intakeMotor.setControl(mVoltage.withVelocity(0));
 			indexerMotor.setControl(mVoltage.withVelocity(0));
+
 			timerSub.stop();
 			timerSub.reset();
 		}
@@ -506,7 +516,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public boolean isFinished() {
-			return handleAutoIntake();
+			return handleAutoIntake() || timerSub.get() >= 2.0;
 		}
 	}
 
@@ -521,17 +531,17 @@ public class IntakeFSMSystem {
 			timerSub = new Timer();
 		}
 
+		public void initialize() {
+			led.orangeLight(false);
+			timerSub.start();
+		}
+
 		/**
 		 * Called every time the scheduler runs while the command is scheduled.
 		 */
 		@Override
 		public void execute() {
-			led.orangeLight(false);
-			if (handleAutoMoveGround()) {
-				timerSub.start();
-			}
-
-			System.out.println("ptg");
+			System.out.println("htg");
 		}
 
 		/**
@@ -539,6 +549,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
+			pivotMotor.set(0);
 			timerSub.stop();
 			timerSub.reset();
 		}
@@ -549,7 +560,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public boolean isFinished() {
-			return handleAutoMoveGround() && timerSub.get() > Constants.AUTO_PIVOT_TIMER;
+			return handleAutoMoveGround();
 		}
 	}
 
@@ -564,6 +575,10 @@ public class IntakeFSMSystem {
 			timerSub = new Timer();
 		}
 
+		public void initialize() {
+			timerSub.start();
+		}
+
 		/**
 		 * Called every time the scheduler runs while the command is scheduled.
 		 */
@@ -573,9 +588,7 @@ public class IntakeFSMSystem {
 				led.rainbow();
 			}
 
-			if (handleAutoMoveHome()) {
-				timerSub.start();
-			}
+			System.out.println("gth");
 		}
 
 		/**
@@ -585,6 +598,8 @@ public class IntakeFSMSystem {
 		public void end(boolean interrupted) {
 			intakeMotor.setControl(mVoltage.withVelocity(0));
 			indexerMotor.setControl(mVoltage.withVelocity(0));
+			pivotMotor.set(0);
+
 			timerSub.stop();
 			timerSub.reset();
 		}
