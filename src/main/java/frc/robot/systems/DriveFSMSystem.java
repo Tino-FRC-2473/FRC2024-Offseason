@@ -384,14 +384,6 @@ public class DriveFSMSystem extends SubsystemBase {
 					gyro.reset();
 				}
 
-				if (input.isTriangleButtonPressed()) {
-					setForwardFormation();
-				}
-
-				if (input.isCircleButtonPressed()) {
-					setXFormation();
-				}
-
 				break;
 
 			case ALIGN_TO_SPEAKER_STATE:
@@ -454,30 +446,8 @@ public class DriveFSMSystem extends SubsystemBase {
 	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case TELEOP_STATE:
-				if (input.isCircleButtonPressed()) {
-					return FSMState.ALIGN_TO_SPEAKER_STATE;
-				} else if (input.isCrossButtonPressed()) {
-					isNoteAligned = false;
-					return FSMState.ALIGN_TO_NOTE_STATE;
-				}
 
 				return FSMState.TELEOP_STATE;
-
-			case ALIGN_TO_SPEAKER_STATE:
-				if (input.isCircleButtonReleased()) {
-					lockedSpeakerId = -1;
-					isSpeakerAligned = false;
-					isSpeakerPositionAligned = false;
-					return FSMState.TELEOP_STATE;
-				}
-				return FSMState.ALIGN_TO_SPEAKER_STATE;
-
-			case ALIGN_TO_NOTE_STATE:
-				if (input.isCrossButtonReleased()) {
-					isNoteAligned = false;
-					return FSMState.TELEOP_STATE;
-				}
-				return FSMState.ALIGN_TO_NOTE_STATE;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());

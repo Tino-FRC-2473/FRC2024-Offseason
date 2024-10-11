@@ -59,24 +59,17 @@
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "New Event Marker",
+      "name": "Ground",
       "waypointRelativePos": 0.1,
       "command": {
         "type": "sequential",
         "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "S_PSG"
-              }
-            }
-          ]
+          "commands": []
         }
       }
     },
     {
-      "name": "New Event Marker",
+      "name": "Intake",
       "waypointRelativePos": 0.55,
       "command": {
         "type": "sequential",
@@ -85,7 +78,7 @@
             {
               "type": "named",
               "data": {
-                "name": "S_TIN"
+                "name": "I_ITN"
               }
             }
           ]
@@ -93,8 +86,18 @@
       }
     },
     {
-      "name": "New Event Marker",
+      "name": "Home",
       "waypointRelativePos": 1.4,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": []
+        }
+      }
+    },
+    {
+      "name": "Shoot",
+      "waypointRelativePos": 1.2,
       "command": {
         "type": "sequential",
         "data": {
@@ -102,24 +105,7 @@
             {
               "type": "named",
               "data": {
-                "name": "S_PGS"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "New Event Marker",
-      "waypointRelativePos": 1.2,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "S_TRS"
+                "name": "S_RXS"
               }
             }
           ]

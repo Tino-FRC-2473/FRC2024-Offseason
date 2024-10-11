@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 // WPILib Imports
 import edu.wpi.first.wpilibj.PS4Controller;
 
@@ -15,6 +16,8 @@ public class TeleopInput {
 	private static final int MECH_CONTROLLER_PORT = 1;
 	private static final int DRIVER_CONTROLLER_PORT = 0;
 
+	private static final float JOYSTICK_TO_BOOLEAN_SENSITIVITY = 0.5f;
+
 	/* ======================== Private variables ======================== */
 	// Input objects
 	private PS4Controller mechController;
@@ -29,7 +32,6 @@ public class TeleopInput {
 	public TeleopInput() {
 		mechController = new PS4Controller(MECH_CONTROLLER_PORT);
 		driverController = new PS4Controller(DRIVER_CONTROLLER_PORT);
-
 	}
 
 	/* ------------------------ Driver Controller ------------------------ */
@@ -134,8 +136,34 @@ public class TeleopInput {
 	}
 
 
+	/**
+	 * Sets the rumble for the left side of the driver controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void driverLeftRumble(double value) {
+		driverController.setRumble(RumbleType.kLeftRumble, value);
+	}
+
+	/**
+	 * Sets the rumble for the right side of the driver controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void driverRightRumble(double value) {
+		driverController.setRumble(RumbleType.kRightRumble, value);
+	}
+
+	/**
+	 * Sets the rumble for both sides of the driver controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void driverBothRumble(double value) {
+		driverController.setRumble(RumbleType.kBothRumble, value);
+	}
+
+
 	/* ------------------------ Mech Controller ------------------------ */
-		/**
+
+	/**
 	 * Get the value of the Triangle Button.
 	 * @return if Triangle Button is pressed
 	 */
@@ -171,7 +199,7 @@ public class TeleopInput {
 	 * Get the value of the Square Button.
 	 * @return if Square Button is pressed
 	 */
-	public boolean isShootAmpButtonPressed() {
+	public boolean isOuttakeButtonPressed() {
 		return mechController.getSquareButton();
 	}
 
@@ -179,16 +207,16 @@ public class TeleopInput {
 	 * Get the value of the Cross  button.
 	 * @return if Cross button is pressed
 	 */
-	public boolean synchClimberTrigger() {
-		return mechController.getCrossButton();
+	public boolean isManualRaiseButtonPressed() {
+		return mechController.getL2Button();
 	}
 
 	/**
 	 * Get the value of the Options Button.
 	 * @return if Options Button is pressed
 	 */
-	public boolean isHooksUpButtonPressed() {
-		return mechController.getOptionsButton();
+	public boolean isManualLowerButtonPressed() {
+		return mechController.getR2Button();
 	}
 
 	/**
@@ -205,5 +233,29 @@ public class TeleopInput {
 	 */
 	public boolean isManualOuttakeButtonPressed() {
 		return mechController.getR2Button();
+	}
+
+	/**
+	 * Sets the rumble for the left side of the mech controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void mechLeftRumble(double value) {
+		mechController.setRumble(RumbleType.kLeftRumble, value);
+	}
+
+	/**
+	 * Sets the rumble for the right side of the mech controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void mechRightRumble(double value) {
+		mechController.setRumble(RumbleType.kRightRumble, value);
+	}
+
+	/**
+	 * Sets the rumble for both sides of the mech controller.
+	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
+	 */
+	public void mechBothRumble(double value) {
+		mechController.setRumble(RumbleType.kBothRumble, value);
 	}
 }

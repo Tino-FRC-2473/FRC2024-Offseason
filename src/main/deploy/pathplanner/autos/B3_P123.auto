@@ -12,9 +12,16 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "sequential",
           "data": {
-            "name": "G_SPN"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "S_SPN"
+                }
+              }
+            ]
           }
         },
         {
@@ -30,7 +37,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "S_TON"
+                  "name": "I_FXN"
                 }
               }
             ]
@@ -49,7 +56,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "S_TON"
+                  "name": "I_FXN"
                 }
               }
             ]
