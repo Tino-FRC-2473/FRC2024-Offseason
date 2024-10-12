@@ -27,8 +27,7 @@ public class IntakeFSMSystem {
 	/* ======================== Constants ======================== */
 	// FSM state definitions
 	public enum IntakeFSMState {
-		MOVE_TO_HOME,
-		MOVE_TO_GROUND,
+		IDLE,
 		INTAKING,
 		OUTTAKING,
 		FEED_SHOOTER,
@@ -51,7 +50,6 @@ public class IntakeFSMSystem {
 	// be private to their owner system and may not be used elsewhere.
 	private TalonFX indexerMotor;
 	private TalonFX intakeMotor;
-	private TalonFX pivotMotor;
 
 	private Encoder throughBore;
 	private final ColorSensorV3 colorSensor;
@@ -67,9 +65,6 @@ public class IntakeFSMSystem {
 
 		indexerMotor = new TalonFX(HardwareMap.INDEXER_MOTOR_ID);
 		indexerMotor.setNeutralMode(NeutralModeValue.Brake);
-
-		pivotMotor = new TalonFX(HardwareMap.PIVOT_MOTOR_ID);
-		pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
 		intakeMotor = new TalonFX(HardwareMap.INTAKE_MOTOR_ID);
 		intakeMotor.setNeutralMode(NeutralModeValue.Coast);
@@ -116,7 +111,7 @@ public class IntakeFSMSystem {
 	 */
 	public void reset() {
 		// led.greenLight(false);
-		currentState = IntakeFSMState.MOVE_TO_HOME;
+		currentState = IntakeFSMState.IDLE;
 		hasNote = false;
 
 		timer.stop();
@@ -133,12 +128,9 @@ public class IntakeFSMSystem {
 	 */
 	public void update(TeleopInput input) {
 		switch (currentState) {
-			case MOVE_TO_HOME:
-				handleMoveHomeState(input);
-				break;
 
-			case MOVE_TO_GROUND:
-				handleMoveGroundState(input);
+			case IDLE:
+				handleIdleState(input);
 				break;
 
 			case INTAKING:
@@ -183,19 +175,22 @@ public class IntakeFSMSystem {
 	 */
 	private IntakeFSMState nextState(TeleopInput input) {
 		switch (currentState) {
-			case MOVE_TO_HOME:
+			case IDLE:
 				if (input == null) {
-					return IntakeFSMState.MOVE_TO_HOME;
+					return IntakeFSMState.IDLE;
 				}
 
-				if (input.isIntakeButtonPressed() || input.isOuttakeButtonPressed()) {
-					return IntakeFSMState.MOVE_TO_GROUND;
+				if (input.isIntakeButtonPressed() && !(input.isOuttakeButtonPressed()
+					|| input.isShootButtonPressed())) {
+					return IntakeFSMState.INTAKING;
+				} else if (input.isOuttakeButtonPressed() && !(input.isIntakeButtonPressed()
+						|| input.isShootButtonPressed())) {
+					return IntakeFSMState.OUTTAKING;
+				} else if (input.isShootButtonPressed() && !(input.isIntakeButtonPressed()
+						|| input.isOuttakeButtonPressed())) {
+					return IntakeFSMState.FEED_SHOOTER;
 				} else {
-					if (input.isShootButtonPressed()) {
-						return IntakeFSMState.FEED_SHOOTER;
-					} else {
-						return IntakeFSMState.MOVE_TO_HOME;
-					}
+					return IntakeFSMState.IDLE;
 				}
 
 			case FEED_SHOOTER:
@@ -203,53 +198,29 @@ public class IntakeFSMSystem {
 					|| input.isOuttakeButtonPressed())) {
 					return IntakeFSMState.FEED_SHOOTER;
 				} else {
-					return IntakeFSMState.MOVE_TO_HOME;
-				}
-
-			case MOVE_TO_GROUND:
-				if (approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)) {
-					if (input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
-						&& !input.isShootButtonPressed()) {
-						return IntakeFSMState.INTAKING;
-					} else if (input.isOuttakeButtonPressed() && !input.isIntakeButtonPressed()
-								&& !input.isShootButtonPressed()) {
-						return IntakeFSMState.OUTTAKING;
-					}
-				}
-
-				if ((input.isIntakeButtonPressed() || input.isOuttakeButtonPressed())
-					&& !input.isShootButtonPressed()) {
-					return IntakeFSMState.MOVE_TO_GROUND;
-				} else {
-					return IntakeFSMState.MOVE_TO_HOME;
+					return IntakeFSMState.IDLE;
 				}
 
 			case INTAKING:
-				if (approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)
-					&& input.isIntakeButtonPressed() && !input.isOuttakeButtonPressed()
-					&& !input.isShootButtonPressed()) {
+				if (input.isIntakeButtonPressed() && !(input.isOuttakeButtonPressed()
+					|| input.isShootButtonPressed())) {
 					return IntakeFSMState.INTAKING;
 				}
 
-				if (input.isShootButtonPressed()
-					&& !(input.isOuttakeButtonPressed() || input.isIntakeButtonPressed())) {
-					return IntakeFSMState.MOVE_TO_HOME;
-				} else {
-					return IntakeFSMState.MOVE_TO_GROUND;
+				if (input.isShootButtonPressed() || input.isOuttakeButtonPressed()
+					|| !input.isIntakeButtonPressed()) {
+					return IntakeFSMState.IDLE;
 				}
 
 			case OUTTAKING:
-				if (approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT)
-					&& input.isOuttakeButtonPressed() && !input.isIntakeButtonPressed()
-					&& !input.isShootButtonPressed()) {
+				if (input.isOuttakeButtonPressed() && !(input.isIntakeButtonPressed()
+					|| input.isShootButtonPressed())) {
 					return IntakeFSMState.OUTTAKING;
 				}
 
-				if (input.isShootButtonPressed()
-					&& !(input.isOuttakeButtonPressed() || input.isIntakeButtonPressed())) {
-					return IntakeFSMState.MOVE_TO_HOME;
-				} else {
-					return IntakeFSMState.MOVE_TO_GROUND;
+				if (input.isShootButtonPressed() || !input.isOuttakeButtonPressed()
+					|| input.isIntakeButtonPressed()) {
+					return IntakeFSMState.IDLE;
 				}
 
 			default:
@@ -316,34 +287,21 @@ public class IntakeFSMSystem {
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
-	/**
-	 * Handle behavior in MOVE_TO_HOME.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
-	 */
-	private void handleMoveHomeState(TeleopInput input) {
-		if (hasNote) {
-			led.greenLight(false);
+
+/**
+ * Handles the idle state of the Intake.
+ * @param input Global TeleopInput if robot in teleop mode or null if
+ *        the robot is in autonomous mode.
+ */
+	private void handleIdleState(TeleopInput input) {
+		indexerMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.setControl(mVoltage.withVelocity(0));
+
+		if (!hasNote) {
+			led.rainbow();
 		} else {
-			led.purpleLight();
+			led.greenLight();
 		}
-
-		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		intakeMotor.setControl(mVoltage.withVelocity(0));
-		indexerMotor.setControl(mVoltage.withVelocity(0));
-	}
-
-	/**
-	 * Handle behavior in MOVE_TO_GROUND.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
-	 */
-	private void handleMoveGroundState(TeleopInput input) {
-		led.orangeLight(false);
-
-		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		intakeMotor.setControl(mVoltage.withVelocity(0));
-		indexerMotor.setControl(mVoltage.withVelocity(0));
 	}
 
 	/**
@@ -357,8 +315,6 @@ public class IntakeFSMSystem {
 		} else {
 			led.greenLight(true);
 		}
-
-		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 
 		if (hasNote) {
 			indexerMotor.setControl(mVoltage.withVelocity(0));
@@ -385,8 +341,6 @@ public class IntakeFSMSystem {
 			input.mechLeftRumble(Constants.SOFT_RUMBLE);
 		}
 
-		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-
 		intakeMotor.setControl(mVoltage.withVelocity(+Constants.OUTTAKE_VELOCITY));
 		indexerMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
 	}
@@ -410,7 +364,6 @@ public class IntakeFSMSystem {
 		led.blueLight();
 		input.mechBothRumble(Constants.HARD_RUMBLE);
 
-		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(
 			-Constants.FEED_SHOOTER_VELOCITY));
@@ -422,7 +375,6 @@ public class IntakeFSMSystem {
 	 */
 	private boolean handleAutoMoveGround() {
 		led.orangeLight(false);
-		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(0));
 
@@ -440,31 +392,7 @@ public class IntakeFSMSystem {
 			led.orangeLight(false);
 		}
 
-		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		return approxEquals(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT);
-	}
-
-	/**
-	 * Performs action for auto Feed Shooter.
-	 * @return if the action carried out has finished executing
-	 */
-	private boolean handleAutoFeedShooter() {
-		if (timer.get() == 0) {
-			timer.start();
-		}
-		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		if (timer.get() > Constants.AUTO_SHOOTING_SECS) {
-			intakeMotor.setControl(mVoltage.withVelocity(0));
-			indexerMotor.setControl(mVoltage.withVelocity(0));
-			timer.stop();
-			timer.reset();
-			return true;
-		} else {
-			intakeMotor.setControl(mVoltage.withVelocity(0));
-			indexerMotor.setControl(mVoltage.withVelocity(
-				-Constants.FEED_SHOOTER_VELOCITY));
-			return false;
-		}
 	}
 
 	/**
@@ -474,7 +402,6 @@ public class IntakeFSMSystem {
 	private boolean handleAutoIntake() {
 		intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
 		indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
-		pivotMotor.set(0);
 		return hasNote();
 	}
 
@@ -557,7 +484,6 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
-			pivotMotor.set(0);
 			timerSub.stop();
 			timerSub.reset();
 		}
@@ -609,7 +535,6 @@ public class IntakeFSMSystem {
 		public void end(boolean interrupted) {
 			intakeMotor.setControl(mVoltage.withVelocity(0));
 			indexerMotor.setControl(mVoltage.withVelocity(0));
-			pivotMotor.set(0);
 
 			timerSub.stop();
 			timerSub.reset();
