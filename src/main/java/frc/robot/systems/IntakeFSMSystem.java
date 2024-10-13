@@ -329,8 +329,8 @@ public class IntakeFSMSystem {
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		intakeMotor.setControl(mVoltage.withVelocity(0));
-		indexerMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.set(0);
+		indexerMotor.set(0);
 	}
 
 	/**
@@ -342,8 +342,8 @@ public class IntakeFSMSystem {
 		led.orangeLight(false);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		intakeMotor.setControl(mVoltage.withVelocity(0));
-		indexerMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.set(0);
+		indexerMotor.set(0);
 	}
 
 	/**
@@ -361,8 +361,8 @@ public class IntakeFSMSystem {
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 
 		if (hasNote) {
-			indexerMotor.setControl(mVoltage.withVelocity(0));
-			intakeMotor.setControl(mVoltage.withVelocity(0));
+			indexerMotor.set(0);
+			intakeMotor.set(0);
 			input.mechRightRumble(Constants.SOFT_RUMBLE);
 		} else {
 			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
@@ -411,7 +411,7 @@ public class IntakeFSMSystem {
 		input.mechBothRumble(Constants.HARD_RUMBLE);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		intakeMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.set(0);
 		indexerMotor.setControl(mVoltage.withVelocity(
 			-Constants.FEED_SHOOTER_VELOCITY));
 	}
@@ -423,8 +423,8 @@ public class IntakeFSMSystem {
 	private boolean handleAutoMoveGround() {
 		led.orangeLight(false);
 		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		intakeMotor.setControl(mVoltage.withVelocity(0));
-		indexerMotor.setControl(mVoltage.withVelocity(0));
+		intakeMotor.set(0);
+		indexerMotor.set(0);
 
 		return approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT);
 	}
@@ -454,13 +454,13 @@ public class IntakeFSMSystem {
 		}
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		if (timer.get() > Constants.AUTO_SHOOTING_SECS) {
-			intakeMotor.setControl(mVoltage.withVelocity(0));
-			indexerMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.set(0);
+			indexerMotor.set(0);
 			timer.stop();
 			timer.reset();
 			return true;
 		} else {
-			intakeMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.set(0);
 			indexerMotor.setControl(mVoltage.withVelocity(
 				-Constants.FEED_SHOOTER_VELOCITY));
 			return false;
@@ -509,8 +509,8 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
-			intakeMotor.setControl(mVoltage.withVelocity(0));
-			indexerMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.set(0);
+			indexerMotor.set(0);
 
 			timerSub.stop();
 			timerSub.reset();
@@ -607,8 +607,8 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
-			intakeMotor.setControl(mVoltage.withVelocity(0));
-			indexerMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.set(0);
+			indexerMotor.set(0);
 			pivotMotor.set(0);
 
 			timerSub.stop();
