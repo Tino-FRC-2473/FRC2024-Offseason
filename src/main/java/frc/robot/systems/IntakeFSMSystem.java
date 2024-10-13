@@ -205,10 +205,7 @@ public class IntakeFSMSystem {
 				if (input.isIntakeButtonPressed() && !(input.isOuttakeButtonPressed()
 					|| input.isShootButtonPressed())) {
 					return IntakeFSMState.INTAKING;
-				}
-
-				if (input.isShootButtonPressed() || input.isOuttakeButtonPressed()
-					|| !input.isIntakeButtonPressed()) {
+				} else {
 					return IntakeFSMState.IDLE;
 				}
 
@@ -216,10 +213,7 @@ public class IntakeFSMSystem {
 				if (input.isOuttakeButtonPressed() && !(input.isIntakeButtonPressed()
 					|| input.isShootButtonPressed())) {
 					return IntakeFSMState.OUTTAKING;
-				}
-
-				if (input.isShootButtonPressed() || !input.isOuttakeButtonPressed()
-					|| input.isIntakeButtonPressed()) {
+				} else {
 					return IntakeFSMState.IDLE;
 				}
 
