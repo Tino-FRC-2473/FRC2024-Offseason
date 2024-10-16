@@ -13,6 +13,9 @@ import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 // Third party Hardware Imports
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 // Robot Imports
 import frc.robot.TeleopInput;
@@ -39,8 +42,8 @@ public class ShooterFSMSystem {
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
-	private TalonFX shooterLeftMotor;
-	private TalonFX shooterRightMotor;
+	private CANSparkMax shooterLeftMotor;
+	//private TalonFX shooterRightMotor;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -49,11 +52,11 @@ public class ShooterFSMSystem {
 	 * the constructor is called only once when the robot boots.
 	 */
 	public ShooterFSMSystem() {
-		shooterLeftMotor = new TalonFX(HardwareMap.LEFT_SHOOTER_MOTOR_ID);
-		shooterLeftMotor.setNeutralMode(NeutralModeValue.Coast);
+		shooterLeftMotor = new CANSparkMax(HardwareMap.LEFT_SHOOTER_MOTOR_ID, MotorType.kBrushless);
+		shooterLeftMotor.setIdleMode(IdleMode.kCoast);
 
-		shooterRightMotor = new TalonFX(HardwareMap.RIGHT_SHOOTER_MOTOR_ID);
-		shooterLeftMotor.setNeutralMode(NeutralModeValue.Coast);
+		// shooterRightMotor = new TalonFX(HardwareMap.RIGHT_SHOOTER_MOTOR_ID);
+		// shooterRightMotor.setNeutralMode(NeutralModeValue.Coast);
 
 		// Add 0.25 V output to overcome static friction
 		slot0Configs.kS = Constants.MM_CONSTANT_S;
@@ -71,8 +74,8 @@ public class ShooterFSMSystem {
 		motionMagicConfigs.MotionMagicJerk = Constants.CONFIG_CONSTANT_J;
 		// Target jerk of 4000 rps/s/s (0.1 seconds)
 
-		statusCode = shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
-		statusCode = shooterRightMotor.getConfigurator().apply(talonFXConfigs);
+		// statusCode = shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
+		// statusCode = shooterRightMotor.getConfigurator().apply(talonFXConfigs);
 
 		// Reset state machine
 		reset();
@@ -114,9 +117,9 @@ public class ShooterFSMSystem {
 		SmartDashboard.putString("TeleOP STATE", currentState.toString());
 		SmartDashboard.putString("Current State", getCurrentState().toString());
 		SmartDashboard.putNumber("Motor Velocity Left",
-			shooterLeftMotor.getVelocity().getValueAsDouble());
-		SmartDashboard.putNumber("Motor Velocity Right",
-				shooterRightMotor.getVelocity().getValueAsDouble());
+			shooterLeftMotor.getEncoder().getVelocity());
+		// SmartDashboard.putNumber("Motor Velocity Right",
+				// shooterRightMotor.getVelocity().getValueAsDouble());
 
 		switch (currentState) {
 			case IDLE_STOP:
@@ -210,7 +213,7 @@ public class ShooterFSMSystem {
 	 */
 	public void handleIdleState(TeleopInput input) {
 		shooterLeftMotor.set(0);
-		shooterRightMotor.set(0);
+		// shooterRightMotor.set(0);
 
 		input.mechLeftRumble(0);
 	}
@@ -220,8 +223,8 @@ public class ShooterFSMSystem {
 	 * @param input action input by driver on the mech controller
 	 */
 	public void handleRevShooterState(TeleopInput input) {
-		shooterLeftMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
-		shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
+		shooterLeftMotor.set((-Constants.SHOOT_VELOCITY));
+		// shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
 
 		input.mechBothRumble(Constants.SOFT_RUMBLE);
 	}
@@ -233,8 +236,8 @@ public class ShooterFSMSystem {
 	public boolean handleAutoRev() {
 		// shooterLeftMotor.set(-MechConstants.SHOOTING_POWER); // dont forget the "-" sign
 		// shooterRightMotor.set(MechConstants.SHOOTING_POWER);
-		shooterLeftMotor.setControl(mVoltage.withVelocity(-Constants.SHOOT_VELOCITY));
-		shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
+		shooterLeftMotor.set((-Constants.SHOOT_VELOCITY));
+		// shooterRightMotor.setControl(mVoltage.withVelocity(Constants.SHOOT_VELOCITY));
 		return true;
 	}
 
@@ -248,20 +251,20 @@ public class ShooterFSMSystem {
 		}
 
 		if (timer.get() < Constants.AUTO_PRELOAD_REVVING_SECS) {
-			shooterLeftMotor.setControl(mVoltage.withVelocity(
+			shooterLeftMotor.set((
 				-Constants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVoltage.withVelocity(
-				Constants.SHOOT_VELOCITY));
+			// shooterRightMotor.setControl(mVoltage.withVelocity(
+				// Constants.SHOOT_VELOCITY));
 			return false;
 		} else if (timer.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
-			shooterLeftMotor.setControl(mVoltage.withVelocity(
+			shooterLeftMotor.set((
 				-Constants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVoltage.withVelocity(
-				Constants.SHOOT_VELOCITY));
+			// shooterRightMotor.setControl(mVoltage.withVelocity(
+			// 	Constants.SHOOT_VELOCITY));
 			return false;
 		} else {
 			shooterLeftMotor.set(0);
-			shooterRightMotor.set(0);
+			// shooterRightMotor.set(0);
 			timer.stop();
 			timer.reset();
 			return true;
@@ -295,16 +298,16 @@ public class ShooterFSMSystem {
 		@Override
 		public void execute() {
 			if (timerSub.get() < Constants.AUTO_PRELOAD_REVVING_SECS) {
-				shooterLeftMotor.setControl(mVoltage.withVelocity(
+				shooterLeftMotor.set((
 					-Constants.SHOOT_VELOCITY));
-				shooterRightMotor.setControl(mVoltage.withVelocity(
-					Constants.SHOOT_VELOCITY));
+				// shooterRightMotor.setControl(mVoltage.withVelocity(
+				// 	Constants.SHOOT_VELOCITY));
 				intakeFSM.setIndexerMotor(0);
 			} else if (timerSub.get() < Constants.AUTO_PRELOAD_SHOOTING_SECS) {
-				shooterLeftMotor.setControl(mVoltage.withVelocity(
+				shooterLeftMotor.set((
 					-Constants.SHOOT_VELOCITY));
-				shooterRightMotor.setControl(mVoltage.withVelocity(
-					Constants.SHOOT_VELOCITY));
+				// shooterRightMotor.setControl(mVoltage.withVelocity(
+				// 	Constants.SHOOT_VELOCITY));
 				intakeFSM.setIndexerMotor(Constants.FEED_SHOOTER_VELOCITY);
 			}
 		}
@@ -312,7 +315,7 @@ public class ShooterFSMSystem {
 		@Override
 		public void end(boolean interrupted) {
 			shooterLeftMotor.set(0);
-			shooterRightMotor.set(0);
+			// shooterRightMotor.set(0);
 			intakeFSM.setIndexerMotor(0);
 			intakeFSM.setHasNote(false);
 
@@ -351,10 +354,10 @@ public class ShooterFSMSystem {
 		@Override
 		public void execute() {
 			if (timerSub.get() < Constants.AUTO_SHOOTING_SECS) {
-				shooterLeftMotor.setControl(mVoltage.withVelocity(
+				shooterLeftMotor.set((
 					-Constants.SHOOT_VELOCITY));
-				shooterRightMotor.setControl(mVoltage.withVelocity(
-					Constants.SHOOT_VELOCITY));
+				// shooterRightMotor.setControl(mVoltage.withVelocity(
+				// 	Constants.SHOOT_VELOCITY));
 				intakeFSM.setIndexerMotor(Constants.FEED_SHOOTER_VELOCITY);
 			}
 		}
@@ -363,7 +366,7 @@ public class ShooterFSMSystem {
 		@Override
 		public void end(boolean interrupted) {
 			shooterLeftMotor.set(0);
-			shooterRightMotor.set(0);
+			// shooterRightMotor.set(0);
 			intakeFSM.setIndexerMotor(0);
 
 			timerSub.stop();
@@ -400,10 +403,10 @@ public class ShooterFSMSystem {
 		@Override
 		public void execute() {
 			if (timerSub.get() < Constants.AUTO_REVVING_SECS) {
-				shooterLeftMotor.setControl(mVoltage.withVelocity(
+				shooterLeftMotor.set((
 					-Constants.SHOOT_VELOCITY));
-				shooterRightMotor.setControl(mVoltage.withVelocity(
-					Constants.SHOOT_VELOCITY));
+				// shooterRightMotor.setControl(mVoltage.withVelocity(
+				// 	Constants.SHOOT_VELOCITY));
 				intakeFSM.setIndexerMotor(0);
 			}
 		}
@@ -412,7 +415,7 @@ public class ShooterFSMSystem {
 		@Override
 		public void end(boolean interrupted) {
 			shooterLeftMotor.set(0);
-			shooterRightMotor.set(0);
+			// shooterRightMotor.set(0);
 			intakeFSM.setIndexerMotor(0);
 
 			timerSub.stop();

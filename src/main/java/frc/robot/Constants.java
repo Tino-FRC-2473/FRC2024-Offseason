@@ -9,7 +9,7 @@ public final class Constants {
 	public static final double AUTO_PRELOAD_REVVING_SECS = 1.3;
 
 	// TeleOp Shooter Constants
-	public static final float SHOOTING_POWER = 0.8f;
+	public static final float SHOOTING_POWER = 0.1f;
 	public static final float TIMED_REVVING_DURATION = 2;
 	public static final float SHOOT_VELOCITY = 75; //must be <=89rps
 
@@ -46,8 +46,8 @@ public final class Constants {
 	public static final double PID_CONSTANT_PIVOT_I = 0;
 	public static final double PID_CONSTANT_PIVOT_D = 0;
 		// Auto
-	public static final double MIN_TURN_SPEED_AUTO = -0.6;
-	public static final double MAX_TURN_SPEED_AUTO = 0.6;
+	public static final double MIN_TURN_SPEED_AUTO = -0.4;
+	public static final double MAX_TURN_SPEED_AUTO = 0.4;
 	public static final double PID_CONSTANT_PIVOT_P_AUTO = 0.001;
 	public static final double INRANGE_VALUE = 20;
 

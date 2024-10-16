@@ -52,63 +52,63 @@ public class DriveFSMSystem extends SubsystemBase {
 	// be private to their owner system and may not be used elsewhere.
 
 	// The gyro sensor
-	private AHRS gyro = new AHRS(SPI.Port.kMXP);
-	private Timer timer = new Timer();
+	// private AHRS gyro = new AHRS(SPI.Port.kMXP);
+	// private Timer timer = new Timer();
 
-	private RaspberryPI rpi = new RaspberryPI();
+	// private RaspberryPI rpi = new RaspberryPI();
 
 	//led
 	//private LED led = new LED();
 
 	// Create MAXSwerveModules
-	private final MAXSwerveModule frontLeft = new MAXSwerveModule(
-		HardwareMap.FRONT_LEFT_DRIVING_CAN_ID,
-		HardwareMap.FRONT_LEFT_TURNING_CAN_ID,
-		DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET);
+	// private final MAXSwerveModule frontLeft = new MAXSwerveModule(
+	// 	HardwareMap.FRONT_LEFT_DRIVING_CAN_ID,
+	// 	HardwareMap.FRONT_LEFT_TURNING_CAN_ID,
+	// 	DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET);
 
-	private final MAXSwerveModule frontRight = new MAXSwerveModule(
-		HardwareMap.FRONT_RIGHT_DRIVING_CAN_ID,
-		HardwareMap.FRONT_RIGHT_TURNING_CAN_ID,
-		DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET);
+	// private final MAXSwerveModule frontRight = new MAXSwerveModule(
+	// 	HardwareMap.FRONT_RIGHT_DRIVING_CAN_ID,
+	// 	HardwareMap.FRONT_RIGHT_TURNING_CAN_ID,
+	// 	DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET);
 
-	private final MAXSwerveModule rearLeft = new MAXSwerveModule(
-		HardwareMap.REAR_LEFT_DRIVING_CAN_ID,
-		HardwareMap.REAR_LEFT_TURNING_CAN_ID,
-		DriveConstants.REAR_LEFT_CHASSIS_ANGULAR_OFFSET);
+	// private final MAXSwerveModule rearLeft = new MAXSwerveModule(
+	// 	HardwareMap.REAR_LEFT_DRIVING_CAN_ID,
+	// 	HardwareMap.REAR_LEFT_TURNING_CAN_ID,
+	// 	DriveConstants.REAR_LEFT_CHASSIS_ANGULAR_OFFSET);
 
-	private final MAXSwerveModule rearRight = new MAXSwerveModule(
-		HardwareMap.REAR_RIGHT_DRIVING_CAN_ID,
-		HardwareMap.REAR_RIGHT_TURNING_CAN_ID,
-		DriveConstants.REAR_RIGHT_CHASSIS_ANGULAR_OFFSET);
+	// private final MAXSwerveModule rearRight = new MAXSwerveModule(
+	// 	HardwareMap.REAR_RIGHT_DRIVING_CAN_ID,
+	// 	HardwareMap.REAR_RIGHT_TURNING_CAN_ID,
+	// 	DriveConstants.REAR_RIGHT_CHASSIS_ANGULAR_OFFSET);
 
 	// Odometry class for tracking robot pose
-	private SwerveDriveOdometry odometry = new SwerveDriveOdometry(
-		DriveConstants.DRIVE_KINEMATICS,
-		Rotation2d.fromDegrees(getHeading()),
-		new SwerveModulePosition[] {
-			frontLeft.getPosition(),
-			frontRight.getPosition(),
-			rearLeft.getPosition(),
-			rearRight.getPosition()
-		});
+	// private SwerveDriveOdometry odometry = new SwerveDriveOdometry(
+	// 	DriveConstants.DRIVE_KINEMATICS,
+	// 	Rotation2d.fromDegrees(getHeading()),
+	// 	new SwerveModulePosition[] {
+	// 		frontLeft.getPosition(),
+	// 		frontRight.getPosition(),
+	// 		rearLeft.getPosition(),
+	// 		rearRight.getPosition()
+	// 	});
 
 
-	private int lockedSpeakerId;
-	private boolean isSpeakerAligned;
-	private boolean isNoteAligned;
-	private boolean isSpeakerPositionAligned;
+	// private int lockedSpeakerId;
+	// private boolean isSpeakerAligned;
+	// private boolean isNoteAligned;
+	// private boolean isSpeakerPositionAligned;
 
 
-	private boolean redAlliance;
-	private Double[] tagOrientationAngles;
+	// private boolean redAlliance;
+	// private Double[] tagOrientationAngles;
 
-	private StructArrayPublisher<SwerveModuleState> statePublisher
-		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
-		SwerveModuleState.struct).publish();
+	// private StructArrayPublisher<SwerveModuleState> statePublisher
+	// 	= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
+	// 	SwerveModuleState.struct).publish();
 
-	private StructArrayPublisher<Pose2d> posePublisher
-		= NetworkTableInstance.getDefault().getStructArrayTopic("MyPose",
-		Pose2d.struct).publish();
+	// private StructArrayPublisher<Pose2d> posePublisher
+	// 	= NetworkTableInstance.getDefault().getStructArrayTopic("MyPose",
+	// 	Pose2d.struct).publish();
 
 
 	/* ======================== Constructor ======================== */
@@ -118,7 +118,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * the constructor is called only once when the robot boots.
 	 */
 	public DriveFSMSystem() {
-		gyro = new AHRS(SPI.Port.kMXP);
+		//gyro = new AHRS(SPI.Port.kMXP);
 
 		AutoBuilder.configureHolonomic(
 				this::getPose,
@@ -131,12 +131,12 @@ public class DriveFSMSystem extends SubsystemBase {
 					// Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
 				new HolonomicPathFollowerConfig(
 						// HolonomicPathFollowerConfig, this should live in your Constants class
-						new PIDConstants(AutoConstants.AUTO_TRANSLATIONAL_KP,
+						new PIDConstants(0,
 							0.0, 0.0), // Translation PID const
-						new PIDConstants(AutoConstants.AUTO_ROTATIONAL_KP,
+						new PIDConstants(0,
 							0.0, 0.0), // Rotation PID const
-						AutoConstants.MAX_MODULE_SPEED, // Max module speed, in m/s
-						AutoConstants.DRIVEBASE_RADIUS, // Drive base radius (in m).
+						0, // Max module speed, in m/s
+						0, // Drive base radius (in m).
 						new ReplanningConfig() // Default path replanning config.
 				),
 			() -> {

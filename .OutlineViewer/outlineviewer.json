@@ -1,0 +1,63 @@
+{
+  "Clients": {
+    "open": true
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "2473"
+  },
+  "Persistent Values": {
+    "open": false
+  },
+  "Server": {
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
+  },
+  "outlineviewer@1": {
+    "open": true
+  },
+  "outlineviewer@2": {
+    "Publishers": {
+      "open": true
+    },
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
+  },
+  "python@1": {
+    "Publishers": {
+      "open": true
+    },
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
+  },
+  "python@3": {
+    "Publishers": {
+      "open": true
+    },
+    "open": true
+  },
+  "shuffleboard@1": {
+    "open": true
+  },
+  "shuffleboard@2": {
+    "Publishers": {
+      "open": true
+    },
+    "open": true
+  },
+  "shuffleboard@3": {
+    "Publishers": {
+      "open": true
+    },
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
+  }
+}

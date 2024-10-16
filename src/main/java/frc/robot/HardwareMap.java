@@ -11,11 +11,11 @@ public final class HardwareMap {
 	public static final int ENCODER_CHANNEL_B = 1;
 
 	// ID numbers for devices on the CAN bus
-	public static final int INTAKE_MOTOR_ID = 9; //9
-	public static final int PIVOT_MOTOR_ID = 17; //17
-	public static final int INDEXER_MOTOR_ID = 11; //11
+	public static final int INTAKE_MOTOR_ID = 35; //9
+	public static final int PIVOT_MOTOR_ID = 36; //17
+	public static final int INDEXER_MOTOR_ID = 38; //11
 
-	public static final int LEFT_SHOOTER_MOTOR_ID = 12; //12
+	public static final int LEFT_SHOOTER_MOTOR_ID = 19; //12
 	public static final int RIGHT_SHOOTER_MOTOR_ID = 13; //13
 
 	public static final int RIGHT_CLIMBER_CAN_ID = 15;
