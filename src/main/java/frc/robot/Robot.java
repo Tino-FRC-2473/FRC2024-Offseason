@@ -71,7 +71,7 @@ public class Robot extends TimedRobot {
 		shooterFSM = new ShooterFSMSystem();
 		// climberMechFSM = new ClimberMechFSM();
 		intakeFSM = new IntakeFSMSystem();
-		
+
 		//Label all named commands here
 		// IntakeFSM Commands
 		NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
