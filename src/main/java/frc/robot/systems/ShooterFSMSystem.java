@@ -209,8 +209,8 @@ public class ShooterFSMSystem {
 	 * @param input action input by driver on the mech controller
 	 */
 	public void handleIdleState(TeleopInput input) {
-		shooterLeftMotor.setControl(mVoltage.withVelocity(0));
-		shooterRightMotor.setControl(mVoltage.withVelocity(0));
+		shooterLeftMotor.set(0);
+		shooterRightMotor.set(0);
 
 		input.mechLeftRumble(0);
 	}
@@ -260,8 +260,8 @@ public class ShooterFSMSystem {
 				Constants.SHOOT_VELOCITY));
 			return false;
 		} else {
-			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
-			shooterRightMotor.setControl(mVoltage.withVelocity(0));
+			shooterLeftMotor.set(0);
+			shooterRightMotor.set(0);
 			timer.stop();
 			timer.reset();
 			return true;
@@ -311,8 +311,8 @@ public class ShooterFSMSystem {
 
 		@Override
 		public void end(boolean interrupted) {
-			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
-			shooterRightMotor.setControl(mVoltage.withVelocity(0));
+			shooterLeftMotor.set(0);
+			shooterRightMotor.set(0);
 			intakeFSM.setIndexerMotor(0);
 			intakeFSM.setHasNote(false);
 
@@ -362,8 +362,8 @@ public class ShooterFSMSystem {
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
-			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
-			shooterRightMotor.setControl(mVoltage.withVelocity(0));
+			shooterLeftMotor.set(0);
+			shooterRightMotor.set(0);
 			intakeFSM.setIndexerMotor(0);
 
 			timerSub.stop();
@@ -411,8 +411,8 @@ public class ShooterFSMSystem {
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
-			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
-			shooterRightMotor.setControl(mVoltage.withVelocity(0));
+			shooterLeftMotor.set(0);
+			shooterRightMotor.set(0);
 			intakeFSM.setIndexerMotor(0);
 
 			timerSub.stop();
