@@ -131,12 +131,12 @@ public class DriveFSMSystem extends SubsystemBase {
 					// Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
 				new HolonomicPathFollowerConfig(
 						// HolonomicPathFollowerConfig, this should live in your Constants class
-						new PIDConstants(4,
+						new PIDConstants(AutoConstants.AUTO_TRANSLATIONAL_KP,
 							0.0, 0.0), // Translation PID const
-						new PIDConstants(0.5,
+						new PIDConstants(AutoConstants.AUTO_ROTATIONAL_KP,
 							0.0, 0.0), // Rotation PID const
-						0, // Max module speed, in m/s
-						0, // Drive base radius (in m).
+						AutoConstants.MAX_MODULE_SPEED, // Max module speed, in m/s
+						AutoConstants.DRIVEBASE_RADIUS, // Drive base radius (in m).
 						new ReplanningConfig() // Default path replanning config.
 				),
 			() -> {
