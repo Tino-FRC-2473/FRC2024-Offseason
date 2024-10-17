@@ -1,5 +1,5 @@
 {
-  "version": 1.0,
+  "version": "2025.0",
   "waypoints": [
     {
       "anchor": {
@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.929963247681598,
-        "y": 7.648412812353575
+        "x": 7.061190026506029,
+        "y": 6.4607352231488475
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.833204379807163,
-        "y": 5.97304619631422
+        "x": 8.070139004030738,
+        "y": 5.805555680979361
       },
       "prevControl": {
-        "x": 7.833204379807163,
-        "y": 5.9061287785426915
+        "x": 8.307316994035467,
+        "y": 5.7014111687327915
       },
       "nextControl": {
-        "x": 7.833204379807163,
-        "y": 6.039963614085749
+        "x": 6.867845297917174,
+        "y": 6.3334811077772715
       },
       "isLocked": false,
       "linkedName": null
@@ -36,8 +36,8 @@
         "y": 6.740728186286426
       },
       "prevControl": {
-        "x": 6.806131802148251,
-        "y": 7.604707596282983
+        "x": 6.759393406485427,
+        "y": 6.168993686621259
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,20 +47,20 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.4,
-      "rotationDegrees": 155.07561319192513,
-      "rotateFast": false
+      "rotationDegrees": 168.66828132050412
     },
     {
       "waypointRelativePos": 1.6,
-      "rotationDegrees": 156.00042465255342,
-      "rotateFast": false
+      "rotationDegrees": 174.60855992471275
     }
   ],
   "constraintZones": [],
+  "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "Ground",
       "waypointRelativePos": 0.05,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -78,6 +78,7 @@
     {
       "name": "Intake",
       "waypointRelativePos": 0.4,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -95,6 +96,7 @@
     {
       "name": "Home",
       "waypointRelativePos": 1.35,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -112,6 +114,7 @@
     {
       "name": "Shoot",
       "waypointRelativePos": 1.5,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -128,21 +131,22 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 6.5,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -118.03883462051547,
-    "rotateFast": false
+    "rotation": -119.99999999999999
   },
   "reversed": false,
-  "folder": null,
-  "previewStartingState": {
-    "rotation": -118.90894804216232,
-    "velocity": 0
+  "folder": "Blue",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -119.99999999999999
   },
   "useDefaultConstraints": true
 }

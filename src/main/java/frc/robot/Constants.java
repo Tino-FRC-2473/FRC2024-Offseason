@@ -69,4 +69,8 @@ public final class Constants {
 	// Controller Rumble Power
 	public static final float SOFT_RUMBLE = 0.5f;
 	public static final float HARD_RUMBLE = 1.0f;
+
+	// Other
+	public static final int UPDATE_FREQUENCY_HZ = 200;
+	public static final int CURRENT_LIMIT_AMPS = 120;
 }

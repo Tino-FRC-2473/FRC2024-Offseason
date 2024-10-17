@@ -1,12 +1,5 @@
 {
-  "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 0.6924444618120014,
-      "y": 6.740728186286426
-    },
-    "rotation": 60.0
-  },
+  "version": "2025.0",
   "command": {
     "type": "sequential",
     "data": {
@@ -61,10 +54,30 @@
               }
             ]
           }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "B1_C3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "I_FXN"
+                }
+              }
+            ]
+          }
         }
       ]
     }
   },
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

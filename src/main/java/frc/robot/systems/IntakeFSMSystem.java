@@ -9,11 +9,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 // Third party Hardware Imports
 import com.revrobotics.ColorSensorV3;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -46,6 +49,7 @@ public class IntakeFSMSystem {
 	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
 	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
+	private CurrentLimitsConfigs currLimitcfgs = talonFXConfigs.CurrentLimits;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -91,8 +95,16 @@ public class IntakeFSMSystem {
 		motionMagicConfigs.MotionMagicAcceleration = Constants.CONFIG_CONSTANT_A;
 		motionMagicConfigs.MotionMagicJerk = Constants.CONFIG_CONSTANT_J;
 
+		currLimitcfgs.StatorCurrentLimit = Constants.CURRENT_LIMIT_AMPS;
+		currLimitcfgs.StatorCurrentLimitEnable = true;
+
 		statusCode = indexerMotor.getConfigurator().apply(talonFXConfigs);
 		statusCode = intakeMotor.getConfigurator().apply(talonFXConfigs);
+
+		BaseStatusSignal.setUpdateFrequencyForAll(Constants.UPDATE_FREQUENCY_HZ,
+			indexerMotor.getVelocity(), intakeMotor.getVelocity());
+			// Diable all status signals except for ones listed in UpdateFrequency
+		ParentDevice.optimizeBusUtilizationForAll(pivotMotor, indexerMotor, intakeMotor);
 
 		// Reset state machine
 		reset();
@@ -160,8 +172,10 @@ public class IntakeFSMSystem {
 		hasNote = hasNote();
 
 		SmartDashboard.putString("CURRENT STATE", currentState.toString());
-		SmartDashboard.putNumber("Back Indexer Velocity",
+		SmartDashboard.putNumber("Indexer Velocity",
 			indexerMotor.getVelocity().getValueAsDouble());
+		SmartDashboard.putNumber("Intake Velocity",
+			intakeMotor.getVelocity().getValueAsDouble());
 
 		SmartDashboard.putBoolean("Color Sensor in Range?", colorSensor.getProximity()
 			>= Constants.PROXIMIIY_THRESHOLD);
