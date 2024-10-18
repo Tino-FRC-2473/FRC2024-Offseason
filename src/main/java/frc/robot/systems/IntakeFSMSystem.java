@@ -169,6 +169,9 @@ public class IntakeFSMSystem {
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
 
 		SmartDashboard.putBoolean("HASNOTE", hasNote);
+
+		SmartDashboard.putNumber("intake velocity", intakeMotor.getVelocity().getValueAsDouble());
+		SmartDashboard.putNumber("indexer velocity", indexerMotor.getVelocity().getValueAsDouble());
 	}
 
 	/* ======================== Private methods ======================== */
@@ -365,7 +368,7 @@ public class IntakeFSMSystem {
 			intakeMotor.set(0);
 			input.mechRightRumble(Constants.SOFT_RUMBLE);
 		} else {
-			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
+			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY/2));
 			intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
 			input.mechRightRumble(0);
 		}
