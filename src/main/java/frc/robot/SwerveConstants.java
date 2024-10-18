@@ -26,7 +26,7 @@ public final class SwerveConstants {
 	public static final class DriveConstants {
 		// Driving Parameters - Note that these are not the maximum capable speeds of
 		// the robot, rather the allowed maximum speeds
-		public static final double MAX_SPEED_METERS_PER_SECOND = 6; //4.8
+		public static final double MAX_SPEED_METERS_PER_SECOND = 4.8; //4.8
 		public static final double MAX_ANGULAR_SPEED = 3 * Math.PI; //2 PI // radians per second
 
 		public static final double LEFT_TRIGGER_DRIVE_CONSTANT = 1.5;

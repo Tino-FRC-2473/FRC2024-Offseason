@@ -23,12 +23,13 @@ public final class Constants {
 
 
 	// TeleOp Intake Constants
-	public static final float INTAKE_VELOCITY = 25; //must be <=89rps
-	public static final float OUTTAKE_VELOCITY = -30; //must be >=-89rps
+	public static final float INTAKE_VELOCITY = 40; //must be <=89rps
+	public static final float INDEXER_VELOCITY = -20;
+	public static final float OUTTAKE_VELOCITY = -40; //must be >=-89rps
 	public static final float FEED_SHOOTER_VELOCITY = 55; //must be <=89rps
 
 	// REV Color Sensor Constants
-	public static final int NOTE_FRAMES_MIN = 2;
+	public static final int NOTE_FRAMES_MIN = 1;
 	public static final double PROXIMIIY_THRESHOLD = 150;
 
 	public static final double GREEN_LOW = 0.18;
@@ -49,7 +50,7 @@ public final class Constants {
 	public static final double MIN_TURN_SPEED_AUTO = -0.6;
 	public static final double MAX_TURN_SPEED_AUTO = 0.6;
 	public static final double PID_CONSTANT_PIVOT_P_AUTO = 0.001;
-	public static final double INRANGE_VALUE = 20;
+	public static final double INRANGE_VALUE = 30;
 
 	// Encoder Position Constants
 	public static final double GROUND_ENCODER_COUNT = -540;
