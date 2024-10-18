@@ -35,7 +35,7 @@ import frc.robot.systems.IntakeFSMSystem;
 public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
-	private DriveFSMSystem driveFSMSystem;
+	//private DriveFSMSystem driveFSMSystem;
 	private ShooterFSMSystem shooterFSM;
 	private ClimberMechFSM climberMechFSM;
 	private IntakeFSMSystem intakeFSM;
@@ -67,21 +67,21 @@ public class Robot extends TimedRobot {
 		input = new TeleopInput();
 
 		// Instantiate all systems here
-		driveFSMSystem = new DriveFSMSystem();
+		//driveFSMSystem = new DriveFSMSystem();
 		shooterFSM = new ShooterFSMSystem();
 		climberMechFSM = new ClimberMechFSM();
 		intakeFSM = new IntakeFSMSystem();
 
 		//Label all named commands here
 		// IntakeFSM Commands
-		NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
-		NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
-		NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
+		// NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
+		// NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
+		// NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
 
-		// ShooterFSM Commands
-		NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand(intakeFSM));
-		NamedCommands.registerCommand("S_RXS", shooterFSM.new RevCommand(intakeFSM));
-		NamedCommands.registerCommand("I_FXN", shooterFSM.new ShootNoteCommand(intakeFSM));
+		// // ShooterFSM Commands
+		// NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand(intakeFSM));
+		// NamedCommands.registerCommand("S_RXS", shooterFSM.new RevCommand(intakeFSM));
+		// NamedCommands.registerCommand("I_FXN", shooterFSM.new ShootNoteCommand(intakeFSM));
 
 		/*
 		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
@@ -92,61 +92,61 @@ public class Robot extends TimedRobot {
 			0.5));
 		*/
 
-		autoChooser = AutoBuilder.buildAutoChooser();
+		// autoChooser = AutoBuilder.buildAutoChooser();
 
-		SmartDashboard.putData("Auto Chooser", autoChooser);
-		SmartDashboard.putData("Field", mField);
+		// SmartDashboard.putData("Auto Chooser", autoChooser);
+		// SmartDashboard.putData("Field", mField);
 
-		driverCam = CameraServer.startAutomaticCapture(0);
-		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
-			streamHeight, streamFPS);
-		driverCam.setVideoMode(videoMode);
-		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-		driverCam.setResolution(streamWidth, streamHeight);
+		// driverCam = CameraServer.startAutomaticCapture(0);
+		// VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
+		// 	streamHeight, streamFPS);
+		// driverCam.setVideoMode(videoMode);
+		// driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+		// driverCam.setResolution(streamWidth, streamHeight);
 	}
 
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
-		driveFSMSystem.resetAutonomus();
-		autonomousCommand = getAutonomousCommand();
-		if (autonomousCommand != null) {
-			autonomousCommand.cancel();
-		}
-		// schedule the autonomous command (example)
-		if (autonomousCommand != null) {
-			autonomousCommand.schedule();
-		}
+		//driveFSMSystem.resetAutonomus();
+		// autonomousCommand = getAutonomousCommand();
+		// if (autonomousCommand != null) {
+		// 	autonomousCommand.cancel();
+		// }
+		// // schedule the autonomous command (example)
+		// if (autonomousCommand != null) {
+		// 	autonomousCommand.schedule();
+		// }
 	}
 
 
 	@Override
 	public void autonomousPeriodic() {
-		CommandScheduler.getInstance().run();
-		driveFSMSystem.updateAutonomous();
-		mField.setRobotPose(driveFSMSystem.getPose());
+		//CommandScheduler.getInstance().run();
+		// driveFSMSystem.updateAutonomous();
+		// mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		driveFSMSystem.reset();
+		//driveFSMSystem.reset();
 		shooterFSM.reset();
 		climberMechFSM.reset();
 		intakeFSM.reset();
-		if (autonomousCommand != null) {
-			autonomousCommand.cancel();
-		}
+		// if (autonomousCommand != null) {
+		// 	autonomousCommand.cancel();
+		// }
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		driveFSMSystem.update(input);
+		//driveFSMSystem.update(input);
 		shooterFSM.update(input);
 		climberMechFSM.update(input);
 		intakeFSM.update(input);
-		mField.setRobotPose(driveFSMSystem.getPose());
+		//mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
 	@Override
