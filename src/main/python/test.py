@@ -18,14 +18,14 @@ CALIB_HEIGHT = 9
 FOV = (50.28, 29.16)
 CAM_HEIGHT = 0.4
 CAM_ANGLE = -15
-input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE)
+input = VisionInput(FOV, RES, CAM_HEIGHT, CAM_ANGLE, 0)
 TAG_LENGTH_METERS = 0.165
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-out = cv2.VideoWriter('data_collection.mp4', fourcc, 20.0, (640,  480))
+out = cv2.VideoWriter('data_collection.mp4', fourcc, 20.0, RES)
 
 fourcc2 = cv2.VideoWriter_fourcc(*'mp4v')
-out2 = cv2.VideoWriter('data_collection_annotated.mp4', fourcc2, 20.0, (640,  480))
+out2 = cv2.VideoWriter('data_collection_annotated.mp4', fourcc2, 20.0, RES)
 
 
 with open(f"datacollection {time.ctime(time.time())}.csv", mode='w', newline='') as csvfile:
@@ -44,7 +44,7 @@ with open(f"datacollection {time.ctime(time.time())}.csv", mode='w', newline='')
         cv2.imshow('result', annotated_frame)
 
         out.write(frame)
-        out.write(annotated_frame)
+        out2.write(annotated_frame)
         writer.writerow([framenum, tagData])
 
 
@@ -53,3 +53,4 @@ with open(f"datacollection {time.ctime(time.time())}.csv", mode='w', newline='')
             break
 
 out.release()
+out2.release()
