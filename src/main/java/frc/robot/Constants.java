@@ -49,7 +49,7 @@ public final class Constants {
 		// Auto
 	public static final double MIN_TURN_SPEED_AUTO = -0.6;
 	public static final double MAX_TURN_SPEED_AUTO = 0.6;
-	public static final double PID_CONSTANT_PIVOT_P_AUTO = 0.001;
+	public static final double PID_CONSTANT_PIVOT_P_AUTO = 0.0007;
 	public static final double INRANGE_VALUE = 30;
 
 	// Encoder Position Constants
