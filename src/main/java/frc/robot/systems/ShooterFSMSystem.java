@@ -350,13 +350,11 @@ public class ShooterFSMSystem {
 		// Called every time the scheduler runs while the command is scheduled.
 		@Override
 		public void execute() {
-			if (timerSub.get() < Constants.AUTO_SHOOTING_SECS) {
-				shooterLeftMotor.setControl(mVoltage.withVelocity(
-					-Constants.SHOOT_VELOCITY));
-				shooterRightMotor.setControl(mVoltage.withVelocity(
-					Constants.SHOOT_VELOCITY));
-				intakeFSM.setIndexerMotor(Constants.FEED_SHOOTER_VELOCITY);
-			}
+			shooterLeftMotor.setControl(mVoltage.withVelocity(
+				-Constants.SHOOT_VELOCITY));
+			shooterRightMotor.setControl(mVoltage.withVelocity(
+				Constants.SHOOT_VELOCITY));
+			intakeFSM.setIndexerMotor(Constants.FEED_SHOOTER_VELOCITY);
 		}
 
 		// Called once the command ends or is interrupted.

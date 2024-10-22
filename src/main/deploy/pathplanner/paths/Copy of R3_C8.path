@@ -1,5 +1,5 @@
 {
-  "version": 1.0,
+  "version": "2025.0",
   "waypoints": [
     {
       "anchor": {
@@ -37,7 +37,7 @@
       },
       "prevControl": {
         "x": 14.54726492905197,
-        "y": -0.5855418272890752
+        "y": -0.5855418272890756
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,20 +47,20 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.5,
-      "rotationDegrees": -22.693185198620743,
-      "rotateFast": false
+      "rotationDegrees": -22.693185198620743
     },
     {
       "waypointRelativePos": 1.45,
-      "rotationDegrees": -22.642003264673246,
-      "rotateFast": false
+      "rotationDegrees": -22.642003264673246
     }
   ],
   "constraintZones": [],
+  "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "Ground",
       "waypointRelativePos": 0.1,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -78,6 +78,7 @@
     {
       "name": "Intake",
       "waypointRelativePos": 0.5,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -93,25 +94,9 @@
       }
     },
     {
-      "name": "Home",
-      "waypointRelativePos": 1.4,
-      "command": {
-        "type": "sequential",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "I_PTH"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
       "name": "Shoot",
       "waypointRelativePos": 1.3,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "parallel",
         "data": {
@@ -131,24 +116,43 @@
           ]
         }
       }
+    },
+    {
+      "name": "Home",
+      "waypointRelativePos": 1.4,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "I_PTH"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "globalConstraints": {
     "maxVelocity": 3.7,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 60.0,
-    "rotateFast": false
+    "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": null,
-  "previewStartingState": {
-    "rotation": 60.0,
-    "velocity": 0
+  "folder": "Blue",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
   },
   "useDefaultConstraints": false
 }
