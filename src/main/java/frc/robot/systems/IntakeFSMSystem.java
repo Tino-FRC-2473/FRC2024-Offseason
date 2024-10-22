@@ -327,7 +327,11 @@ public class IntakeFSMSystem {
 	 * @param rpsVelocity The power to send to the indexer motor.
 	 */
 	public void setIndexerMotor(float rpsVelocity) {
+		if (rpsVelocity != 0) {
 		indexerMotor.setControl(mVoltage.withVelocity(-rpsVelocity));
+		} else {
+			indexerMotor.set(rpsVelocity);
+		}
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
