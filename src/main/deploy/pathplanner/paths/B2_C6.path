@@ -1,5 +1,5 @@
 {
-  "version": "2025.0",
+  "version": 1.0,
   "waypoints": [
     {
       "anchor": {
@@ -79,28 +79,30 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.7,
-      "rotationDegrees": 141.00614585174264
+      "rotationDegrees": 141.00614585174264,
+      "rotateFast": false
     },
     {
       "waypointRelativePos": 1.55,
-      "rotationDegrees": -175.32898084426395
+      "rotationDegrees": -175.32898084426395,
+      "rotateFast": false
     },
     {
       "waypointRelativePos": 2.3,
-      "rotationDegrees": -176.93093616836677
+      "rotationDegrees": -176.93093616836677,
+      "rotateFast": false
     },
     {
       "waypointRelativePos": 3.3,
-      "rotationDegrees": 138.3161432539671
+      "rotationDegrees": 138.3161432539671,
+      "rotateFast": false
     }
   ],
   "constraintZones": [],
-  "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "Ground",
       "waypointRelativePos": 1.3,
-      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -118,7 +120,6 @@
     {
       "name": "Intake",
       "waypointRelativePos": 1.55,
-      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -136,7 +137,6 @@
     {
       "name": "Home",
       "waypointRelativePos": 3.35,
-      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -154,7 +154,6 @@
     {
       "name": "Shoot",
       "waypointRelativePos": 3.55,
-      "endWaypointRelativePos": null,
       "command": {
         "type": "sequential",
         "data": {
@@ -171,22 +170,21 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 6.5,
+    "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
-    "nominalVoltage": 12.0,
-    "unlimited": false
+    "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -179.36340642403655
+    "rotation": -179.36340642403655,
+    "rotateFast": false
   },
   "reversed": false,
-  "folder": "Blue",
-  "idealStartingState": {
-    "velocity": 0,
-    "rotation": 0.0
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 179.5225462226904,
+    "velocity": 0
   },
   "useDefaultConstraints": true
 }
