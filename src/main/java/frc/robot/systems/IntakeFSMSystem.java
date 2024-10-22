@@ -328,7 +328,7 @@ public class IntakeFSMSystem {
 	 */
 	public void setIndexerMotor(float rpsVelocity) {
 		if (rpsVelocity != 0) {
-		indexerMotor.setControl(mVoltage.withVelocity(-rpsVelocity));
+			indexerMotor.setControl(mVoltage.withVelocity(-rpsVelocity));
 		} else {
 			indexerMotor.set(rpsVelocity);
 		}

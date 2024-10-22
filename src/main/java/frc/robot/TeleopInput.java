@@ -220,22 +220,6 @@ public class TeleopInput {
 	}
 
 	/**
-	 * Get the value of the L2 button.
-	 * @return if L2 button is pressed
-	 */
-	public boolean isManualIntakeButtonPressed() {
-		return mechController.getL2Button();
-	}
-
-	/**
-	 * Get the value of the R2 button.
-	 * @return if R2 button is pressed.
-	 */
-	public boolean isManualOuttakeButtonPressed() {
-		return mechController.getR2Button();
-	}
-
-	/**
 	 * Sets the rumble for the left side of the mech controller.
 	 * @param value between 0 and 1, where 0 is no rumble and 1 is maximum rumble.
 	 */
