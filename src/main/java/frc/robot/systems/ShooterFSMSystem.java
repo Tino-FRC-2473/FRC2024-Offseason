@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -35,7 +34,6 @@ public class ShooterFSMSystem {
 	private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
-	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -71,8 +69,8 @@ public class ShooterFSMSystem {
 		motionMagicConfigs.MotionMagicJerk = Constants.CONFIG_CONSTANT_J;
 		// Target jerk of 4000 rps/s/s (0.1 seconds)
 
-		statusCode = shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
-		statusCode = shooterRightMotor.getConfigurator().apply(talonFXConfigs);
+		shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
+		shooterRightMotor.getConfigurator().apply(talonFXConfigs);
 
 		// Reset state machine
 		reset();

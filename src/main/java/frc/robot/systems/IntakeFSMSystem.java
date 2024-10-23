@@ -1,8 +1,10 @@
 package frc.robot.systems;
 
+import edu.wpi.first.math.system.plant.DCMotor;
 // WPILib Imports
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -49,6 +51,8 @@ public class IntakeFSMSystem {
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
 	private CurrentLimitsConfigs currLimitcfgs = talonFXConfigs.CurrentLimits;
 
+	private final DCMotorSim indexMotorSim = new DCMotorSim(DCMotor.getKrakenX60(1), 1, 0.1);
+
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
 	private TalonFX indexerMotor;
@@ -69,6 +73,7 @@ public class IntakeFSMSystem {
 
 		indexerMotor = new TalonFX(HardwareMap.INDEXER_MOTOR_ID);
 		indexerMotor.setNeutralMode(NeutralModeValue.Brake);
+		var indexerSim = indexerMotor.getSimState();
 
 		pivotMotor = new TalonFX(HardwareMap.PIVOT_MOTOR_ID);
 		pivotMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -100,7 +105,7 @@ public class IntakeFSMSystem {
 		intakeMotor.getConfigurator().apply(talonFXConfigs);
 
 		BaseStatusSignal.setUpdateFrequencyForAll(Constants.UPDATE_FREQUENCY_HZ,
-			indexerMotor.getVelocity(), intakeMotor.getVelocity());
+			indexerMotor.getVelocity(), intakeMotor.getVelocity(), pivotMotor.getPosition());
 			// Diable all status signals except for ones listed in UpdateFrequency
 		ParentDevice.optimizeBusUtilizationForAll(pivotMotor, indexerMotor, intakeMotor);
 
@@ -181,9 +186,6 @@ public class IntakeFSMSystem {
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
 
 		SmartDashboard.putBoolean("HASNOTE", hasNote);
-
-		SmartDashboard.putNumber("intake velocity", intakeMotor.getVelocity().getValueAsDouble());
-		SmartDashboard.putNumber("indexer velocity", indexerMotor.getVelocity().getValueAsDouble());
 	}
 
 	/* ======================== Private methods ======================== */
@@ -540,7 +542,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public boolean isFinished() {
-			return handleAutoIntake() || timerSub.get() >= 2.0;
+			return handleAutoIntake() || timerSub.get() >= 3.0;
 		}
 	}
 

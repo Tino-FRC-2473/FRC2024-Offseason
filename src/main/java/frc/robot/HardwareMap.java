@@ -9,6 +9,7 @@ public final class HardwareMap {
 	// RoboRIO Ports
 	public static final int ENCODER_CHANNEL_A = 0;
 	public static final int ENCODER_CHANNEL_B = 1;
+	public static final int DRIVER_CAM_USB = 3;
 
 	// ID numbers for devices on the CAN bus
 	public static final int INTAKE_MOTOR_ID = 9; //9

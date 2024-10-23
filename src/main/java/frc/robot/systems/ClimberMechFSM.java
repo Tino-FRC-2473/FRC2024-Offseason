@@ -207,6 +207,7 @@ public class ClimberMechFSM {
 		} else {
 			rightMotor.set(calculatePower(false, true));
 		}
+
 		if (leftBottomSwitch.isPressed()) {
 			leftMotor.getEncoder().setPosition(0);
 			leftMotor.set(0);
@@ -233,9 +234,10 @@ public class ClimberMechFSM {
 			raisedPosition = LEFT_RAISED_POSITION;
 			currentPosition = leftMotor.getEncoder().getPosition();
 		}
-		
-		if (!goingUp) currentPosition = raisedPosition - currentPosition;
 
+		if (!goingUp) {
+			currentPosition = raisedPosition - currentPosition;
+		}
 		currentPosition = Math.abs(currentPosition);
 		raisedPosition = Math.abs(raisedPosition);
 

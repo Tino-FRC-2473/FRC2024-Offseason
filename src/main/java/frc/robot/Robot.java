@@ -98,7 +98,7 @@ public class Robot extends TimedRobot {
 		SmartDashboard.putData("Auto Chooser", autoChooser);
 		SmartDashboard.putData("Field", mField);
 
-		driverCam = CameraServer.startAutomaticCapture(3);
+		driverCam = CameraServer.startAutomaticCapture(HardwareMap.DRIVER_CAM_USB);
 		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
 			streamHeight, streamFPS);
 		driverCam.setVideoMode(videoMode);
@@ -110,6 +110,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
+		SignalLogger.start();
 		driveFSMSystem.resetAutonomus();
 		autonomousCommand = getAutonomousCommand();
 		if (autonomousCommand != null) {
