@@ -15,7 +15,7 @@ public final class Constants {
 
 	// Auto Intake Constants
 	public static final double AUTO_PIVOT_TIMER = 0.5;
-	public static final double OUTTAKE_AUTO_TIMER = 0.7;
+	public static final double INATAKE_AUTO_TIMER = 2.5;
 	public static final float TIMED_INTAKING_DURATION = 1.5f;
 	public static final float AUTO_INTAKE_POWER = 0.2f;
 	public static final float AUTO_OUTTAKE_POWER = -0.2f;
@@ -49,7 +49,7 @@ public final class Constants {
 		// Auto
 	public static final double MIN_TURN_SPEED_AUTO = -0.6;
 	public static final double MAX_TURN_SPEED_AUTO = 0.6;
-	public static final double PID_CONSTANT_PIVOT_P_AUTO = 0.001;
+	public static final double PID_CONSTANT_PIVOT_P_AUTO = 0.0008;
 	public static final double INRANGE_VALUE = 30;
 
 	// Encoder Position Constants
