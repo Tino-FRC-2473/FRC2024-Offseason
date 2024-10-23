@@ -226,13 +226,16 @@ public class ClimberMechFSM {
 		double raisedPosition;
 		double currentPosition;
 		if (right) {
+			value *= -1;
 			raisedPosition = RIGHT_RAISED_POSITION;
 			currentPosition = rightMotor.getEncoder().getPosition();
 		} else {
-			value *= -1;
 			raisedPosition = LEFT_RAISED_POSITION;
 			currentPosition = leftMotor.getEncoder().getPosition();
 		}
+		
+		if (!goingUp) currentPosition = raisedPosition - currentPosition;
+
 		currentPosition = Math.abs(currentPosition);
 		raisedPosition = Math.abs(raisedPosition);
 
