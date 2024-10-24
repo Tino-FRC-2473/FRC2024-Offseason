@@ -163,6 +163,14 @@ public class ClimberMechFSM {
 				}
 				break;
 
+			case ZERO_HOOKS_STATE:
+				if (input.isZeroHooksButtonPressed() && !input.isManualRaiseButtonPressed()
+					&& !input.isManualLowerButtonPressed()) {
+						next = ClimberMechFSMState.ZERO_HOOKS_STATE;
+				} else {
+					next = ClimberMechFSMState.IDLE;
+				}
+
 			case IDLE:
 				if (input.isManualRaiseButtonPressed() && !input.isManualLowerButtonPressed()
 					&& !input.isZeroHooksButtonPressed()) {
