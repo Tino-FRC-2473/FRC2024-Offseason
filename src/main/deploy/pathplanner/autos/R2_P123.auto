@@ -20,6 +20,12 @@
                 "data": {
                   "name": "S_SPN"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "I_PTG"
+                }
               }
             ]
           }
@@ -32,6 +38,12 @@
                 "type": "path",
                 "data": {
                   "pathName": "R2_C1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "I_FXN"
                 }
               }
             ]

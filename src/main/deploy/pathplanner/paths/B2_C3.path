@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 2.5670791427174855,
-        "y": 4.016816935203058
+        "x": 2.531379610241326,
+        "y": 4.382111698008433
       },
       "prevControl": {
-        "x": 2.8161530318312833,
-        "y": 3.727569838167679
+        "x": 2.780453499355124,
+        "y": 4.092864600973055
       },
       "nextControl": {
-        "x": 2.2040432097982587,
-        "y": 4.438407050851192
+        "x": 2.1683436773220994,
+        "y": 4.803701813656568
       },
       "isLocked": false,
       "linkedName": null
@@ -57,29 +57,12 @@
     },
     {
       "waypointRelativePos": 0.9,
-      "rotationDegrees": 140.0,
+      "rotationDegrees": 146.08384509044524,
       "rotateFast": false
     }
   ],
   "constraintZones": [],
   "eventMarkers": [
-    {
-      "name": "Ground",
-      "waypointRelativePos": 0.2,
-      "command": {
-        "type": "sequential",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "I_PTG"
-              }
-            }
-          ]
-        }
-      }
-    },
     {
       "name": "Intake",
       "waypointRelativePos": 0.55,
@@ -91,23 +74,6 @@
               "type": "named",
               "data": {
                 "name": "I_ITN"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "Home",
-      "waypointRelativePos": 1.25,
-      "command": {
-        "type": "sequential",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "I_PTH"
               }
             }
           ]
