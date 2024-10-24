@@ -20,11 +20,13 @@ public class ClimberMechFSM {
 		START_STATE,
 		RAISE_HOOK_MANUAL,
 		LOWER_HOOK_MANUAL,
+		ZERO_HOOKS_STATE,
 		IDLE
 	}
 
 	private static final float MOTOR_POWER_UP = -0.5f;
 	private static final float MOTOR_POWER_DOWN = 0.5f;
+	private static final float ZEROING_MOTOR_POWER = -0.1f;
 
 	private static final float RIGHT_RAISED_POSITION = -70f;
 
@@ -112,6 +114,9 @@ public class ClimberMechFSM {
 			case LOWER_HOOK_MANUAL:
 				handleLowerHookManualState(input);
 				break;
+			case ZERO_HOOKS_STATE :
+				handleZeroHookState(input);
+				break;
 			case IDLE:
 				handleIdleState(input);
 				break;
@@ -141,7 +146,8 @@ public class ClimberMechFSM {
 
 		switch (currentState) {
 			case RAISE_HOOK_MANUAL:
-				if (input.isManualRaiseButtonPressed() && !input.isManualLowerButtonPressed()) {
+				if (input.isManualRaiseButtonPressed() && !input.isManualLowerButtonPressed()
+					&& !input.isZeroHooksButtonPressed()) {
 					next = ClimberMechFSMState.RAISE_HOOK_MANUAL;
 				} else {
 					next = ClimberMechFSMState.IDLE;
@@ -149,7 +155,8 @@ public class ClimberMechFSM {
 				break;
 
 			case LOWER_HOOK_MANUAL:
-				if ((!input.isManualRaiseButtonPressed() && input.isManualLowerButtonPressed())) {
+				if (!input.isManualRaiseButtonPressed() && input.isManualLowerButtonPressed()
+					&& !input.isZeroHooksButtonPressed()) {
 					next = ClimberMechFSMState.LOWER_HOOK_MANUAL;
 				} else {
 					next = ClimberMechFSMState.IDLE;
@@ -157,11 +164,15 @@ public class ClimberMechFSM {
 				break;
 
 			case IDLE:
-				if (input.isManualRaiseButtonPressed() && !input.isManualLowerButtonPressed()) {
+				if (input.isManualRaiseButtonPressed() && !input.isManualLowerButtonPressed()
+					&& !input.isZeroHooksButtonPressed()) {
 					next = ClimberMechFSMState.RAISE_HOOK_MANUAL;
-				} else if (
-					(input.isManualLowerButtonPressed() && !input.isManualRaiseButtonPressed())) {
+				} else if (input.isManualLowerButtonPressed() && !input.isManualRaiseButtonPressed()
+						&& !input.isZeroHooksButtonPressed()) {
 					next = ClimberMechFSMState.LOWER_HOOK_MANUAL;
+				} else if (input.isZeroHooksButtonPressed() && !input.isManualRaiseButtonPressed()
+					&& !input.isManualLowerButtonPressed()) {
+					next = ClimberMechFSMState.ZERO_HOOKS_STATE;
 				} else {
 					next = ClimberMechFSMState.IDLE;
 				}
@@ -213,6 +224,22 @@ public class ClimberMechFSM {
 			leftMotor.set(0);
 		} else {
 			leftMotor.set(calculatePower(false, false));
+		}
+	}
+
+	private void handleZeroHookState(TeleopInput input) {
+		if (rightBottomSwitch.isPressed()) {
+			rightMotor.getEncoder().setPosition(0);
+			rightMotor.set(0);
+		} else {
+			rightMotor.set(-ZEROING_MOTOR_POWER);
+		}
+
+		if (leftBottomSwitch.isPressed()) {
+			leftMotor.getEncoder().setPosition(0);
+			leftMotor.set(0);
+		} else {
+			leftMotor.set(ZEROING_MOTOR_POWER);
 		}
 	}
 

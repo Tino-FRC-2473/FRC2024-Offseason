@@ -180,6 +180,14 @@ public class TeleopInput {
 	}
 
 	/**
+	 * Get the value of the L2 Button.
+	 * @return if L2 Button is pressed
+	 */
+	public boolean isZeroHooksButtonPressed() {
+		return mechController.getL2Button();
+	}
+
+	/**
 	 * Get the value of the L1 Button.
 	 * @return if L1 Button is pressed
 	 */
@@ -196,16 +204,16 @@ public class TeleopInput {
 	}
 
 	/**
-	 * Get the value of the L1  button.
-	 * @return if L1 button is pressed
+	 * Get the value of the R1  button.
+	 * @return if R1 button is pressed
 	 */
 	public boolean isManualRaiseButtonPressed() {
 		return mechController.getR1Button();
 	}
 
 	/**
-	 * Get the value of the L2 Button.
-	 * @return if L2 Button is pressed
+	 * Get the value of the R2 Button.
+	 * @return if R2 Button is pressed
 	 */
 	public boolean isManualLowerButtonPressed() {
 		return mechController.getR2Button();

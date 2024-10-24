@@ -336,8 +336,8 @@ public class IntakeFSMSystem {
 	 * Stops the pivot motor and intake motor.
 	 */
 	public void stopPivotIntake() {
-		intakeMotor.set(0);
-		indexerMotor.set(0);
+		intakeMotor.stopMotor();
+		pivotMotor.set(0);
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
