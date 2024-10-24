@@ -54,23 +54,6 @@
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "Ground",
-      "waypointRelativePos": 0.05,
-      "command": {
-        "type": "sequential",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "I_PTG"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
       "name": "Intake",
       "waypointRelativePos": 0.25,
       "command": {
@@ -88,25 +71,8 @@
       }
     },
     {
-      "name": "Home",
-      "waypointRelativePos": 1.65,
-      "command": {
-        "type": "sequential",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "I_PTH"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
       "name": "Shoot",
-      "waypointRelativePos": 1.5,
+      "waypointRelativePos": 1.75,
       "command": {
         "type": "sequential",
         "data": {

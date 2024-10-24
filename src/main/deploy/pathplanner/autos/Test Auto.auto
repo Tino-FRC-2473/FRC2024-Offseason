@@ -18,6 +18,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "I_PTG"
+          }
+        },
+        {
           "type": "sequential",
           "data": {
             "commands": [
@@ -25,6 +31,44 @@
                 "type": "path",
                 "data": {
                   "pathName": "R2_C2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "I_FXN"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R2_C1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "I_FXN"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R2_C3"
                 }
               },
               {

@@ -12,16 +12,15 @@
     "data": {
       "commands": [
         {
-          "type": "sequential",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "S_SPN"
-                }
-              }
-            ]
+            "name": "S_SPN"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "I_PTG"
           }
         },
         {
