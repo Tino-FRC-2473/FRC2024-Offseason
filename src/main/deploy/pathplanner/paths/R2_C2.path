@@ -55,7 +55,7 @@
   "eventMarkers": [
     {
       "name": "Ground",
-      "waypointRelativePos": 0.05,
+      "waypointRelativePos": 0.2,
       "command": {
         "type": "sequential",
         "data": {
@@ -72,7 +72,7 @@
     },
     {
       "name": "Intake",
-      "waypointRelativePos": 0.25,
+      "waypointRelativePos": 0.35,
       "command": {
         "type": "sequential",
         "data": {
@@ -89,7 +89,7 @@
     },
     {
       "name": "Home",
-      "waypointRelativePos": 1.65,
+      "waypointRelativePos": 1.75,
       "command": {
         "type": "sequential",
         "data": {
@@ -106,7 +106,7 @@
     },
     {
       "name": "Shoot",
-      "waypointRelativePos": 1.5,
+      "waypointRelativePos": 1.75,
       "command": {
         "type": "sequential",
         "data": {

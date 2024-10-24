@@ -60,17 +60,24 @@
   "eventMarkers": [
     {
       "name": "Ground",
-      "waypointRelativePos": 0.2,
+      "waypointRelativePos": 0.1,
       "command": {
         "type": "sequential",
         "data": {
-          "commands": []
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "I_PTG"
+              }
+            }
+          ]
         }
       }
     },
     {
       "name": "Intake",
-      "waypointRelativePos": 0.45,
+      "waypointRelativePos": 0.15,
       "command": {
         "type": "sequential",
         "data": {
@@ -91,13 +98,20 @@
       "command": {
         "type": "sequential",
         "data": {
-          "commands": []
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "I_PTH"
+              }
+            }
+          ]
         }
       }
     },
     {
       "name": "Shoot",
-      "waypointRelativePos": 1.15,
+      "waypointRelativePos": 1.35,
       "command": {
         "type": "sequential",
         "data": {
