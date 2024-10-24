@@ -177,6 +177,7 @@ public class IntakeFSMSystem {
 
 		SmartDashboard.putBoolean("Color Sensor in Range?", colorSensor.getProximity()
 			>= Constants.PROXIMIIY_THRESHOLD);
+		SmartDashboard.putNumber("Color Senor Val", colorSensor.getProximity());
 		SmartDashboard.putNumber("Frames with Note in View", noteColorFrames);
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
 
@@ -331,6 +332,14 @@ public class IntakeFSMSystem {
 		}
 	}
 
+	/**
+	 * Stops the pivot motor and intake motor.
+	 */
+	public void stopPivotIntake() {
+		intakeMotor.set(0);
+		indexerMotor.set(0);
+	}
+
 	/* ------------------------ FSM state handlers ------------------------ */
 	/**
 	 * Handle behavior in MOVE_TO_HOME.
@@ -455,6 +464,8 @@ public class IntakeFSMSystem {
 		} else {
 			led.orangeLight(false);
 		}
+		intakeMotor.set(0);
+		indexerMotor.set(0);
 
 		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		return approxEquals(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT);

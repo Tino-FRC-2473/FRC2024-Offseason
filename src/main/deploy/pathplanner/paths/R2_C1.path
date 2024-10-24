@@ -60,7 +60,7 @@
   "eventMarkers": [
     {
       "name": "Intake",
-      "waypointRelativePos": 0.45,
+      "waypointRelativePos": 0.15,
       "command": {
         "type": "sequential",
         "data": {
@@ -77,7 +77,7 @@
     },
     {
       "name": "Shoot",
-      "waypointRelativePos": 1.15,
+      "waypointRelativePos": 1.35,
       "command": {
         "type": "sequential",
         "data": {

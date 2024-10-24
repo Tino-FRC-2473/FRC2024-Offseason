@@ -312,6 +312,7 @@ public class ShooterFSMSystem {
 			shooterLeftMotor.set(0);
 			shooterRightMotor.set(0);
 			intakeFSM.setIndexerMotor(0);
+			intakeFSM.stopPivotIntake();
 			intakeFSM.setHasNote(false);
 
 			timerSub.stop();
@@ -348,6 +349,8 @@ public class ShooterFSMSystem {
 		// Called every time the scheduler runs while the command is scheduled.
 		@Override
 		public void execute() {
+			intakeFSM.stopPivotIntake();
+
 			shooterLeftMotor.setControl(mVoltage.withVelocity(
 				-Constants.SHOOT_VELOCITY));
 			shooterRightMotor.setControl(mVoltage.withVelocity(
@@ -361,6 +364,7 @@ public class ShooterFSMSystem {
 			shooterLeftMotor.set(0);
 			shooterRightMotor.set(0);
 			intakeFSM.setIndexerMotor(0);
+			intakeFSM.stopPivotIntake();
 
 			timerSub.stop();
 			timerSub.reset();
@@ -395,6 +399,8 @@ public class ShooterFSMSystem {
 		// Called every time the scheduler runs while the command is scheduled.
 		@Override
 		public void execute() {
+			intakeFSM.stopPivotIntake();
+
 			if (timerSub.get() < Constants.AUTO_REVVING_SECS) {
 				shooterLeftMotor.setControl(mVoltage.withVelocity(
 					-Constants.SHOOT_VELOCITY));

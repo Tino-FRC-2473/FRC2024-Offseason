@@ -15,7 +15,7 @@ public final class Constants {
 
 	// Auto Intake Constants
 	public static final double AUTO_PIVOT_TIMER = 0.5;
-	public static final double INATAKE_AUTO_TIMER = 2.5;
+	public static final double INATAKE_AUTO_TIMER = 3.0;
 	public static final float TIMED_INTAKING_DURATION = 1.5f;
 	public static final float AUTO_INTAKE_POWER = 0.2f;
 	public static final float AUTO_OUTTAKE_POWER = -0.2f;
@@ -30,7 +30,7 @@ public final class Constants {
 
 	// REV Color Sensor Constants
 	public static final int NOTE_FRAMES_MIN = 1;
-	public static final double PROXIMIIY_THRESHOLD = 150;
+	public static final double PROXIMIIY_THRESHOLD = 105;
 
 	public static final double GREEN_LOW = 0.18;
 	public static final double BLUE_LOW = 0.00;
