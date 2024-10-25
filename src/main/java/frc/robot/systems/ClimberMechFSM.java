@@ -34,6 +34,7 @@ public class ClimberMechFSM {
 
 	private static final float[] THRESHOLDS = new float[] {0.9f, 0.8f, 0.7f};
 	private static final float[] MODIFIERS = new float[] {0.3f, 0.5f, 0.7f};
+	private static final float LOWER_P_CONSTANT = 0.5f;
 
 	/* ======================== Private variables ======================== */
 	private ClimberMechFSMState currentState;
@@ -250,6 +251,23 @@ public class ClimberMechFSM {
 			leftMotor.set(ZEROING_MOTOR_POWER);
 		}
 	}
+	
+	/**
+	 * Clamps the value to be between a given minimum and maximum value.
+	 * @param val The value to be clamped.
+	 * @param min The minimum value.
+	 * @param max The maximum value.
+	 * @return The clamped value.
+	 */
+	private double clamp(double val, double min, double max) {
+		if (val < min) {
+			return min;
+		} else if (val > max) {
+			return max;
+		} else {
+			return val;
+		}
+	}
 
 	/**
 	 * modifies the power going up based on a step function.
@@ -271,7 +289,7 @@ public class ClimberMechFSM {
 		}
 
 		if (!goingUp) {
-			currentPosition = raisedPosition - currentPosition;
+			return clamp(LOWER_P_CONSTANT * -currentPosition, -MOTOR_POWER_DOWN, MOTOR_POWER_DOWN);
 		}
 		currentPosition = Math.abs(currentPosition);
 		raisedPosition = Math.abs(raisedPosition);
