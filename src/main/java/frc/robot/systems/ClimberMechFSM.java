@@ -169,7 +169,7 @@ public class ClimberMechFSM {
 			case ZERO_HOOKS_STATE:
 				if (input.isZeroHooksButtonPressed() && !input.isManualRaiseButtonPressed()
 					&& !input.isManualLowerButtonPressed()) {
-						next = ClimberMechFSMState.ZERO_HOOKS_STATE;
+					next = ClimberMechFSMState.ZERO_HOOKS_STATE;
 				} else {
 					next = ClimberMechFSMState.IDLE;
 				}
@@ -253,7 +253,7 @@ public class ClimberMechFSM {
 			leftMotor.set(-ZEROING_MOTOR_POWER);
 		}
 	}
-	
+
 	/**
 	 * Clamps the value to be between a given minimum and maximum value.
 	 * @param val The value to be clamped.
@@ -291,7 +291,8 @@ public class ClimberMechFSM {
 		}
 
 		if (!goingUp) {
-			// return clamp(LOWER_P_CONSTANT * -currentPosition, -MOTOR_POWER_DOWN, MOTOR_POWER_DOWN);
+			// return clamp(LOWER_P_CONSTANT * -currentPosition, -MOTOR_POWER_DOWN,
+				//MOTOR_POWER_DOWN);
 			currentPosition = raisedPosition - currentPosition;
 		}
 		currentPosition = Math.abs(currentPosition);

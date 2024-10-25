@@ -3,8 +3,9 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
-import edu.wpi.first.cscore.HttpCamera;
 // WPILib Imports
+import edu.wpi.first.cscore.HttpCamera;
+import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
@@ -19,14 +20,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import com.ctre.phoenix6.SignalLogger;
 // Third Party Imports
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.HttpCamera;
-import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
 
 // Systems
 import frc.robot.systems.ClimberMechFSM;
@@ -109,10 +107,12 @@ public class Robot extends TimedRobot {
 		driverCam.setVideoMode(videoMode);
 		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
 		driverCam.setResolution(streamWidth, streamHeight);
-		
-		//edu.wpi.first.cscore.HttpCamera cam = new edu.wpi.first.cscore.HttpCamera("drivercam", driverCam, HttpCameraKind.kMJPGStreamer);
-		edu.wpi.first.cscore.HttpCamera cam = new edu.wpi.first.cscore.HttpCamera("drivercam", "http://10.24.73.106:1181/stream.mjpg", HttpCameraKind.kMJPGStreamer);
-        CameraServer.startAutomaticCapture(cam);
+
+		//edu.wpi.first.cscore.HttpCamera cam = new edu.wpi.first.cscore.HttpCamera("drivercam",
+			//driverCam, HttpCameraKind.kMJPGStreamer);
+		edu.wpi.first.cscore.HttpCamera cam = new edu.wpi.first.cscore.HttpCamera("drivercam",
+			"http://10.24.73.106:1181/stream.mjpg", HttpCameraKind.kMJPGStreamer);
+		CameraServer.startAutomaticCapture(cam);
 	}
 
 
