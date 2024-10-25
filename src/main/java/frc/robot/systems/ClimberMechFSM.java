@@ -24,13 +24,13 @@ public class ClimberMechFSM {
 		IDLE
 	}
 
-	private static final float MOTOR_POWER_UP = -0.5f;
-	private static final float MOTOR_POWER_DOWN = 0.5f;
+	private static final float MOTOR_POWER_UP = 0.5f;
+	private static final float MOTOR_POWER_DOWN = -0.5f;
 	private static final float ZEROING_MOTOR_POWER = -0.1f;
 
-	private static final float RIGHT_RAISED_POSITION = -70f;
+	private static final float RIGHT_RAISED_POSITION = 70f;
 
-	private static final float LEFT_RAISED_POSITION = 70f;
+	private static final float LEFT_RAISED_POSITION = -70f;
 
 	private static final float[] THRESHOLDS = new float[] {0.9f, 0.8f, 0.7f};
 	private static final float[] MODIFIERS = new float[] {0.3f, 0.5f, 0.7f};
@@ -56,21 +56,21 @@ public class ClimberMechFSM {
 	public ClimberMechFSM() {
 		// Perform hardware init
 		rightMotor = new CANSparkMax(
-			HardwareMap.LEFT_CLIMBER_CAN_ID,
+			HardwareMap.RIGHT_CLIMBER_CAN_ID,
 			CANSparkMax.MotorType.kBrushless);
 
 		rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		rightMotor.getEncoder().setPosition(0);
 
 		leftMotor = new CANSparkMax(
-			HardwareMap.RIGHT_CLIMBER_CAN_ID,
+			HardwareMap.LEFT_CLIMBER_CAN_ID,
 			CANSparkMax.MotorType.kBrushless);
 
 		leftMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		leftMotor.getEncoder().setPosition(0);
 
-		leftBottomSwitch = leftMotor.getReverseLimitSwitch(Type.kNormallyClosed);
-		rightBottomSwitch = rightMotor.getForwardLimitSwitch(Type.kNormallyClosed);
+		leftBottomSwitch = leftMotor.getForwardLimitSwitch(Type.kNormallyClosed);
+		rightBottomSwitch = rightMotor.getReverseLimitSwitch(Type.kNormallyClosed);
 
 		// Reset state machine
 		reset();
@@ -127,6 +127,8 @@ public class ClimberMechFSM {
 		SmartDashboard.putString("Climber State", currentState.toString());
 		SmartDashboard.putNumber("left encoder position", leftMotor.getEncoder().getPosition());
 		SmartDashboard.putNumber("right encoder position", rightMotor.getEncoder().getPosition());
+		SmartDashboard.putBoolean("Left limit switch pressed", leftBottomSwitch.isPressed());
+		SmartDashboard.putBoolean("Right limit switch pressed", rightBottomSwitch.isPressed());
 
 		currentState = nextState(input);
 	}
@@ -241,14 +243,14 @@ public class ClimberMechFSM {
 			rightMotor.getEncoder().setPosition(0);
 			rightMotor.set(0);
 		} else {
-			rightMotor.set(-ZEROING_MOTOR_POWER);
+			rightMotor.set(ZEROING_MOTOR_POWER);
 		}
 
 		if (leftBottomSwitch.isPressed()) {
 			leftMotor.getEncoder().setPosition(0);
 			leftMotor.set(0);
 		} else {
-			leftMotor.set(ZEROING_MOTOR_POWER);
+			leftMotor.set(-ZEROING_MOTOR_POWER);
 		}
 	}
 	
@@ -280,16 +282,17 @@ public class ClimberMechFSM {
 		double raisedPosition;
 		double currentPosition;
 		if (right) {
-			value *= -1;
 			raisedPosition = RIGHT_RAISED_POSITION;
 			currentPosition = rightMotor.getEncoder().getPosition();
 		} else {
+			value *= -1;
 			raisedPosition = LEFT_RAISED_POSITION;
 			currentPosition = leftMotor.getEncoder().getPosition();
 		}
 
 		if (!goingUp) {
-			return clamp(LOWER_P_CONSTANT * -currentPosition, -MOTOR_POWER_DOWN, MOTOR_POWER_DOWN);
+			// return clamp(LOWER_P_CONSTANT * -currentPosition, -MOTOR_POWER_DOWN, MOTOR_POWER_DOWN);
+			currentPosition = raisedPosition - currentPosition;
 		}
 		currentPosition = Math.abs(currentPosition);
 		raisedPosition = Math.abs(raisedPosition);
