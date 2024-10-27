@@ -4,13 +4,14 @@
 package frc.robot;
 
 // WPILib Imports
-// import edu.wpi.first.cameraserver.CameraServer;
-// import edu.wpi.first.cscore.MjpegServer;
-// import edu.wpi.first.cscore.UsbCamera;
-// import edu.wpi.first.cscore.VideoMode;
-// import edu.wpi.first.cscore.VideoSink;
-// import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
-// import edu.wpi.first.util.PixelFormat;
+import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.MjpegServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoMode;
+import edu.wpi.first.cscore.VideoSink;
+import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
+import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -18,10 +19,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import com.ctre.phoenix6.SignalLogger;
 // Third Party Imports
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+
 
 // Systems
 import frc.robot.systems.ClimberMechFSM;
@@ -45,18 +47,18 @@ public class Robot extends TimedRobot {
 	private Command autonomousCommand;
 	private final Field2d mField = new Field2d();
 
-	// private UsbCamera driverCam;
-	// private UsbCamera chainCam;
-	// private VideoSink videoSink;
-	// private MjpegServer driverStream;
-	// private MjpegServer chainStream;
+	private UsbCamera driverCam;
+	private UsbCamera chainCam;
+	private VideoSink videoSink;
+	private MjpegServer driverStream;
+	private MjpegServer chainStream;
 
-	// private final int streamWidth = 256;
-	// private final int streamHeight = 144;
-	// private final int streamFPS = 30;
+	private final int streamWidth = 256;
+	private final int streamHeight = 144;
+	private final int streamFPS = 30;
 
-	// private final int redSpeakerTagID = 4;
-	// private final int blueSpeakerTagID = 7;
+	private final int redSpeakerTagID = 4;
+	private final int blueSpeakerTagID = 7;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -98,12 +100,18 @@ public class Robot extends TimedRobot {
 		SmartDashboard.putData("Auto Chooser", autoChooser);
 		SmartDashboard.putData("Field", mField);
 
-		// driverCam = CameraServer.startAutomaticCapture(HardwareMap.DRIVER_CAM_USB);
-		// VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
-		// 	streamHeight, streamFPS);
-		// driverCam.setVideoMode(videoMode);
-		// driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-		// driverCam.setResolution(streamWidth, streamHeight);
+		driverCam = CameraServer.startAutomaticCapture(HardwareMap.DRIVER_CAM_USB);
+		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
+			streamHeight, streamFPS);
+		driverCam.setVideoMode(videoMode);
+		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+		driverCam.setResolution(streamWidth, streamHeight);
+
+		//edu.wpi.first.cscore.HttpCamera cam = new edu.wpi.first.cscore.HttpCamera("drivercam",
+			//driverCam, HttpCameraKind.kMJPGStreamer);
+		edu.wpi.first.cscore.HttpCamera cam = new edu.wpi.first.cscore.HttpCamera("drivercam",
+			"http://10.24.73.106:1181/stream.mjpg", HttpCameraKind.kMJPGStreamer);
+		CameraServer.startAutomaticCapture(cam);
 	}
 
 
