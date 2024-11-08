@@ -7,7 +7,8 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 // WPILib Imports
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,26 +17,23 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.Timer;
-
-// Robot Imports
-import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
 //import frc.robot.LED;
 import frc.robot.RaspberryPI;
-import frc.robot.SwerveConstants;
 import frc.robot.SwerveConstants.AutoConstants;
 // import frc.robot.LED;
 import frc.robot.SwerveConstants.DriveConstants;
 import frc.robot.SwerveConstants.OIConstants;
 import frc.robot.SwerveConstants.VisionConstants;
+// Robot Imports
+import frc.robot.TeleopInput;
+import frc.robot.utils.SwerveUtils;
 
 public class DriveFSMSystem extends SubsystemBase {
 	/* ======================== Constants ======================== */
@@ -93,6 +91,13 @@ public class DriveFSMSystem extends SubsystemBase {
 			rearRight.getPosition()
 		});
 
+	private double currentRotation = 0.0;
+	private double currentTranslationDir = 0.0;
+	private double currentTranslationMag = 0.0;
+
+	private SlewRateLimiter magLimiter = new SlewRateLimiter(DriveConstants.MAGNITUDE_SLEW_RATE);
+	private SlewRateLimiter rotLimiter = new SlewRateLimiter(DriveConstants.kRotationalSlewRate);
+	private double prevTime = WPIUtilJNI.now() * 1e-6;
 
 	private int lockedSpeakerId;
 	private boolean isSpeakerAligned;
@@ -413,31 +418,63 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * @param rateLimit 	Whether to rate limit the supplied swerve speeds.
 	*/
 	public void drive(double xSpeed, double ySpeed, double rot,
-		boolean fieldRelative, double rateLimit) {
+		boolean fieldRelative, boolean rateLimit) {
 		// Convert the commanded speeds into the correct units for the drivetrain
 		double xSpeedDelivered = xSpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double ySpeedDelivered = ySpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double rotDelivered = rot * DriveConstants.MAX_ANGULAR_SPEED;
 
+		double xSpeedCommanded;
+		double ySpeedCommanded;
+
 		if (rateLimit) {
-			/*
-			 * Rate limit system:
-			 * - X_speed rate limit
-			 * - Y_speed rate limit
-			 * 
-			 * R_x = (x_k - x_(k-1)) / (t_k - t_(k-1))
-			 * R_y = (y_k - y_(k-1)) / (t_k - t_(k-1))
-			 * 
-			 * Given --> R_r_x, R_r_y, R_f_x, R_f_y
-			 * If R > R_r_x: x_k = R_r_x * (t_k - t_(k-1)) + x_(k-1)
-			 * If R < R_f_x: x_k = R_f_x * (t_k - t_(k-1)) + x_(k-1)
-			 * repeat for y
-			 * 
-			 * 
-			 */
+			// Convert XY to polar for rate limiting
+			double inputTranslationDir = Math.atan2(ySpeed, xSpeed);
+			double inputTranslationMag = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2));
+
+			// Calculate the direction slew rate based on an estimate of the lateral acceleration
+			double directionSlewRate;
+			if (m_currentTranslationMag != 0.0) {
+				directionSlewRate = Math.abs(DriveConstants.kDirectionSlewRate / m_currentTranslationMag);
+			} else {
+				directionSlewRate = 500.0; //some high number that means the slew rate is effectively instantaneous
+			}
 			
+
+			double currentTime = WPIUtilJNI.now() * 1e-6;
+			double elapsedTime = currentTime - m_prevTime;
+			double angleDif = SwerveUtils.AngleDifference(inputTranslationDir, m_currentTranslationDir);
+			if (angleDif < 0.45*Math.PI) {
+				m_currentTranslationDir = SwerveUtils.StepTowardsCircular(m_currentTranslationDir, inputTranslationDir, directionSlewRate * elapsedTime);
+				m_currentTranslationMag = m_magLimiter.calculate(inputTranslationMag);
+			}
+			else if (angleDif > 0.85*Math.PI) {
+				if (m_currentTranslationMag > 1e-4) { //some small number to avoid floating-point errors with equality checking
+				// keep currentTranslationDir unchanged
+				m_currentTranslationMag = m_magLimiter.calculate(0.0);
+				}
+				else {
+				m_currentTranslationDir = SwerveUtils.WrapAngle(m_currentTranslationDir + Math.PI);
+				m_currentTranslationMag = m_magLimiter.calculate(inputTranslationMag);
+				}
+			}
+			else {
+				m_currentTranslationDir = SwerveUtils.StepTowardsCircular(m_currentTranslationDir, inputTranslationDir, directionSlewRate * elapsedTime);
+				m_currentTranslationMag = m_magLimiter.calculate(0.0);
+			}
+			m_prevTime = currentTime;
+
+			xSpeedCommanded = m_currentTranslationMag * Math.cos(m_currentTranslationDir);
+			ySpeedCommanded = m_currentTranslationMag * Math.sin(m_currentTranslationDir);
+			m_currentRotation = m_rotLimiter.calculate(rot);
+
+
+		} else {
+			xSpeedCommanded = xSpeed;
+			ySpeedCommanded = ySpeed;
+			m_currentRotation = rot;
 		}
-			
+
 		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
 			fieldRelative
 				? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered,
