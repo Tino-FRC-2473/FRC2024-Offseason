@@ -120,7 +120,7 @@ public final class SwerveConstants {
 	}
 
 	public static final class OIConstants {
-		public static final double DRIVE_DEADBAND = 0.02;
+		public static final double DRIVE_DEADBAND = 0.05;
 	}
 
 	public static final class AutoConstants {

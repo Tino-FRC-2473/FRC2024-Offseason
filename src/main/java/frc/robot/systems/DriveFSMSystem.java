@@ -30,6 +30,7 @@ import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
 //import frc.robot.LED;
 import frc.robot.RaspberryPI;
+import frc.robot.SwerveConstants;
 import frc.robot.SwerveConstants.AutoConstants;
 // import frc.robot.LED;
 import frc.robot.SwerveConstants.DriveConstants;
@@ -98,17 +99,8 @@ public class DriveFSMSystem extends SubsystemBase {
 	private boolean isNoteAligned;
 	private boolean isSpeakerPositionAligned;
 
-
 	private boolean redAlliance;
 	private Double[] tagOrientationAngles;
-
-	private StructArrayPublisher<SwerveModuleState> statePublisher
-		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
-		SwerveModuleState.struct).publish();
-
-	private StructArrayPublisher<Pose2d> posePublisher
-		= NetworkTableInstance.getDefault().getStructArrayTopic("MyPose",
-		Pose2d.struct).publish();
 
 
 	/* ======================== Constructor ======================== */
@@ -321,66 +313,21 @@ public class DriveFSMSystem extends SubsystemBase {
 		SmartDashboard.putString("Drive State", getCurrentState().toString());
 		//SmartDashboard.putBoolean("Is Speaker Aligned", isSpeakerAligned);
 
-		//SmartDashboard.putNumber("X Pos", getPose().getX());
-		//SmartDashboard.putNumber("Y Pos", getPose().getY());
-		//SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
-
-		/*
-		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-		SmartDashboard.putNumber("Gyro Yaw", gyro.getYaw());
-		SmartDashboard.putNumber("Gyro Fused Heading", gyro.getFusedHeading());
-		*/
-
-		/*SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
-			input.getControllerLeftJoystickY()
-					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-					OIConstants.DRIVE_DEADBAND));
-
-		SmartDashboard.putNumber("y feed", -MathUtil.applyDeadband((
-			input.getControllerLeftJoystickX()
-					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-					OIConstants.DRIVE_DEADBAND));
-
-		SmartDashboard.putNumber("ang feed", -MathUtil.applyDeadband(
-			(input.getControllerRightJoystickX()
-					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT),
-					OIConstants.DRIVE_DEADBAND));
-
-
-
-		SwerveModuleState[] states = new SwerveModuleState[] {
-			frontLeft.getState(),
-			frontRight.getState(),
-			rearLeft.getState(),
-			rearRight.getState()
-		};
-
-		Pose2d[] poses = new Pose2d[] {
-			getPose()
-		};
-
-		statePublisher.set(states);
-		posePublisher.set(poses);
-
-		*/
-
+		SmartDashboard.putNumber("X Pos", getPose().getX());
+		SmartDashboard.putNumber("Y Pos", getPose().getY());
+		SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
+		
 		switch (currentState) {
 			case TELEOP_STATE:
-				drive(-MathUtil.applyDeadband((input.getControllerLeftJoystickY()
-					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
-					-MathUtil.applyDeadband((input.getControllerLeftJoystickX()
-					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
-					-MathUtil.applyDeadband((input.getControllerRightJoystickX()
-					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND),
-					true);
+				drive(
+					-MathUtil.applyDeadband(input.getControllerLeftJoystickY(), OIConstants.DRIVE_DEADBAND),
+					-MathUtil.applyDeadband(input.getControllerLeftJoystickX(), OIConstants.DRIVE_DEADBAND),
+					-MathUtil.applyDeadband(input.getControllerRightJoystickX(), OIConstants.DRIVE_DEADBAND),
+					true,
+					true
+				);
 
-				if (input.isCrossButtonPressed()) {
+				if (input.isOptionsButtonPressed()) {
 					gyro.reset();
 				}
 
@@ -446,7 +393,6 @@ public class DriveFSMSystem extends SubsystemBase {
 	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case TELEOP_STATE:
-
 				return FSMState.TELEOP_STATE;
 
 			default:
@@ -464,34 +410,39 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * @param rot           Angular rate of the robot.
 	 * @param fieldRelative Whether the provided x and y speeds are relative to the
 	 *                      field.
+	 * @param rateLimit 	Whether to rate limit the supplied swerve speeds.
 	*/
 	public void drive(double xSpeed, double ySpeed, double rot,
-		boolean fieldRelative) {
+		boolean fieldRelative, double rateLimit) {
 		// Convert the commanded speeds into the correct units for the drivetrain
 		double xSpeedDelivered = xSpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double ySpeedDelivered = ySpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double rotDelivered = rot * DriveConstants.MAX_ANGULAR_SPEED;
 
-		//SmartDashboard.putNumber("x speed delivered", xSpeedDelivered);
-		//SmartDashboard.putNumber("y speed delivered", ySpeedDelivered);
-		//SmartDashboard.putNumber("rot speed delivered", rotDelivered);
-
-
+		if (rateLimit) {
+			/*
+			 * Rate limit system:
+			 * - X_speed rate limit
+			 * - Y_speed rate limit
+			 * 
+			 * R_x = (x_k - x_(k-1)) / (t_k - t_(k-1))
+			 * R_y = (y_k - y_(k-1)) / (t_k - t_(k-1))
+			 * 
+			 * Given --> R_r_x, R_r_y, R_f_x, R_f_y
+			 * If R > R_r_x: x_k = R_r_x * (t_k - t_(k-1)) + x_(k-1)
+			 * If R < R_f_x: x_k = R_f_x * (t_k - t_(k-1)) + x_(k-1)
+			 * repeat for y
+			 * 
+			 * 
+			 */
+			
+		}
+			
 		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
 			fieldRelative
 				? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered,
 					rotDelivered, Rotation2d.fromDegrees(getHeading()))
 				: new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
-
-		/*SmartDashboard.putNumber("s0d", swerveModuleStates[0].speedMetersPerSecond);
-		SmartDashboard.putNumber("s1d", swerveModuleStates[1].speedMetersPerSecond);
-		SmartDashboard.putNumber("s2d", swerveModuleStates[2].speedMetersPerSecond);
-		SmartDashboard.putNumber("s3d", swerveModuleStates[(2 + 1)].speedMetersPerSecond);
-
-		SmartDashboard.putNumber("s0t", swerveModuleStates[0].angle.getRadians());
-		SmartDashboard.putNumber("s1t", swerveModuleStates[1].angle.getRadians());
-		SmartDashboard.putNumber("s2t", swerveModuleStates[2].angle.getRadians());
-		SmartDashboard.putNumber("s3t", swerveModuleStates[(2 + 1)].angle.getRadians());*/
 
 		SwerveDriveKinematics.desaturateWheelSpeeds(
 			swerveModuleStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
@@ -500,11 +451,6 @@ public class DriveFSMSystem extends SubsystemBase {
 		frontRight.setDesiredState(swerveModuleStates[1]);
 		rearLeft.setDesiredState(swerveModuleStates[2]);
 		rearRight.setDesiredState(swerveModuleStates[(2 + 1)]);
-
-		//System.out.println("S1" + swerveModuleStates[0]);
-		//System.out.println("S2" + swerveModuleStates[1]);
-		//System.out.println("S3" + swerveModuleStates[2]);
-		//System.out.println("S4" + swerveModuleStates[(2 + 1)]);
 	}
 
 
