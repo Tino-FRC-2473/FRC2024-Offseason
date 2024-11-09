@@ -23,10 +23,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 // Systems
-import frc.robot.systems.ClimberMechFSM;
-import frc.robot.systems.DriveFSMSystem;
-import frc.robot.systems.ShooterFSMSystem;
-import frc.robot.systems.IntakeFSMSystem;
+//import frc.robot.systems.DriveFSMSystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -35,10 +32,7 @@ import frc.robot.systems.IntakeFSMSystem;
 public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
-	private DriveFSMSystem driveFSMSystem;
-	private ShooterFSMSystem shooterFSM;
-	private ClimberMechFSM climberMechFSM;
-	private IntakeFSMSystem intakeFSM;
+	//private DriveFSMSystem driveFSMSystem;
 
 	private SendableChooser<Command> autoChooser;
 	private Command autonomousCommand;
@@ -67,30 +61,9 @@ public class Robot extends TimedRobot {
 		input = new TeleopInput();
 
 		// Instantiate all systems here
-		driveFSMSystem = new DriveFSMSystem();
-		shooterFSM = new ShooterFSMSystem();
-		climberMechFSM = new ClimberMechFSM();
-		intakeFSM = new IntakeFSMSystem();
+		//driveFSMSystem = new DriveFSMSystem();
 
 		//Label all named commands here
-		// IntakeFSM Commands
-		NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
-		NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
-		NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
-
-		// ShooterFSM Commands
-		NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand(intakeFSM));
-		NamedCommands.registerCommand("S_RXS", shooterFSM.new RevCommand(intakeFSM));
-		NamedCommands.registerCommand("I_FXN", shooterFSM.new ShootNoteCommand(intakeFSM));
-
-		/*
-		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
-			driveFSMSystem, 0.5));
-		NamedCommands.registerCommand("S_ABT", new AprilTagAlign(blueSpeakerTagID,
-			driveFSMSystem, 0.5));
-		NamedCommands.registerCommand("S_AXN", new NoteAlign(driveFSMSystem,
-			0.5));
-		*/
 
 		autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -109,7 +82,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
-		driveFSMSystem.resetAutonomus();
+		//driveFSMSystem.resetAutonomus();
 		autonomousCommand = getAutonomousCommand();
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
@@ -124,17 +97,14 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousPeriodic() {
 		CommandScheduler.getInstance().run();
-		driveFSMSystem.updateAutonomous();
-		mField.setRobotPose(driveFSMSystem.getPose());
+		//driveFSMSystem.updateAutonomous();
+		//mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		driveFSMSystem.reset();
-		shooterFSM.reset();
-		climberMechFSM.reset();
-		intakeFSM.reset();
+		//driveFSMSystem.reset();
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
@@ -142,11 +112,8 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		driveFSMSystem.update(input);
-		shooterFSM.update(input);
-		climberMechFSM.update(input);
-		intakeFSM.update(input);
-		mField.setRobotPose(driveFSMSystem.getPose());
+		//driveFSMSystem.update(input);
+		//mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
 	@Override
