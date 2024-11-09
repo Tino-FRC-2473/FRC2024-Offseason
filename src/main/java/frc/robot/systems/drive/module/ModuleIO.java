@@ -1,4 +1,4 @@
-package frc.robot.systems.drive;
+package frc.robot.systems.drive.module;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
@@ -7,6 +7,8 @@ public interface ModuleIO {
 
     @AutoLog
     public class ModuleIOInfo {
+        public boolean connected = false;
+        
         public double drivePosition = 0.0; // rad
         public double driveVelocity = 0.0; // rad/s
 

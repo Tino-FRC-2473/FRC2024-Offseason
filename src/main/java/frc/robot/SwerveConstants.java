@@ -68,6 +68,12 @@ public final class SwerveConstants {
 		// a robot that drives faster).
 		public static final int DRIVING_MOTOR_PINON_TEETH = 13;
 
+		public static final double DRIVE_GEAR_RATIO = 4.0;
+		public static final double TURN_GEAR_RATIO = 2.0;
+		public static final double WHEEL_RADIUS = 6.0;
+		public static final double DRIVING_FF_KS = 0.0;
+		public static final double DRIVING_FF_KV = 0.0;
+
 		// Invert the turning encoder, since the output shaft rotates in the opposite direction of
 		// the steering motor in the MAXSwerve Module.
 		public static final boolean TURNING_MOTOR_INVERTED = true;

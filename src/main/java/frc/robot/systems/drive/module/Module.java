@@ -1,19 +1,18 @@
-	package frc.robot.systems.drive;
+package frc.robot.systems.drive.module;
 
-	import edu.wpi.first.math.controller.PIDController;
-	import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-	import edu.wpi.first.math.geometry.Rotation2d;
-	import edu.wpi.first.math.kinematics.SwerveModulePosition;
-	import edu.wpi.first.math.kinematics.SwerveModuleState;
-	import edu.wpi.first.math.util.Units;
-	import frc.robot.SwerveConstants.ModuleConstants;
-	import frc.robot.systems.ModuleIOInfoAutoLogged;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
+import frc.robot.SwerveConstants.ModuleConstants;
+import frc.robot.systems.drive.ModuleIOInfoAutoLogged;
 
-	import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 
-	public class Module {
+public class Module {
 	private final ModuleIO io;
 	private final ModuleIOInfoAutoLogged inputs = new ModuleIOInfoAutoLogged(); //this is generated when you put the @AutoLog annotation on the ModuleInfo class
 
@@ -23,9 +22,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 	private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
 	private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
 	private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
-	
-	private SwerveModulePosition internalState = new SwerveModulePosition();
-	
+		
 	public Module(ModuleIO io) {
 		this.io = io;
 
@@ -142,4 +139,4 @@ import com.ctre.phoenix6.BaseStatusSignal;
 	public double getCharacterizationVelocity() {
 		return inputs.driveVelocity;
 	}
-	}
+}

@@ -1,6 +1,7 @@
-package frc.robot.systems.drive;
+package frc.robot.systems.drive.module;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -77,7 +78,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
 	@Override
 	public void updateInputs(ModuleIOInfo inputs) {
-		BaseStatusSignal.refreshAll(
+		inputs.connected = BaseStatusSignal.refreshAll(
 			drivePosition,
 			driveVelocity,
 			driveAppliedVolts,
@@ -87,7 +88,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 			turnVelocity,
 			turnAppliedVolts,
 			turnCurrent
-		);
+		).equals(StatusCode.OK);
 
 		inputs.drivePosition = drivePosition.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO;
 		inputs.driveVelocity = driveVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO;
