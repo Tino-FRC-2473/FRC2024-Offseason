@@ -115,7 +115,7 @@ public class Robot extends LoggedRobot {
 							DRIVE_WHEEL_TYPE.TIRE,
 							(2 + 1)), //13 gear ratio
 						gyroSimulation,
-						new Pose2d((2 + 1), (2 + 1), new Rotation2d())
+						new Pose2d(1.4, 5.6, new Rotation2d())
 					);
 
 				SimulatedArena.getInstance()
@@ -130,6 +130,8 @@ public class Robot extends LoggedRobot {
 						new ModuleIOSim(swerveDriveSimulation.getModules()[1]),
 						new ModuleIOSim(swerveDriveSimulation.getModules()[2]),
 						new ModuleIOSim(swerveDriveSimulation.getModules()[(2 + 1)]));
+
+				//driveFSMSystem.setPose(new Pose2d(1.4, 5.6, new Rotation2d()));
 
 				Logger.addDataReceiver(new NT4Publisher());
 
@@ -231,7 +233,6 @@ public class Robot extends LoggedRobot {
 	@Override
 	public void simulationPeriodic() {
 		driveFSMSystem.update(input);
-		driveFSMSystem.setPose(swerveDriveSimulation.getSimulatedDriveTrainPose());
 		updateSimulationField();
 	}
 
@@ -256,6 +257,8 @@ public class Robot extends LoggedRobot {
 
 			Logger.recordOutput("FieldSimulation/RobotPosition",
 				swerveDriveSimulation.getSimulatedDriveTrainPose());
+
+			driveFSMSystem.setPose(swerveDriveSimulation.getSimulatedDriveTrainPose());
 		}
 	}
 }

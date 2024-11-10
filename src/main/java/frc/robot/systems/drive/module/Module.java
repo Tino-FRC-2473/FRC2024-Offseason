@@ -75,11 +75,8 @@ public class Module {
 
 		SmartDashboard.putNumber("TURN FEEDBACK",
 			turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
-		SmartDashboard.putNumber("DRIVE FEEDFORWARD CALC",
-			driveFeedforward.calculate(velocity));
-		SmartDashboard.putNumber("DRIVE FEEDBACK CALC",
-			driveFeedback.calculate(inputs.driveVelocity, velocity));
-		SmartDashboard.putNumber("ADJUST SPEED SETPOINT", adjustSpeedSetpoint);
+		SmartDashboard.putNumber("TURN FEEDBACK ERROR", turnFeedback.getPositionError());
+		SmartDashboard.putNumber("ANGLE SETPOINT (RAD)", angleSetpoint.getRadians());
 	}
 
 	public void resetEncoders() {

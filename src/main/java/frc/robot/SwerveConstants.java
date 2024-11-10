@@ -42,7 +42,7 @@ public final class SwerveConstants {
 		// Distance between centers of right and left wheels on robot
 		public static final double WHEEL_BASE = Units.inchesToMeters(22.75);
 		//Weight of chassis with bumpers included in pounds
-		public static final double ROBOT_MASS = Units.lbsToKilograms(110);
+		public static final double ROBOT_MASS = Units.lbsToKilograms(50);
 		//Width of chassis with bumpers on
 		public static final double BUMPER_WIDTH = Units.inchesToMeters(27.5);
 		// Distance between front and back wheels on robot
