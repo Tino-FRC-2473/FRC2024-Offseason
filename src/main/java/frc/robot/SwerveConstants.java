@@ -43,7 +43,7 @@ public final class SwerveConstants {
 		public static final double WHEEL_BASE = Units.inchesToMeters(22.75);
 		//Weight of chassis with bumpers included in pounds
 		public static final double ROBOT_MASS = Units.lbsToKilograms(110);
-		//Width of chassis with bumpers on 
+		//Width of chassis with bumpers on
 		public static final double BUMPER_WIDTH = Units.inchesToMeters(27.5);
 		// Distance between front and back wheels on robot
 		public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(
@@ -72,7 +72,8 @@ public final class SwerveConstants {
 		// a robot that drives faster).
 		public static final int DRIVING_MOTOR_PINON_TEETH = 13;
 
-		public static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);;
+		public static final double DRIVE_GEAR_RATIO =
+			(50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);;
 		public static final double TURN_GEAR_RATIO = 150.0 / 7.0;
 		public static final double WHEEL_RADIUS = 6.0;
 		public static final double DRIVING_FF_KS = 0.1;
@@ -108,7 +109,7 @@ public final class SwerveConstants {
 		public static final double TURNING_ENCODER_POSITION_PID_MAX_INPUT
 				= TURNING_ENCODER_POSITION_FACTOR; // radians
 
-		public static final double DRIVING_P = 0.05;
+		public static final double DRIVING_P = 0.5;
 		public static final double DRIVING_I = 0;
 		public static final double DRIVING_D = 0;
 		public static final double DRIVING_FF = 1 / DRIVE_WHEEL_FREE_SPEED_RPS;

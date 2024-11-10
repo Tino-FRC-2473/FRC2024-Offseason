@@ -6,46 +6,50 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-import java.util.Queue;
 
-import frc.robot.SwerveConstants;
 import frc.robot.SwerveConstants.ModuleConstants;
 
 public class ModuleIOTalonFX implements ModuleIO {
-    private final TalonFX driveMotor;
-    private final TalonFX turnMotor;
-    private final CANcoder turningEncoder;
+	private final TalonFX driveMotor;
+	private final TalonFX turnMotor;
+	private final CANcoder turningEncoder;
 
-    private final boolean isTurnMotorInverted = true;
-    private final Rotation2d angleEncoderOffset;
+	private final boolean isTurnMotorInverted = true;
+	private final Rotation2d angleEncoderOffset;
 
-    //Status Signals --> NOT JUST FOR LOGGING
-    private final StatusSignal<Double> drivePosition;
-    private final StatusSignal<Double> driveVelocity;
-    private final StatusSignal<Double> driveAppliedVolts;
-    private final StatusSignal<Double> driveCurrent;
-  
-    private final StatusSignal<Double> turnAbsolutePosition;
-    private final StatusSignal<Double> turnRelativePosition;
-    private final StatusSignal<Double> turnVelocity;
-    private final StatusSignal<Double> turnAppliedVolts;
-    private final StatusSignal<Double> turnCurrent;
-  
-	public ModuleIOTalonFX(int driveMotorId, int turningMotorId, int encoderId, double angleEncoderOffset) {
+	//Status Signals --> NOT JUST FOR LOGGING
+	private final StatusSignal<Double> drivePosition;
+	private final StatusSignal<Double> driveVelocity;
+	private final StatusSignal<Double> driveAppliedVolts;
+	private final StatusSignal<Double> driveCurrent;
+
+	private final StatusSignal<Double> turnAbsolutePosition;
+	private final StatusSignal<Double> turnRelativePosition;
+	private final StatusSignal<Double> turnVelocity;
+	private final StatusSignal<Double> turnAppliedVolts;
+	private final StatusSignal<Double> turnCurrent;
+
+	/**
+	 * Makes a ModuleIOTalonFX object that models a MK4n with 2 Krakenx60s,
+	 * a CANCoder, and specified angle offset.
+	 *
+	 * @param driveMotorId
+	 * @param turningMotorId
+	 * @param encoderId
+	 * @param angleOffset
+	 */
+	public ModuleIOTalonFX(int driveMotorId, int turningMotorId,
+		int encoderId, double angleOffset) {
 		driveMotor = new TalonFX(driveMotorId);
 		turnMotor = new TalonFX(turningMotorId);
 		turningEncoder = new CANcoder(encoderId);
-		this.angleEncoderOffset = new Rotation2d(angleEncoderOffset);
+		this.angleEncoderOffset = new Rotation2d(angleOffset);
 
 		TalonFXConfiguration driveConfig = new TalonFXConfiguration();
 		driveConfig.CurrentLimits.SupplyCurrentLimit = ModuleConstants.DRIVING_MOTOR_CURRENT_LIMIT;
@@ -56,10 +60,10 @@ public class ModuleIOTalonFX implements ModuleIO {
 		turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
 		CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
-		
+
 		driveMotor.getConfigurator().apply(driveConfig);
 		turnMotor.getConfigurator().apply(turnConfig);
-		turningEncoder.getConfigurator().apply(encoderConfig); 
+		turningEncoder.getConfigurator().apply(encoderConfig);
 
 		drivePosition = driveMotor.getPosition();
 		driveVelocity = driveMotor.getVelocity();
@@ -90,15 +94,21 @@ public class ModuleIOTalonFX implements ModuleIO {
 			turnCurrent
 		).equals(StatusCode.OK);
 
-		inputs.drivePosition = drivePosition.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO;
-		inputs.driveVelocity = driveVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO;
+		inputs.drivePosition =
+			drivePosition.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO;
+		inputs.driveVelocity =
+			driveVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO;
 		inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
 		inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
-		inputs.turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
+		inputs.turnAbsolutePosition =
+			Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
 			.minus(angleEncoderOffset);
-		inputs.turnRelativePosition = Rotation2d.fromRotations(turnRelativePosition.getValueAsDouble() / ModuleConstants.TURN_GEAR_RATIO);
-		inputs.turnVelocity = turnVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.TURN_GEAR_RATIO;
+		inputs.turnRelativePosition =
+			Rotation2d.fromRotations(turnRelativePosition.getValueAsDouble()
+				/ ModuleConstants.TURN_GEAR_RATIO);
+		inputs.turnVelocity =
+			turnVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.TURN_GEAR_RATIO;
 		inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
 		inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
 	}
@@ -130,7 +140,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 				: InvertedValue.CounterClockwise_Positive;
 		config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
 		turnMotor.getConfigurator().apply(config);
-  	}
+	}
 
 	@Override
 	public void resetEncoders() {

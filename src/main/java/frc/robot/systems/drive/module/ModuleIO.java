@@ -5,46 +5,78 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
 
-    @AutoLog
-    public class ModuleIOInfo {
-        public boolean connected = false;
-        
-        public double drivePosition = 0.0; // rad
-        public double driveVelocity = 0.0; // rad/s
+	@AutoLog
+	public class ModuleIOInfo {
+		public boolean connected = false;
 
-        public double driveAppliedVolts = 0.0;
-        public double driveCurrentAmps = 0.0;
-    
-        public Rotation2d turnAbsolutePosition = new Rotation2d(); //this is generated from the CANCoder 
-        public Rotation2d turnRelativePosition = new Rotation2d(); //this is using the talonfx encoder val
-        public double turnVelocity = 0.0;
+		public double drivePosition = 0.0; // rad
+		public double driveVelocity = 0.0; // rad/s
 
-        public double turnAppliedVolts = 0.0;
-        public double turnCurrentAmps = 0.0;
-    }
+		public double driveAppliedVolts = 0.0;
+		public double driveCurrentAmps = 0.0;
 
-    /** Update all the values of the logged values of the module above */
-    public default void updateInputs(ModuleIOInfo moduleInfo) {}
+		//this is generated from the CANCoder
+		public Rotation2d turnAbsolutePosition = new Rotation2d();
+		//this is using the talonfx encoder val
+		public Rotation2d turnRelativePosition = new Rotation2d();
+		public double turnVelocity = 0.0;
 
-    /** Run the drive motor at the specified voltage. */
-    public default void setDriveVoltage(double volts) {}
+		public double turnAppliedVolts = 0.0;
+		public double turnCurrentAmps = 0.0;
+	}
 
-    /** Run the turn motor at the specified voltage. */
-    public default void setTurnVoltage(double volts) {}
+	/**
+	 * Update all the values of the logged values of the module through a ModuleIOInfo object.
+	 * @param moduleInfo
+	 */
+	default void updateInputs(ModuleIOInfo moduleInfo) {
+	}
 
-    /** Enable or disable brake mode on the drive motor. */
-    public default void setDriveBrakeMode(boolean enable) {}
+	/**
+	 * Run the drive motor at the specified voltage.
+	 * @param volts
+	*/
+	default void setDriveVoltage(double volts) {
+	}
 
-    /** Enable or disable brake mode on the turn motor. */
-    public default void setTurnBrakeMode(boolean enable) {}
+	/**
+	 * Run the turn motor at the specified voltage.
+	 * @param volts
+	 */
+	default void setTurnVoltage(double volts) {
+	}
 
-    /** Set the shorthanded logging name of the module */
-    public default void setModuleName(String moduleName) {}
+	/**
+	 * Set whether the drive motor is on brake mode or not.
+	 * @param enable
+	*/
+	default void setDriveBrakeMode(boolean enable) {
+	}
 
-    /** Get the shorthanded logging name of the module */
-    public default String getModuleName() { return ""; }
+	/**
+	 * Set whether the turn motor is on brake mode or not.
+	 * @param enable
+	 */
+	default void setTurnBrakeMode(boolean enable) {
+	}
 
-    /** Reset the encoder position values. */
-    public default void resetEncoders() {}
+	/**
+	 * Set the name of the module.
+	 * @param moduleName
+	 */
+	default void setModuleName(String moduleName) {
+	}
+
+	/**
+	 * Get the shorthanded logging name of the module.
+	 * @return Name of the module
+	 */
+	default String getModuleName() {
+		return "";
+	}
+
+	/** Reset the encoder position values. */
+	default void resetEncoders() {
+	}
 
 }

@@ -21,7 +21,7 @@ public class Module {
 	private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
 	private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
 	private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
-		
+
 	public Module(ModuleIO io) {
 		this.io = io;
 
@@ -56,21 +56,30 @@ public class Module {
 		return optimizedState;
 	}
 
-	/** Voltage based closed loop turn control 
+	/** Voltage based closed loop turn control
 	 *  based on the angle and speed setpoint of the desired state. */
-	private void setCloosedLoopCorrection() { 
+	private void setCloosedLoopCorrection() {
 		// Run closed loop turn control
 		io.setTurnVoltage(
 			turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
-		
-		// Scale velocity based on turn error - vector projection of speedSetpoint on error deviation (in radians)
+
+		// Scale velocity based on turn error
+		// - vector projection of speedSetpoint on error deviation (in radians)
 		double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
 
 		// Run closed loop drive control
 		double velocity = adjustSpeedSetpoint / ModuleConstants.WHEEL_RADIUS;
 		io.setDriveVoltage(
 			driveFeedforward.calculate(velocity)
-				+ driveFeedback.calculate(inputs.driveVelocity, velocity));  
+				+ driveFeedback.calculate(inputs.driveVelocity, velocity));
+
+		SmartDashboard.putNumber("TURN FEEDBACK",
+			turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
+		SmartDashboard.putNumber("DRIVE FEEDFORWARD CALC",
+			driveFeedforward.calculate(velocity));
+		SmartDashboard.putNumber("DRIVE FEEDBACK CALC",
+			driveFeedback.calculate(inputs.driveVelocity, velocity));
+		SmartDashboard.putNumber("ADJUST SPEED SETPOINT", adjustSpeedSetpoint);
 	}
 
 	public void resetEncoders() {

@@ -16,8 +16,6 @@ public class TeleopInput {
 	private static final int MECH_CONTROLLER_PORT = 1;
 	private static final int DRIVER_CONTROLLER_PORT = 0;
 
-	private static final float JOYSTICK_TO_BOOLEAN_SENSITIVITY = 0.5f;
-
 	/* ======================== Private variables ======================== */
 	// Input objects
 	private PS4Controller mechController;

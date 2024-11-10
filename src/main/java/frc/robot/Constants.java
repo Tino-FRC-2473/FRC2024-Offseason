@@ -9,7 +9,7 @@ public final class Constants {
 			REPLAY
 		}
 
-		public static final Mode currentMode = Mode.SIM;
+		public static final Mode CURRENT_MODE = Mode.SIM;
 	}
 
 	// Auto Shooter Constants
