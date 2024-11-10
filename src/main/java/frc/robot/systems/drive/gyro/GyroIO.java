@@ -11,5 +11,9 @@ public interface GyroIO {
     public double yawVelocity = 0.0;
   }
 
+  /** Update a set of loggable inputs. */
   public default void updateInputs(GyroIOInfo inputs) {}
+
+  /** Reset the heading of the gyro. */
+  public default void resetHeading() {}
 }

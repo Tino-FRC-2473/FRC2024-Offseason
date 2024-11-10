@@ -5,7 +5,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import frc.robot.SwerveConstants.ModuleConstants;
 import frc.robot.systems.drive.ModuleIOInfoAutoLogged;
 
@@ -108,11 +107,9 @@ public class Module {
 
 	/** Returns the current turn angle of the module. */
 	public Rotation2d getAngle() {
-		if (turnRelativeOffset == null) {
-			return new Rotation2d();
-		} else {
-			return inputs.turnRelativePosition.plus(turnRelativeOffset);
-		}
+		return inputs.turnRelativePosition.plus(
+			turnRelativeOffset != null ? turnRelativeOffset: new Rotation2d()
+		);
 	}
 
 	/** Returns the current drive position of the module in meters. */
