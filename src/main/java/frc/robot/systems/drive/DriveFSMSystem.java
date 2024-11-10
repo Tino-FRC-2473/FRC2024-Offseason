@@ -75,12 +75,7 @@ public class DriveFSMSystem extends SubsystemBase {
     //private RaspberryPI rpi = new RaspberryPI(); << not including for example
 
 	// Odometry class for tracking robot pose
-	private SwerveDriveOdometry odometry = new SwerveDriveOdometry(
-		DriveConstants.DRIVE_KINEMATICS,
-		rawGyroRotation,
-        lastModulePositions,
-        new Pose2d()
-    );
+	private SwerveDriveOdometry odometry;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -102,11 +97,25 @@ public class DriveFSMSystem extends SubsystemBase {
         blModule = new Module(blModuleIO);
         brModule = new Module(brModuleIO);
 
+        lastModulePositions = new SwerveModulePosition[] {
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition()
+        };
+
+        odometry = new SwerveDriveOdometry(
+            DriveConstants.DRIVE_KINEMATICS,
+            rawGyroRotation,
+            lastModulePositions,
+            new Pose2d()
+        );
+
         //Initialize Holonomic System in AutoBuilder + Pathplanner logging
         AutoBuilder.configureHolonomic(
 				this::getPose,
 					// Robot pose supplier
-				this::resetPose,
+				this::setPose,
 					// Method to reset odometry (will be called if your auto has a starting pose)
 				this::getRobotRelativeSpeeds,
 					// ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
@@ -189,7 +198,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	public void reset() {
 		currentState = FSMState.TELEOP_STATE;
 
-        resetPose(new Pose2d());  
+        setPose(new Pose2d());  
         gyroIO.resetHeading();
 
 		// Call one tick of update to ensure outputs reflect start state
@@ -208,7 +217,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	public void resetAutonomous() {
 		//currentState = FSMState.AUTO_STATE;
 
-		resetPose(getPose());
+		setPose(getPose());
         gyroIO.resetHeading();
 
 		// Call one tick of update to ensure outputs reflect start state
@@ -256,6 +265,8 @@ public class DriveFSMSystem extends SubsystemBase {
             Twist2d twist = DriveConstants.DRIVE_KINEMATICS.toTwist2d(moduleDeltas);
             rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
         }
+
+        lastModulePositions = getModulePositions();
 
         Logger.processInputs("Drive/Gyro", gyroIOInfo);
         SmartDashboard.putString("Drive State", getCurrentState().toString());
@@ -316,6 +327,10 @@ public class DriveFSMSystem extends SubsystemBase {
 	public void drive(double xSpeed, double ySpeed, double rot,
 		boolean fieldRelative) {
         
+        SmartDashboard.putNumber("X Speed", xSpeed);
+        SmartDashboard.putNumber("Y Speed", ySpeed);
+        SmartDashboard.putNumber("Rot", rot);
+
         //convert XY to polar and square the magnitude and angle (carrying sign) first
         Rotation2d inputTranslationDir = new Rotation2d(xSpeed, ySpeed);
         double inputTranslationMag = MathUtil.applyDeadband(
@@ -338,6 +353,11 @@ public class DriveFSMSystem extends SubsystemBase {
 		double ySpeedDelivered = inputVelocity.getY() * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double rotDelivered = theta * DriveConstants.MAX_ANGULAR_SPEED;
         
+        SmartDashboard.putNumber("X Speed Delivered", xSpeedDelivered);
+        SmartDashboard.putNumber("Y Speed Delivered", ySpeedDelivered);
+        SmartDashboard.putNumber("Rot Speed Delivered", rotDelivered);
+
+
         //flip the axis around based on what alliance it's on - EXPERIMENTAL
         boolean isFlipped = DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == Alliance.Red;
@@ -451,7 +471,7 @@ public class DriveFSMSystem extends SubsystemBase {
 
     /** Resets the current odometry pose.
 	 */
-	public void resetPose(Pose2d pose) {
+	public void setPose(Pose2d pose) {
 	    odometry.resetPosition(rawGyroRotation, getModulePositions(), pose);
 	}
 

@@ -32,6 +32,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
 import frc.robot.Constants.MatchConstants;
 import frc.robot.SwerveConstants.DriveConstants;
 // Systems
@@ -71,7 +73,7 @@ public class Robot extends LoggedRobot {
 		switch (MatchConstants.currentMode) {
 			case REAL:
 				this.swerveDriveSimulation = null;
-
+				
 				driveFSMSystem = new DriveFSMSystem(
 					new GyroIOPigeon2(),
 					new ModuleIOTalonFX( // front left
@@ -121,8 +123,9 @@ public class Robot extends LoggedRobot {
 							DRIVE_WHEEL_TYPE.TIRE, 
 							3), //13 gear ratio
 						gyroSimulation,
-						new Pose2d(0, 0, new Rotation2d())
+						new Pose2d(3, 3, new Rotation2d())
 					);
+
 				SimulatedArena.getInstance()
 					.addDriveTrainSimulation(swerveDriveSimulation);
 				
@@ -130,8 +133,7 @@ public class Robot extends LoggedRobot {
 
 				driveFSMSystem =
 					new DriveFSMSystem(
-						new GyroIOSim(
-							gyroSimulation), 
+						new GyroIOSim(gyroSimulation), 
 						new ModuleIOSim(swerveDriveSimulation.getModules()[0]),
 						new ModuleIOSim(swerveDriveSimulation.getModules()[1]),
 						new ModuleIOSim(swerveDriveSimulation.getModules()[2]),
@@ -160,6 +162,8 @@ public class Robot extends LoggedRobot {
 
 				break;
 		}
+
+		autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 		
 		// Set up SysId routines
 		autoChooser.addOption(
@@ -233,6 +237,8 @@ public class Robot extends LoggedRobot {
 
 	@Override
 	public void simulationPeriodic() {
+		driveFSMSystem.update(input);
+		driveFSMSystem.setPose(swerveDriveSimulation.getSimulatedDriveTrainPose());
 		updateSimulationField();
 	}
 

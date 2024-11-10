@@ -5,8 +5,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.SwerveConstants.ModuleConstants;
-import frc.robot.systems.drive.ModuleIOInfoAutoLogged;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -119,6 +119,7 @@ public class Module {
 
 	/** Returns the current drive velocity of the module in meters per second. */
 	public double getVelocityMetersPerSec() {
+		SmartDashboard.putNumber("Drive Velocity", inputs.driveVelocity);
 		return inputs.driveVelocity * ModuleConstants.WHEEL_RADIUS;
 	}
 

@@ -29,7 +29,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final boolean isTurnMotorInverted = true;
     private final Rotation2d angleEncoderOffset;
 
-    //Status Signals --> ALL FOR LOGGING
+    //Status Signals --> NOT JUST FOR LOGGING
     private final StatusSignal<Double> drivePosition;
     private final StatusSignal<Double> driveVelocity;
     private final StatusSignal<Double> driveAppliedVolts;
