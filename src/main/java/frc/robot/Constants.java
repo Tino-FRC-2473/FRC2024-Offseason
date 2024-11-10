@@ -2,6 +2,16 @@ package frc.robot;
 
 public final class Constants {
 
+	public static final class MatchConstants {
+		public enum Mode {
+			REAL,
+			SIM,
+			REPLAY
+		}
+
+		public static final Mode currentMode = Mode.SIM;
+	}
+
 	// Auto Shooter Constants
 	public static final double AUTO_REVVING_SECS = 0.5;
 	public static final double AUTO_SHOOTING_SECS = 1.0;
@@ -20,7 +30,6 @@ public final class Constants {
 	public static final float AUTO_INTAKE_POWER = 0.2f;
 	public static final float AUTO_OUTTAKE_POWER = -0.2f;
 	public static final float AUTO_HOLDING_POWER = 0.05f;
-
 
 	// TeleOp Intake Constants
 	public static final float INTAKE_VELOCITY = 25; //must be <=89rps

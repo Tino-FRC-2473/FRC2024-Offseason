@@ -36,7 +36,6 @@ import edu.wpi.first.units.Units;
 
 // Robot Imports
 import frc.robot.TeleopInput;
-import frc.robot.RaspberryPI;
 import frc.robot.SwerveConstants.DriveConstants;
 import frc.robot.SwerveConstants.OIConstants;
 import frc.robot.systems.drive.gyro.GyroIO;
@@ -73,7 +72,7 @@ public class DriveFSMSystem extends SubsystemBase {
     private SwerveModulePosition[] lastModulePositions;
     private final SysIdRoutine sysId;
 
-    private RaspberryPI rpi = new RaspberryPI();
+    //private RaspberryPI rpi = new RaspberryPI(); << not including for example
 
 	// Odometry class for tracking robot pose
 	private SwerveDriveOdometry odometry = new SwerveDriveOdometry(

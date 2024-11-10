@@ -3,53 +3,61 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 // WPILib Imports
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.MjpegServer;
-import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoMode;
-import edu.wpi.first.cscore.VideoSink;
-import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
-import edu.wpi.first.util.PixelFormat;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
+import java.util.List;
+
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.GyroSimulation;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation.DRIVE_WHEEL_TYPE;
+import org.littletonrobotics.junction.LogFileUtil;
 // Third Party Imports
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import frc.robot.Constants.MatchConstants;
+import frc.robot.SwerveConstants.DriveConstants;
 // Systems
-//import frc.robot.systems.DriveFSMSystem;
+import frc.robot.systems.drive.DriveFSMSystem;
+import frc.robot.systems.drive.gyro.GyroIO;
+// IO Implementations
+import frc.robot.systems.drive.gyro.GyroIOPigeon2;
+import frc.robot.systems.drive.gyro.GyroIOSim;
+import frc.robot.systems.drive.module.ModuleIO;
+import frc.robot.systems.drive.module.ModuleIOSim;
+import frc.robot.systems.drive.module.ModuleIOTalonFX;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation.
  */
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
 	private TeleopInput input;
+	
 	// Systems
-	//private DriveFSMSystem driveFSMSystem;
+	private DriveFSMSystem driveFSMSystem;
+	private SwerveDriveSimulation swerveDriveSimulation;
 
-	private SendableChooser<Command> autoChooser;
+	private LoggedDashboardChooser<Command> autoChooser;
 	private Command autonomousCommand;
 	private final Field2d mField = new Field2d();
-
-	private UsbCamera driverCam;
-	private UsbCamera chainCam;
-	private VideoSink videoSink;
-	private MjpegServer driverStream;
-	private MjpegServer chainStream;
-
-	private final int streamWidth = 256;
-	private final int streamHeight = 144;
-	private final int streamFPS = 30;
-
-	private final int redSpeakerTagID = 4;
-	private final int blueSpeakerTagID = 7;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -60,24 +68,116 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 		input = new TeleopInput();
 
-		// Instantiate all systems here
-		//driveFSMSystem = new DriveFSMSystem();
+		switch (MatchConstants.currentMode) {
+			case REAL:
+				this.swerveDriveSimulation = null;
 
-		//Label all named commands here
+				driveFSMSystem = new DriveFSMSystem(
+					new GyroIOPigeon2(),
+					new ModuleIOTalonFX( // front left
+						HardwareMap.FRONT_LEFT_DRIVING_CAN_ID, 
+						HardwareMap.FRONT_LEFT_TURNING_CAN_ID, 
+						HardwareMap.FRONT_LEFT_CANCODER_ID, 
+						DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET
+					),
+					new ModuleIOTalonFX( // front right
+						HardwareMap.FRONT_RIGHT_DRIVING_CAN_ID, 
+						HardwareMap.FRONT_RIGHT_TURNING_CAN_ID, 
+						HardwareMap.FRONT_RIGHT_CANCODER_ID, 
+						DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET
+					),
+					new ModuleIOTalonFX( // back left
+						HardwareMap.REAR_LEFT_DRIVING_CAN_ID, 
+						HardwareMap.REAR_LEFT_TURNING_CAN_ID, 
+						HardwareMap.REAR_LEFT_CANCODER_ID, 
+						DriveConstants.REAR_LEFT_CHASSIS_ANGULAR_OFFSET
+					),
+					new ModuleIOTalonFX( // back right
+						HardwareMap.REAR_RIGHT_DRIVING_CAN_ID, 
+						HardwareMap.REAR_RIGHT_TURNING_CAN_ID, 
+						HardwareMap.REAR_RIGHT_CANCODER_ID, 
+						DriveConstants.REAR_RIGHT_CHASSIS_ANGULAR_OFFSET
+					)
+				);
 
-		autoChooser = AutoBuilder.buildAutoChooser();
+				Logger.addDataReceiver(new WPILOGWriter());
+				Logger.addDataReceiver(new NT4Publisher());
 
-		SmartDashboard.putData("Auto Chooser", autoChooser);
-		SmartDashboard.putData("Field", mField);
+				break;
+			case SIM:
+				final GyroSimulation gyroSimulation = GyroSimulation.createPigeon2();
 
-		driverCam = CameraServer.startAutomaticCapture(0);
-		VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
-			streamHeight, streamFPS);
-		driverCam.setVideoMode(videoMode);
-		driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-		driverCam.setResolution(streamWidth, streamHeight);
+				this.swerveDriveSimulation = 
+					new SwerveDriveSimulation(
+						DriveConstants.ROBOT_MASS,
+						DriveConstants.TRACK_WIDTH,
+						DriveConstants.TRACK_WIDTH,
+						DriveConstants.BUMPER_WIDTH,
+						DriveConstants.BUMPER_WIDTH,
+						SwerveModuleSimulation.getMark4n(
+							DCMotor.getKrakenX60(1), 
+							DCMotor.getKrakenX60(1), 
+							DriveConstants.CURRENT_THRESHOLD,
+							DRIVE_WHEEL_TYPE.TIRE, 
+							3), //13 gear ratio
+						gyroSimulation,
+						new Pose2d(0, 0, new Rotation2d())
+					);
+				SimulatedArena.getInstance()
+					.addDriveTrainSimulation(swerveDriveSimulation);
+				
+				SimulatedArena.getInstance().resetFieldForAuto();
+
+				driveFSMSystem =
+					new DriveFSMSystem(
+						new GyroIOSim(
+							gyroSimulation), 
+						new ModuleIOSim(swerveDriveSimulation.getModules()[0]),
+						new ModuleIOSim(swerveDriveSimulation.getModules()[1]),
+						new ModuleIOSim(swerveDriveSimulation.getModules()[2]),
+						new ModuleIOSim(swerveDriveSimulation.getModules()[3]));
+				
+				Logger.addDataReceiver(new NT4Publisher());
+
+				break;
+			default:
+				/* Replayed robot, disable IO implementations */
+		
+				/* physics simulations are also not needed */
+				this.swerveDriveSimulation = null;
+				driveFSMSystem =
+					new DriveFSMSystem(
+						new GyroIO() {},
+						new ModuleIO() {},
+						new ModuleIO() {},
+						new ModuleIO() {},
+						new ModuleIO() {});
+
+				setUseTiming(false); // Run as fast as possible
+				String logPath = LogFileUtil.findReplayLog();
+				Logger.setReplaySource(new WPILOGReader(logPath));
+				Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+
+				break;
+		}
+		
+		// Set up SysId routines
+		autoChooser.addOption(
+			"Drive SysId (Quasistatic Forward)",
+			driveFSMSystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+		autoChooser.addOption(
+			"Drive SysId (Quasistatic Reverse)",
+			driveFSMSystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+		autoChooser.addOption(
+			"Drive SysId (Dynamic Forward)", 
+			driveFSMSystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+		autoChooser.addOption(
+			"Drive SysId (Dynamic Reverse)", 
+			driveFSMSystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+		// Start AKit Logger
+		Logger.start();
 	}
-
 
 	@Override
 	public void autonomousInit() {
@@ -92,7 +192,6 @@ public class Robot extends TimedRobot {
 			autonomousCommand.schedule();
 		}
 	}
-
 
 	@Override
 	public void autonomousPeriodic() {
@@ -112,7 +211,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		//driveFSMSystem.update(input);
+		driveFSMSystem.update(input);
 		//mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
@@ -133,7 +232,9 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void simulationPeriodic() { }
+	public void simulationPeriodic() {
+		updateSimulationField();
+	}
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
@@ -144,6 +245,15 @@ public class Robot extends TimedRobot {
 	 * @return Returns the value selected by the auto chooser.
 	 */
 	public Command getAutonomousCommand() {
-		return autoChooser.getSelected();
+		return autoChooser.get();
 	}
+
+	public void updateSimulationField() {
+		if (swerveDriveSimulation != null) {
+			SimulatedArena.getInstance().simulationPeriodic();
+
+			Logger.recordOutput(
+				"FieldSimulation/RobotPosition", swerveDriveSimulation.getSimulatedDriveTrainPose());
+		}
+  }
 }

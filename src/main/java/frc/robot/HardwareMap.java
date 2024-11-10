@@ -11,6 +11,12 @@ public final class HardwareMap {
 	public static final int ENCODER_CHANNEL_B = 1;
 	public static final int GYRO_ID = 20;
 
+	//CANCoder ID's
+	public static final int FRONT_LEFT_CANCODER_ID = 0; 
+	public static final int FRONT_RIGHT_CANCODER_ID = 1; 
+	public static final int REAR_LEFT_CANCODER_ID = 2; 
+	public static final int REAR_RIGHT_CANCODER_ID = 3; 
+
 	// ID numbers for devices on the CAN bus
 	public static final int INTAKE_MOTOR_ID = 9; //9
 	public static final int PIVOT_MOTOR_ID = 17; //17

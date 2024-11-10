@@ -41,6 +41,10 @@ public final class SwerveConstants {
 		public static final double TRACK_WIDTH = Units.inchesToMeters(22.5);
 		// Distance between centers of right and left wheels on robot
 		public static final double WHEEL_BASE = Units.inchesToMeters(22.75);
+		//Weight of chassis with bumpers included in pounds
+		public static final double ROBOT_MASS = Units.lbsToKilograms(110);
+		//Width of chassis with bumpers on 
+		public static final double BUMPER_WIDTH = Units.inchesToMeters(27.5);
 		// Distance between front and back wheels on robot
 		public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(
 			new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
@@ -56,7 +60,7 @@ public final class SwerveConstants {
 
 		public static final boolean GYRO_REVERSED = false;
 		public static final double TIME_CONSTANT = 1e-6;
-		public static final double CURRENT_THRESHOLD = 1e-4;
+		public static final double CURRENT_THRESHOLD = 80;
 		// some small number to avoid floating-point errors with equality checking
 		public static final double ANGLE_MULTIPLIER_1 = 0.45;
 		public static final double ANGLE_MULTIPLIER_2 = 0.85;
