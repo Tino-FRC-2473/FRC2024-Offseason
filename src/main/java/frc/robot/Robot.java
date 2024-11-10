@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 
@@ -38,6 +39,8 @@ import frc.robot.systems.drive.gyro.GyroIOSim;
 import frc.robot.systems.drive.module.ModuleIO;
 import frc.robot.systems.drive.module.ModuleIOSim;
 import frc.robot.systems.drive.module.ModuleIOTalonFX;
+
+import java.util.List;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -256,6 +259,9 @@ public class Robot extends LoggedRobot {
 
 			Logger.recordOutput("FieldSimulation/RobotPosition",
 				swerveDriveSimulation.getSimulatedDriveTrainPose());
+
+			final List<Pose3d> notes = SimulatedArena.getInstance().getGamePiecesByType("Note");
+			if (notes != null) Logger.recordOutput("FieldSimulation/Notes", notes.toArray(Pose3d[]::new));
 		}
 	}
 }
