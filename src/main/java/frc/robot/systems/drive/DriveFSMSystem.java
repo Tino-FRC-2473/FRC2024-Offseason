@@ -137,25 +137,25 @@ public class DriveFSMSystem extends SubsystemBase {
 						AutoConstants.DRIVEBASE_RADIUS, // Drive base radius (in m).
 						new ReplanningConfig() // Default path replanning config.
 				),
-					() ->
-						DriverStation.getAlliance().isPresent()
-								&& DriverStation.getAlliance().get() == Alliance.Red,
-					this);
+			() ->
+				DriverStation.getAlliance().isPresent()
+				&& DriverStation.getAlliance().get() == Alliance.Red,
+			this);
 
 		Pathfinding.setPathfinder(new LocalADStar());
 		PathPlannerLogging.setLogActivePathCallback(
-				(activePath) -> {
-					Logger.recordOutput(
-						"Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])
-					);
-				}
+			(activePath) -> {
+				Logger.recordOutput(
+					"Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])
+				);
+			}
 		);
 		PathPlannerLogging.setLogTargetPoseCallback(
-				(targetPose) -> {
-					Logger.recordOutput(
-						"Odometry/Trajectory_Setpoint", targetPose
-					);
-				}
+			(targetPose) -> {
+				Logger.recordOutput(
+					"Odometry/Trajectory_Setpoint", targetPose
+				);
+			}
 		);
 
 		//SysId configuration

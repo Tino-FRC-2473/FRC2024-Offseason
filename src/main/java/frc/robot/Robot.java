@@ -118,7 +118,10 @@ public class Robot extends LoggedRobot {
 							DRIVE_WHEEL_TYPE.TIRE,
 							(2 + 1)), //13 gear ratio
 						gyroSimulation,
-						new Pose2d(1.4, 5.6, new Rotation2d())
+						new Pose2d(
+							MatchConstants.SIM_STARTING_POSE_X,
+							MatchConstants.SIM_STARTING_POSE_Y,
+							new Rotation2d())
 					);
 
 				SimulatedArena.getInstance()
@@ -262,7 +265,9 @@ public class Robot extends LoggedRobot {
 				swerveDriveSimulation.getSimulatedDriveTrainPose());
 
 			final List<Pose3d> notes = SimulatedArena.getInstance().getGamePiecesByType("Note");
-			if (notes != null) Logger.recordOutput("FieldSimulation/Notes", notes.toArray(Pose3d[]::new));
+			if (notes != null) {
+				Logger.recordOutput("FieldSimulation/Notes", notes.toArray(Pose3d[]::new));
+			}
 
 			driveFSMSystem.setPose(swerveDriveSimulation.getSimulatedDriveTrainPose());
 		}
