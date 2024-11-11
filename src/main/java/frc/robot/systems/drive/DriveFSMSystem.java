@@ -39,11 +39,11 @@ import frc.robot.TeleopInput;
 import frc.robot.SwerveConstants.DriveConstants;
 import frc.robot.SwerveConstants.OIConstants;
 import frc.robot.systems.drive.gyro.GyroIO;
-import frc.robot.systems.drive.gyro.GyroIOInfoAutoLogged;
 import frc.robot.systems.drive.gyro.GyroIOPigeon2;
 import frc.robot.systems.drive.module.ModuleIO;
 import frc.robot.systems.drive.module.Module;
 import frc.robot.SwerveConstants.AutoConstants;
+import frc.robot.systems.drive.gyro.GyroIOInfoAutoLogged;
 
 public class DriveFSMSystem extends SubsystemBase {
 	/* ======================== Constants ======================== */
@@ -264,9 +264,9 @@ public class DriveFSMSystem extends SubsystemBase {
 		SwerveModulePosition[] moduleDeltas = calculateModuleDeltas(getModulePositions());
 
 		// Update gyro angle
-		if (gyroIOInfo.connected) {
+		if (gyroIOInfo.isConnected()) {
 			// Use the real gyro angle
-			rawGyroRotation = gyroIOInfo.yawPosition;
+			rawGyroRotation = gyroIOInfo.getYawPosition();
 		} else {
 			// Use the angle delta from the kinematics and module deltas
 			Twist2d twist = DriveConstants.DRIVE_KINEMATICS.toTwist2d(moduleDeltas);
@@ -518,7 +518,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * @return the robot's heading in degrees, from -180 to 180
 	 */
 	public double getHeading() {
-		return gyroIOInfo.yawPosition.getDegrees();
+		return gyroIOInfo.getYawPosition().getDegrees();
 	}
 
 	private SwerveModulePosition[] calculateModuleDeltas(SwerveModulePosition[] modulePositions) {

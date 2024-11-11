@@ -17,18 +17,18 @@ public class ModuleIOSim implements ModuleIO {
 
 	@Override
 	public void updateInputs(ModuleIOInfo inputs) {
-		inputs.connected = true;
-		inputs.drivePosition = moduleSimulation.getDriveWheelFinalPositionRad();
-		inputs.driveVelocity = moduleSimulation.getDriveWheelFinalSpeedRadPerSec();
-		inputs.driveAppliedVolts = moduleSimulation.getDriveMotorAppliedVolts();
-		inputs.driveCurrentAmps = Math.abs(moduleSimulation.getDriveMotorSupplyCurrentAmps());
+		inputs.setConnected(true);
+		inputs.setDrivePosition(moduleSimulation.getDriveWheelFinalPositionRad());
+		inputs.setDriveVelocity(moduleSimulation.getDriveWheelFinalSpeedRadPerSec());
+		inputs.setDriveAppliedVolts(moduleSimulation.getDriveMotorAppliedVolts());
+		inputs.setDriveCurrentAmps(Math.abs(moduleSimulation.getDriveMotorSupplyCurrentAmps()));
 
-		inputs.turnAbsolutePosition = moduleSimulation.getSteerAbsoluteFacing();
-		inputs.turnRelativePosition = Rotation2d.fromRadians(
-				moduleSimulation.getSteerRelativeEncoderPositionRad());
-		inputs.turnVelocity = moduleSimulation.getSteerRelativeEncoderSpeedRadPerSec();
-		inputs.turnAppliedVolts = moduleSimulation.getSteerMotorAppliedVolts();
-		inputs.turnCurrentAmps = Math.abs(moduleSimulation.getSteerMotorSupplyCurrentAmps());
+		inputs.setTurnAbsolutePosition(moduleSimulation.getSteerAbsoluteFacing());
+		inputs.setTurnRelativePosition(Rotation2d.fromRadians(
+				moduleSimulation.getSteerRelativeEncoderPositionRad()));
+		inputs.setTurnVelocity(moduleSimulation.getSteerRelativeEncoderSpeedRadPerSec());
+		inputs.setTurnAppliedVolts(moduleSimulation.getSteerMotorAppliedVolts());
+		inputs.setTurnCurrentAmps(Math.abs(moduleSimulation.getSteerMotorSupplyCurrentAmps()));
 	}
 
 	@Override

@@ -9,28 +9,28 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.HardwareMap;
 
-/** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
-  private final Pigeon2 pigeon = new Pigeon2(HardwareMap.GYRO_ID);
-  private final StatusSignal<Double> yaw = pigeon.getYaw();
-  private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
+	private final Pigeon2 pigeon = new Pigeon2(HardwareMap.GYRO_ID);
+	private final StatusSignal<Double> yaw = pigeon.getYaw();
+	private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
 
-  public GyroIOPigeon2() {
-    pigeon.getConfigurator().apply(new Pigeon2Configuration());
-    pigeon.getConfigurator().setYaw(0.0);
-    pigeon.optimizeBusUtilization();
-  }
+	/** IO implementation for Pigeon2. */
+	public GyroIOPigeon2() {
+		pigeon.getConfigurator().apply(new Pigeon2Configuration());
+		pigeon.getConfigurator().setYaw(0.0);
+		pigeon.optimizeBusUtilization();
+	}
 
-  @Override
-  public void updateInputs(GyroIOInfo inputs) {
-    inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
-    inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
-    inputs.yawVelocity = Units.degreesToRadians(yawVelocity.getValueAsDouble());
-  }
+	@Override
+	public void updateInputs(GyroIOInfo inputs) {
+		inputs.setConnected(BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK));
+		inputs.setYawPosition(Rotation2d.fromDegrees(yaw.getValueAsDouble()));
+		inputs.setYawVelocity(Units.degreesToRadians(yawVelocity.getValueAsDouble()));
+	}
 
-  @Override
-  public void resetHeading() {
-    pigeon.reset();
-    pigeon.setYaw(0);
-  }
+	@Override
+	public void resetHeading() {
+		pigeon.reset();
+		pigeon.setYaw(0);
+	}
 }

@@ -82,7 +82,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
 	@Override
 	public void updateInputs(ModuleIOInfo inputs) {
-		inputs.connected = BaseStatusSignal.refreshAll(
+		inputs.setConnected(BaseStatusSignal.refreshAll(
 			drivePosition,
 			driveVelocity,
 			driveAppliedVolts,
@@ -92,25 +92,25 @@ public class ModuleIOTalonFX implements ModuleIO {
 			turnVelocity,
 			turnAppliedVolts,
 			turnCurrent
-		).equals(StatusCode.OK);
+		).equals(StatusCode.OK));
 
-		inputs.drivePosition =
-			drivePosition.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO;
-		inputs.driveVelocity =
-			driveVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO;
-		inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
-		inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
+		inputs.setDrivePosition(
+			drivePosition.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO);
+		inputs.setDriveVelocity(
+			driveVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.DRIVE_GEAR_RATIO);
+		inputs.setDriveAppliedVolts(driveAppliedVolts.getValueAsDouble());
+		inputs.setDriveCurrentAmps(driveCurrent.getValueAsDouble());
 
-		inputs.turnAbsolutePosition =
+		inputs.setTurnAbsolutePosition(
 			Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
-			.minus(angleEncoderOffset);
-		inputs.turnRelativePosition =
+			.minus(angleEncoderOffset));
+		inputs.setTurnRelativePosition(
 			Rotation2d.fromRotations(turnRelativePosition.getValueAsDouble()
-				/ ModuleConstants.TURN_GEAR_RATIO);
-		inputs.turnVelocity =
-			turnVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.TURN_GEAR_RATIO;
-		inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
-		inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
+				/ ModuleConstants.TURN_GEAR_RATIO));
+		inputs.setTurnVelocity(
+			turnVelocity.getValueAsDouble() * 2 * Math.PI / ModuleConstants.TURN_GEAR_RATIO);
+		inputs.setTurnAppliedVolts(turnAppliedVolts.getValueAsDouble());
+		inputs.setTurnCurrentAmps(turnCurrent.getValueAsDouble());
 	}
 
 	@Override

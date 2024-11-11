@@ -1,71 +1,224 @@
 package frc.robot.systems.drive.module;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
 
-	@AutoLog
-	public class ModuleIOInfo {
-		public boolean connected = false;
+	class ModuleIOInfo {
+		private boolean connected = false;
 
-		public double drivePosition = 0.0; // rad
-		public double driveVelocity = 0.0; // rad/s
+		private double drivePosition = 0.0; // rad
+		private double driveVelocity = 0.0; // rad/s
 
-		public double driveAppliedVolts = 0.0;
-		public double driveCurrentAmps = 0.0;
+		private double driveAppliedVolts = 0.0;
+		private double driveCurrentAmps = 0.0;
 
 		//this is generated from the CANCoder
-		public Rotation2d turnAbsolutePosition = new Rotation2d();
+		private Rotation2d turnAbsolutePosition = new Rotation2d();
 		//this is using the talonfx encoder val
-		public Rotation2d turnRelativePosition = new Rotation2d();
-		public double turnVelocity = 0.0;
+		private Rotation2d turnRelativePosition = new Rotation2d();
+		private double turnVelocity = 0.0;
 
-		public double turnAppliedVolts = 0.0;
-		public double turnCurrentAmps = 0.0;
+		private double turnAppliedVolts = 0.0;
+		private double turnCurrentAmps = 0.0;
+
+		/**
+		 * Get the connection status.
+		 * @return connected
+		 */
+		public boolean isConnected() {
+			return this.connected;
+		}
+
+		/**
+		 * Set the connection status.
+		 * @param isConnected
+		 */
+		public void setConnected(boolean isConnected) {
+			connected = isConnected;
+		}
+
+		/**
+		 * Get the drive position.
+		 * @return drive position
+		 */
+		public double getDrivePosition() {
+			return drivePosition;
+		}
+
+		/**
+		 * Set the drive position.
+		 * @param drivePos
+		 */
+		public void setDrivePosition(double drivePos) {
+			drivePosition = drivePos;
+		}
+
+		/**
+		 * Get the drive velocity.
+		 * @return drive velocity
+		 */
+		public double getDriveVelocity() {
+			return driveVelocity;
+		}
+
+		/**
+		 * Set the drive velocity.
+		 * @param driveVel
+		 */
+		public void setDriveVelocity(double driveVel) {
+			driveVelocity = driveVel;
+		}
+
+		/**
+		 * Get the drive applied volts.
+		 * @return drive applied volts
+		 */
+		public double getDriveAppliedVolts() {
+			return this.driveAppliedVolts;
+		}
+
+		/**
+		 * Set the drive applied volts.
+		 * @param driveVolts
+		 */
+		public void setDriveAppliedVolts(double driveVolts) {
+			this.driveAppliedVolts = driveVolts;
+		}
+
+		/**
+		 * Get the drive current amps.
+		 * @return drive current amps.
+		 */
+		public double getDriveCurrentAmps() {
+			return this.driveCurrentAmps;
+		}
+
+		/**
+		 * Set the drive current amps.
+		 * @param driveAmps
+		 */
+		public void setDriveCurrentAmps(double driveAmps) {
+			this.driveCurrentAmps = driveAmps;
+		}
+
+		/**
+		 * Get the turn absolute position.
+		 * @return turn absolute position.
+		 */
+		public Rotation2d getTurnAbsolutePosition() {
+			return this.turnAbsolutePosition;
+		}
+
+	/**
+	 * Set the turn absolute position.
+	 * @param turnAbsPos
+	 */
+		public void setTurnAbsolutePosition(Rotation2d turnAbsPos) {
+			this.turnAbsolutePosition = turnAbsPos;
+		}
+
+		/**
+		 * Get the turn relative position.
+		 * @return turn relative position
+		 */
+		public Rotation2d getTurnRelativePosition() {
+			return this.turnRelativePosition;
+		}
+
+		/**
+		 * Set the turn relative position.
+		 * @param turnRelPos
+		 */
+		public void setTurnRelativePosition(Rotation2d turnRelPos) {
+			this.turnRelativePosition = turnRelPos;
+		}
+
+		/**
+		 * Get the turn velocity.
+		 * @return turn velocity
+		 */
+		public double getTurnVelocity() {
+			return this.turnVelocity;
+		}
+
+		/**
+		 * Set turn velocity.
+		 * @param turnVel
+		 */
+		public void setTurnVelocity(double turnVel) {
+			this.turnVelocity = turnVel;
+		}
+
+		/**
+		 * Get turn applied volts.
+		 * @return Turn applied volts
+		 */
+		public double getTurnAppliedVolts() {
+			return this.turnAppliedVolts;
+		}
+
+		/**
+		 * Set turn applied volts.
+		 * @param turnVolts
+		 */
+		public void setTurnAppliedVolts(double turnVolts) {
+			this.turnAppliedVolts = turnVolts;
+		}
+
+		/**
+		 * Get turn current amps.
+		 * @return Turn current amps
+		 */
+		public double getTurnCurrentAmps() {
+			return this.turnCurrentAmps;
+		}
+
+		/**
+		 * Set turn current amps.
+		 * @param turnCurrent
+		 */
+		public void setTurnCurrentAmps(double turnCurrent) {
+			this.turnCurrentAmps = turnCurrent;
+		}
 	}
+
 
 	/**
 	 * Update all the values of the logged values of the module through a ModuleIOInfo object.
 	 * @param moduleInfo
 	 */
-	default void updateInputs(ModuleIOInfo moduleInfo) {
-	}
+	default void updateInputs(ModuleIOInfo moduleInfo) { }
 
 	/**
 	 * Run the drive motor at the specified voltage.
 	 * @param volts
 	*/
-	default void setDriveVoltage(double volts) {
-	}
+	default void setDriveVoltage(double volts) { }
 
 	/**
 	 * Run the turn motor at the specified voltage.
 	 * @param volts
 	 */
-	default void setTurnVoltage(double volts) {
-	}
+	default void setTurnVoltage(double volts) { }
 
 	/**
 	 * Set whether the drive motor is on brake mode or not.
 	 * @param enable
 	*/
-	default void setDriveBrakeMode(boolean enable) {
-	}
+	default void setDriveBrakeMode(boolean enable) { }
 
 	/**
 	 * Set whether the turn motor is on brake mode or not.
 	 * @param enable
 	 */
-	default void setTurnBrakeMode(boolean enable) {
-	}
+	default void setTurnBrakeMode(boolean enable) { }
 
 	/**
 	 * Set the name of the module.
 	 * @param moduleName
 	 */
-	default void setModuleName(String moduleName) {
-	}
+	default void setModuleName(String moduleName) { }
 
 	/**
 	 * Get the shorthanded logging name of the module.
@@ -76,7 +229,6 @@ public interface ModuleIO {
 	}
 
 	/** Reset the encoder position values. */
-	default void resetEncoders() {
-	}
+	default void resetEncoders() { }
 
 }
