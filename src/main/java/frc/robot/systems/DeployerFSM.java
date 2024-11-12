@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -22,8 +23,8 @@ public class DeployerFSM {
 	// FSM state definitions
 	public enum DeployerFSMState {
 		IDLE,
-        RUN_NEO,
-        RUN_KRAKEN
+        DEPLOY,
+        RETRACT
 	}
 
     final int NEO_MOTOR_ID = -1;
@@ -33,11 +34,11 @@ public class DeployerFSM {
     final double NEO_I_CONSTANT = 0;
     final double NEO_D_CONSTANT = 0;
 
-    final double NEO_PID_POS_TOLERANCE = 5;
-    final double NEO_PID_VEL_TOLERANCE = 1;
+    final double PID_POS_TOLERANCE = 5;
+    final double PID_VEL_TOLERANCE = 1;
 
     final double NEO_SETPOINT = 500;
-    final double KRAKEN_SETPOINT = 500;
+    final double KRAKEN_SETPOINT = 2; // rotations
 
 	/* ======================== Private variables ======================== */
 	private DeployerFSMState currentState;
@@ -66,7 +67,7 @@ public class DeployerFSM {
         neoMotor.getEncoder().setPosition(0);
 
         neoPID = new PIDController(NEO_P_CONSTANT, NEO_I_CONSTANT, NEO_D_CONSTANT);
-        neoPID.setTolerance(NEO_PID_POS_TOLERANCE, NEO_PID_VEL_TOLERANCE);
+        neoPID.setTolerance(PID_POS_TOLERANCE, PID_VEL_TOLERANCE);
         neoPID.reset();
 
         //perform kraken init
@@ -137,11 +138,11 @@ public class DeployerFSM {
 			case IDLE:
 				handleIdleState(input);
 				break;
-            case RUN_NEO:
-                handleRunNeoState(input);
+            case DEPLOY:
+                handleDeployState(input);
                 break;
-            case RUN_KRAKEN:
-                handleRunKrakenState(input);
+            case RETRACT:
+                handleRetractState(input);
                 break;
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -164,13 +165,28 @@ public class DeployerFSM {
 	private DeployerFSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case IDLE:
-				break;
-
+				if (input.isIntakeButtonPressed()) {
+					return DeployerFSMState.DEPLOY;
+				} else {
+					return DeployerFSMState.IDLE;
+				}
+			case RETRACT:
+				if (input.isIntakeButtonPressed()) {
+					return DeployerFSMState.DEPLOY;
+				} else if (Math.abs(krakenMotor.getPosition().getValueAsDouble()) <= PID_POS_TOLERANCE) {
+					return DeployerFSMState.IDLE;
+				} else {
+					return DeployerFSMState.RETRACT;
+				}
+			case DEPLOY:
+				if (input.isIntakeButtonPressed()) {
+					return DeployerFSMState.DEPLOY;
+				} else {
+					return DeployerFSMState.RETRACT;
+				}
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
-
-        return DeployerFSMState.IDLE; //filler
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
@@ -180,40 +196,30 @@ public class DeployerFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIdleState(TeleopInput input) {
-		neoMotor.set(0);
 		krakenMotor.set(0);
+
+		// neoMotor.set(0);
 	}
 
     /**
-	 * Handle behavior in RUN_NEO.
+	 * Handle behavior in DEPLOY.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleRunNeoState(TeleopInput input) {
-		krakenMotor.set(0);
+	private void handleDeployState(TeleopInput input) {
+		krakenMotor.setControl(new MotionMagicVoltage(0).withPosition(KRAKEN_SETPOINT));
 
-        neoMotor.set(neoPID.calculate(neoMotor.getEncoder().getPosition(), NEO_SETPOINT));
+        // neoMotor.set(neoPID.calculate(neoMotor.getEncoder().getPosition(), NEO_SETPOINT));
 	}
 
     /**
-	 * Handle behavior in RUN_NEO.
+	 * Handle behavior in RETRACT.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleRunKrakenState(TeleopInput input) {
-		neoMotor.set(0);
+	private void handleRetractState(TeleopInput input) {
+		krakenMotor.setControl(new MotionMagicVoltage(0).withPosition(0));
 
-        
-	}
-
-	/**
-	 * Clamps the value to be between a given minimum and maximum value.
-	 * @param val The value to be clamped.
-	 * @param min The minimum value.
-	 * @param max The maximum value.
-	 * @return The clamped value.
-	 */
-	private double clamp(double val, double min, double max) {
-		return MathUtil.clamp(val, min, max);
+        // neoMotor.set(neoPID.calculate(neoMotor.getEncoder().getPosition(), 0));
 	}
 }
