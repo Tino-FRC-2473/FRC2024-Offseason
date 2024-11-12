@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.units.Units;
+import frc.robot.HardwareMap;
 
 // Robot Imports
 import frc.robot.TeleopInput;
@@ -41,8 +42,6 @@ import frc.robot.SwerveConstants.OIConstants;
 import frc.robot.systems.drive.gyro.GyroIO;
 import frc.robot.systems.drive.gyro.GyroIOInfoAutoLogged;
 import frc.robot.systems.drive.gyro.GyroIOPigeon2;
-import frc.robot.systems.drive.module.ModuleIO;
-import frc.robot.systems.drive.module.Module;
 import frc.robot.SwerveConstants.AutoConstants;
 
 public class DriveFSMSystem extends SubsystemBase {
@@ -82,26 +81,33 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * Create FSMSystem and initialize to starting state. Also perform any
 	 * one-time initialization or configuration of hardware required. Note
 	 * the constructor is called only once when the robot boots.
-	 *
-	 * @param gyroPigeonIO
-	 * @param flModuleIO
-	 * @param frModuleIO
-	 * @param blModuleIO
-	 * @param brModuleIO
 	 */
-	public DriveFSMSystem(
-		GyroIO gyroPigeonIO,
-		ModuleIO flModuleIO,
-		ModuleIO frModuleIO,
-		ModuleIO blModuleIO,
-		ModuleIO brModuleIO
-	) {
+	public DriveFSMSystem() {
 		// Perform hardware init
-		this.gyroIO = gyroPigeonIO;
-		flModule = new Module(flModuleIO);
-		frModule = new Module(frModuleIO);
-		blModule = new Module(blModuleIO);
-		brModule = new Module(brModuleIO);
+		flModule = new Module(
+			HardwareMap.FRONT_LEFT_DRIVING_CAN_ID,
+			HardwareMap.FRONT_LEFT_TURNING_CAN_ID,
+			HardwareMap.FRONT_LEFT_CANCODER_ID,
+			DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET
+		);
+		frModule = new Module(
+			HardwareMap.FRONT_RIGHT_DRIVING_CAN_ID,
+			HardwareMap.FRONT_RIGHT_TURNING_CAN_ID,
+			HardwareMap.FRONT_RIGHT_CANCODER_ID,
+			DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET
+		);
+		blModule = new Module(
+			HardwareMap.REAR_LEFT_DRIVING_CAN_ID,
+			HardwareMap.REAR_LEFT_TURNING_CAN_ID,
+			HardwareMap.REAR_LEFT_CANCODER_ID,
+			DriveConstants.REAR_LEFT_CHASSIS_ANGULAR_OFFSET
+		);
+		brModule = new Module(
+			HardwareMap.REAR_RIGHT_DRIVING_CAN_ID,
+			HardwareMap.REAR_RIGHT_TURNING_CAN_ID,
+			HardwareMap.REAR_RIGHT_CANCODER_ID,
+			DriveConstants.REAR_RIGHT_CHASSIS_ANGULAR_OFFSET
+		);
 
 		lastModulePositions = new SwerveModulePosition[] {
 			new SwerveModulePosition(),
@@ -239,10 +245,10 @@ public class DriveFSMSystem extends SubsystemBase {
 	public void update(TeleopInput input) {
 
 		//Refresh all the values from the StatusSignal + AdvKit logging
-		flModule.processInputs();
-		frModule.processInputs();
-		blModule.processInputs();
-		brModule.processInputs();
+		flModule.updateInputs();
+		frModule.updateInputs();
+		blModule.updateInputs();
+		brModule.updateInputs();
 		gyroIO.updateInputs(gyroIOInfo);
 
 		if (input == null) {

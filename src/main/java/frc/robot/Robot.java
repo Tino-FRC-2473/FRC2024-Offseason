@@ -127,12 +127,7 @@ public class Robot extends LoggedRobot {
 				SimulatedArena.getInstance().resetFieldForAuto();
 
 				driveFSMSystem =
-					new DriveFSMSystem(
-						new GyroIOSim(gyroSimulation),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[0]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[1]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[2]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[(2 + 1)]));
+					new DriveFSMSystem();
 
 				//driveFSMSystem.setPose(new Pose2d(1.4, 5.6, new Rotation2d()));
 
