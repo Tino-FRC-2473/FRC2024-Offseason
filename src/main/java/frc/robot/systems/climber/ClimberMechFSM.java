@@ -1,4 +1,4 @@
-package frc.robot.systems;
+package frc.robot.systems.climber;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
