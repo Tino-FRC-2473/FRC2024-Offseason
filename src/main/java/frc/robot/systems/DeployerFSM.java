@@ -1,54 +1,42 @@
 package frc.robot.systems;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 // WPILib Imports
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+// Third party Hardware Imports
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-// Third party Hardware Imports
-import com.revrobotics.CANSparkMax;
 
 // Robot Imports
-import frc.robot.TeleopInput;
+import frc.robot.Constants;
 import frc.robot.HardwareMap;
+import frc.robot.TeleopInput;
 
 public class DeployerFSM {
 	/* ======================== Constants ======================== */
 
 	// FSM state definitions
 	public enum DeployerFSMState {
-		IDLE,
-        RUN_NEO,
-        RUN_KRAKEN
+		DEPLOY,
+		RETRACT,
+		IDLE
 	}
 
-    final int NEO_MOTOR_ID = -1;
-    final int KRAKEN_MOTOR_ID = -1;
-
-    final double NEO_P_CONSTANT = 0;
-    final double NEO_I_CONSTANT = 0;
-    final double NEO_D_CONSTANT = 0;
-
-    final double NEO_PID_POS_TOLERANCE = 5;
-    final double NEO_PID_VEL_TOLERANCE = 1;
-
-    final double NEO_SETPOINT = 500;
-    final double KRAKEN_SETPOINT = 500;
+	private final MotionMagicVoltage mmVoltage = new MotionMagicVoltage(0);
 
 	/* ======================== Private variables ======================== */
 	private DeployerFSMState currentState;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
-	private CANSparkMax neoMotor;
+	// private CANSparkMax neoMotor;
 	private TalonFX krakenMotor;
 
-    //PID Controller for NEO motor
-    PIDController neoPID;
+	//PID Controller for NEO motor
+	// PIDController neoPID;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -58,45 +46,49 @@ public class DeployerFSM {
 	 */
 	public DeployerFSM() {
 		// Perform neo init
-		neoMotor = new CANSparkMax(
-			NEO_MOTOR_ID,
-			CANSparkMax.MotorType.kBrushless);
+		// neoMotor = new CANSparkMax(
+		// 	NEO_MOTOR_ID,
+		// 	CANSparkMax.MotorType.kBrushless);
 
-        neoMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
-        neoMotor.getEncoder().setPosition(0);
+		// neoMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+		// neoMotor.getEncoder().setPosition(0);
 
-        neoPID = new PIDController(NEO_P_CONSTANT, NEO_I_CONSTANT, NEO_D_CONSTANT);
-        neoPID.setTolerance(NEO_PID_POS_TOLERANCE, NEO_PID_VEL_TOLERANCE);
-        neoPID.reset();
+		// neoPID = new PIDController(NEO_P_CONSTANT, NEO_I_CONSTANT, NEO_D_CONSTANT);
+		// neoPID.setTolerance(NEO_PID_POS_TOLERANCE, NEO_PID_VEL_TOLERANCE);
+		// neoPID.reset();
 
-        //perform kraken init
-        krakenMotor = new TalonFX(KRAKEN_MOTOR_ID);
+		//perform kraken init
+		krakenMotor = new TalonFX(HardwareMap.PIVOT_MOTOR_ID);
 		krakenMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        // below ripped from ctre documentation:
-        // https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/device-specific/talonfx/motion-magic.html
-        var talonFXConfigs = new TalonFXConfiguration();
+		var talonFXConfigs = new TalonFXConfiguration();
 
-		krakenMotor.setControl(new VoltageOut(0.0)); //increment by 0.01 until motor starts moving the deployer to find kS
+		// set slot 0 gains
+		var slot0Configs = talonFXConfigs.Slot0;
+		slot0Configs.kG = Constants.MM_CONSTANT_G; // Voltae output to overcome gravity
+		slot0Configs.kS = Constants.MM_CONSTANT_S; // Voltage output to overcome static friction
+		slot0Configs.kV = Constants.MM_CONSTANT_V; // Voltage for velocity target of 1 rps
+		slot0Configs.kA = Constants.MM_CONSTANT_A; // Voltage for acceleration of 1 rps/s
+		slot0Configs.kP = Constants.MM_CONSTANT_P; // Account for position error of 1 rotations
+		slot0Configs.kI = Constants.MM_CONSTANT_I; // output for integrated error
+		slot0Configs.kD = Constants.MM_CONSTANT_D; // Account for velocity error of 1 rps
 
-        // set slot 0 gains
-        var slot0Configs = talonFXConfigs.Slot0;
-        slot0Configs.kG = 0; // Add 0.00 V output to overcome gravity
-        slot0Configs.kS = 0.25; // Add kS V output to overcome static friction
-        slot0Configs.kV = 0.12; // A velocity target of 1 rps results in kV V output
-        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires kA V output
-        slot0Configs.kP = 4.8; // A position error of 1 rotations results in kP V output
-        slot0Configs.kI = 0; // output for integrated error
-        slot0Configs.kD = 0.1; // A velocity error of 1 rps results in kD V output
+		// set Motion Magic settings
+		var motionMagicConfigs = talonFXConfigs.MotionMagic;
+		motionMagicConfigs.MotionMagicCruiseVelocity = Constants.CONFIG_CONSTANT_CV; //Target velo
+		motionMagicConfigs.MotionMagicAcceleration = Constants.CONFIG_CONSTANT_A; //Target accel
+		motionMagicConfigs.MotionMagicJerk = Constants.CONFIG_CONSTANT_J; // Target jerk
 
-        // set Motion Magic settings
-        var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 30; // Target cruise velocity of 30 rps
-        motionMagicConfigs.MotionMagicAcceleration = 160; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
+		krakenMotor.getConfigurator().apply(talonFXConfigs);
 
-        krakenMotor.getConfigurator().apply(talonFXConfigs);
+		BaseStatusSignal.setUpdateFrequencyForAll(
+			Constants.UPDATE_FREQUENCY_HZ,
+			krakenMotor.getPosition(),
+			krakenMotor.getVelocity(),
+			krakenMotor.getAcceleration(),
+			krakenMotor.getMotorVoltage());
 
+		krakenMotor.optimizeBusUtilization();
 		// Reset state machine
 		reset();
 	}
@@ -118,7 +110,7 @@ public class DeployerFSM {
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
 	public void reset() {
-		currentState = DeployerFSMState.IDLE;
+		currentState = DeployerFSMState.RETRACT;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
@@ -134,20 +126,23 @@ public class DeployerFSM {
 			return;
 		}
 		switch (currentState) {
-			case IDLE:
-				handleIdleState(input);
+			case DEPLOY:
+				handleDeployState(input);
 				break;
-            case RUN_NEO:
-                handleRunNeoState(input);
-                break;
-            case RUN_KRAKEN:
-                handleRunKrakenState(input);
-                break;
+			case RETRACT:
+				handleRetractState(input);
+				break;
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
 
 		currentState = nextState(input);
+
+		SmartDashboard.putNumber("Postion", krakenMotor.getPosition().getValueAsDouble());
+		SmartDashboard.putNumber("Velo", krakenMotor.getVelocity().getValueAsDouble());
+		SmartDashboard.putNumber("Accel", krakenMotor.getAcceleration().getValueAsDouble());
+		SmartDashboard.putNumber("Voltage", krakenMotor.getMotorVoltage().getValueAsDouble());
+		SmartDashboard.putString("CURRENT STATE", currentState.toString());
 	}
 
 
@@ -163,14 +158,28 @@ public class DeployerFSM {
 	 */
 	private DeployerFSMState nextState(TeleopInput input) {
 		switch (currentState) {
-			case IDLE:
-				break;
+			case RETRACT:
+
+				if (input == null) {
+					return DeployerFSMState.RETRACT;
+				}
+
+				if (input.isIntakeButtonPressed()) {
+					return DeployerFSMState.DEPLOY;
+				} else {
+					return DeployerFSMState.RETRACT;
+				}
+
+			case DEPLOY:
+				if (input.isIntakeButtonPressed()) {
+					return DeployerFSMState.DEPLOY;
+				} else {
+					return DeployerFSMState.RETRACT;
+				}
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
-
-        return DeployerFSMState.IDLE; //filler
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
@@ -180,40 +189,24 @@ public class DeployerFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIdleState(TeleopInput input) {
-		neoMotor.set(0);
 		krakenMotor.set(0);
-	}
-
-    /**
-	 * Handle behavior in RUN_NEO.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
-	 */
-	private void handleRunNeoState(TeleopInput input) {
-		krakenMotor.set(0);
-
-        neoMotor.set(neoPID.calculate(neoMotor.getEncoder().getPosition(), NEO_SETPOINT));
-	}
-
-    /**
-	 * Handle behavior in RUN_NEO.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
-	 */
-	private void handleRunKrakenState(TeleopInput input) {
-		neoMotor.set(0);
-
-        
 	}
 
 	/**
-	 * Clamps the value to be between a given minimum and maximum value.
-	 * @param val The value to be clamped.
-	 * @param min The minimum value.
-	 * @param max The maximum value.
-	 * @return The clamped value.
+	 * Handle behavior in DEPLOY.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
 	 */
-	private double clamp(double val, double min, double max) {
-		return MathUtil.clamp(val, min, max);
+	private void handleDeployState(TeleopInput input) {
+		krakenMotor.setControl(mmVoltage.withPosition(Constants.DEPLOYED_POSITION));
+	}
+
+	/**
+	 * Handle behavior in RETRACT.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleRetractState(TeleopInput input) {
+		krakenMotor.setControl(mmVoltage.withPosition(Constants.HOME_POSITION));
 	}
 }
