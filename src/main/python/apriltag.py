@@ -134,7 +134,8 @@ class AprilTag():
                     pose_data[ids[i]] = (cvec, tvec)
                     
                     self.draw_axis_on_image(frame_ann, self.camera_matrix, self.dist_coeffs, rvec, tvec, cvec, 0.1)
-
+            else: 
+                return None
             return pose_data
 
 
