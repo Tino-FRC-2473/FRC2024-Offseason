@@ -382,16 +382,8 @@ public class DriveFSMSystem extends SubsystemBase {
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND),
 					true);
 
-				if (input.isCrossButtonPressed()) {
+				if (input.isOptionsButtonPressed()) {
 					gyro.reset();
-				}
-
-				if (input.isTriangleButtonPressed()) {
-					setForwardFormation();
-				}
-
-				if (input.isCircleButtonPressed()) {
-					setXFormation();
 				}
 
 				break;
@@ -417,12 +409,6 @@ public class DriveFSMSystem extends SubsystemBase {
 
 				break;
 
-			case ALIGN_TO_NOTE_STATE:
-				if (rpi.getNoteYaw() != VisionConstants.UNABLE_TO_SEE_NOTE_CONSTANT) {
-					alignToNote();
-				}
-
-				break;
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 
@@ -458,9 +444,6 @@ public class DriveFSMSystem extends SubsystemBase {
 			case TELEOP_STATE:
 				if (input.isCircleButtonPressed()) {
 					return FSMState.ALIGN_TO_SPEAKER_STATE;
-				} else if (input.isCrossButtonPressed()) {
-					isNoteAligned = false;
-					return FSMState.ALIGN_TO_NOTE_STATE;
 				}
 
 				return FSMState.TELEOP_STATE;
@@ -473,13 +456,6 @@ public class DriveFSMSystem extends SubsystemBase {
 					return FSMState.TELEOP_STATE;
 				}
 				return FSMState.ALIGN_TO_SPEAKER_STATE;
-
-			case ALIGN_TO_NOTE_STATE:
-				if (input.isCrossButtonReleased()) {
-					isNoteAligned = false;
-					return FSMState.TELEOP_STATE;
-				}
-				return FSMState.ALIGN_TO_NOTE_STATE;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
