@@ -4,8 +4,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
@@ -21,11 +19,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.systems.ClimberMechFSMLeft;
-import frc.robot.systems.ClimberMechFSMRight;
 // Systems
 import frc.robot.systems.DriveFSMSystem;
-import frc.robot.systems.MBRFSMv2;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -35,9 +30,6 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
-	private MBRFSMv2 mbrfsMv2;
-	private ClimberMechFSMLeft chainLeftFSM;
-	private ClimberMechFSMRight chainRightFSM;
 	private SendableChooser<Command> autoChooser;
 	private Command autonomousCommand;
 	private final Field2d mField = new Field2d();
@@ -67,19 +59,6 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFSMSystem = new DriveFSMSystem();
-		mbrfsMv2 = new MBRFSMv2();
-		chainLeftFSM = new ClimberMechFSMLeft();
-		chainRightFSM = new ClimberMechFSMRight();
-
-		NamedCommands.registerCommand("S_TIN", mbrfsMv2.new IntakeNoteCommand());
-		NamedCommands.registerCommand("S_TON", mbrfsMv2.new OuttakeNoteCommand());
-		NamedCommands.registerCommand("S_PGS",
-			mbrfsMv2.new PivotGroundToShooterCommand());
-		NamedCommands.registerCommand("S_PSG",
-			mbrfsMv2.new PivotShooterToGroundCommand());
-		NamedCommands.registerCommand("S_TRS", mbrfsMv2.new RevShooterCommand());
-		NamedCommands.registerCommand("G_SPN", mbrfsMv2.new ShootPreloadedCommand());
-		NamedCommands.registerCommand("G_SSN", mbrfsMv2.new ShootNoteCommand());
 
 		/*
 		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
@@ -131,9 +110,7 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		driveFSMSystem.reset();
-		mbrfsMv2.reset();
-		chainLeftFSM.reset();
-		chainRightFSM.reset();
+
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
@@ -142,9 +119,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
-		mbrfsMv2.update(input);
-		chainLeftFSM.update(input);
-		chainRightFSM.update(input);
+
 		mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
