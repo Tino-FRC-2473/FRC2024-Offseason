@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.Timer;
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
+import frc.robot.MechConstants;
 //import frc.robot.LED;
 import frc.robot.RaspberryPI;
 import frc.robot.SwerveConstants.AutoConstants;
@@ -92,6 +93,8 @@ public class DriveFSMSystem extends SubsystemBase {
 			rearRight.getPosition()
 		});
 
+	// private MBRFSMv2 mbrfsm;
+
 	private int lockedSpeakerId;
 	private boolean isSpeakerAligned;
 	private boolean isNoteAligned;
@@ -108,8 +111,6 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double rotSpeedInput;
 	private double oldRotRawInput;
 	private double rotRawInput;
-	private double oldAngleDiff;
-	private double angleDiff;
 
 	private static final double ROT_DEADZONE = 0.01;
 
@@ -206,8 +207,6 @@ public class DriveFSMSystem extends SubsystemBase {
 		rotSpeedInput = 0;
 		oldRotRawInput = 0;
 		rotRawInput = 0;
-		oldAngleDiff = 0;
-		angleDiff = 0;
 
 
 		gyro.reset();
@@ -394,14 +393,15 @@ public class DriveFSMSystem extends SubsystemBase {
 
 				double xSpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
-					-MathUtil.applyDeadband((input.getControllerLeftJoystickX()
+					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
+				
+				double ySpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickX()
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND),
-					-MathUtil.applyDeadband((input.getControllerRightJoystickX()
+					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
+				
+				rotSpeedInput = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT),
-					OIConstants.DRIVE_DEADBAND);
+					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
 
 				double correctedRotSpeed = .0;
 				//double correctedXSpeed = .0;
@@ -436,7 +436,6 @@ public class DriveFSMSystem extends SubsystemBase {
 
 				oldRotSpeedInput = rotSpeedInput;
 				oldRotRawInput = rotRawInput;
-				oldAngleDiff = angleDiff;
 
 				// if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
 				// 	if (xSpeedInput != 0) {
@@ -458,8 +457,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				// 	}
 				// }
 
-				drive(xSpeedInput,
-					ySpeedInput,
+				drive(xSpeedInput,ySpeedInput,
 					correctRot ? correctedRotSpeed : rotSpeedInput,
 					true);
 
@@ -471,8 +469,6 @@ public class DriveFSMSystem extends SubsystemBase {
 					rotSpeedInput = 0;
 					rotRawInput = 0;
 					oldRotRawInput = 0;
-					angleDiff = 0;
-					oldAngleDiff = 0;
 				}
 
 				//if (input.isTriangleButtonPressed()) {
@@ -624,27 +620,19 @@ public class DriveFSMSystem extends SubsystemBase {
 		double arc1 = 360 + (expected - deviated);
 		double arc2 = (expected - deviated);
 
-		angleDiff = (Math.abs(arc1) > Math.abs(arc2)
+		double angleDiff = (Math.abs(arc1) > Math.abs(arc2)
 			? arc2 : arc1);
 
-		double correction = 0;
-
-		if (Math.abs(angleDiff) > MechConstants.ANGLE_EPSILON) {
-			correction =
-				((Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
-				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P //scale to max: -Kp -> +Kp
-				- Math.abs((oldAngleDiff - angleDiff) / 180) //scaled differential
-				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_D) //scale to max: -Kd -> +Kd
-				* (Math.abs(angleDiff) / angleDiff); //transfer sign
-		}
+		double correction =
+			(1 - Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
+			* (Math.abs(angleDiff) / angleDiff) //transfer sign
+			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P; //scale to max: -Kc -> +Kc
 
 		SmartDashboard.putNumber("Saved Heading", deviated);
 		SmartDashboard.putNumber("Minor Arc", angleDiff);
-		SmartDashboard.putNumber("Angle Diff", oldAngleDiff - angleDiff);
 		SmartDashboard.putNumber("Scaled Correction", correction);
 
-		return clamp(correction, MechConstants.MIN_TURN_SPEED,
-			MechConstants.MAX_TURN_SPEED); //redundant clamp, but keep just in case?
+		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED); //redundant clamp, but keep just in case?
 	}
 
 	// public double pidPosition(double deviated, double expected) {
@@ -930,4 +918,67 @@ public class DriveFSMSystem extends SubsystemBase {
 	public static double clamp(double value, double lowerBound, double upperBound) {
 		return Math.min(Math.max(value, lowerBound), upperBound);
 	}
+
+	// public class ATAlignmentCommand extends Command {
+	// 	private Timer timer = new Timer();
+	// 	private int id;
+
+	// 	/**
+	// 	 * Creates AT Alignment command during auto.
+	// 	 * @param tagID the id of the tag to be aligned with
+	// 	 */
+	// 	public ATAlignmentCommand(int tagID) {
+	// 		this.id = tagID;
+	// 	}
+
+	// 	@Override
+	// 	public void initialize() {
+	// 		System.out.println("ALIGNMENT TO APRIL TAG INIT");
+	// 		timer.start();
+	// 	}
+
+	// 	@Override
+	// 	public void execute() {
+	// 		alignToAT(id);
+	// 	}
+
+	// 	@Override
+	// 	public boolean isFinished() {
+	// 		return isSpeakerAligned;
+	// 	}
+
+	// 	@Override
+	// 	public void end(boolean interrupted) {
+	// 		timer.stop();
+	// 		timer.reset();
+	// 		isSpeakerAligned = false;
+	// 		isSpeakerPositionAligned = false;
+	// 	}
+	// }
+
+	// public class NoteAlignmentCommand extends Command {
+	// 	private Timer timer = new Timer();
+
+	// 	@Override
+	// 	public void initialize() {
+	// 		System.out.println("ALIGNMENT INITIALIZED");
+	// 		timer.start();
+	// 	}
+
+	// 	@Override
+	// 	public void execute() {
+	// 		alignToNote();
+	// 	}
+
+	// 	@Override
+	// 	public boolean isFinished() {
+	// 		// return mbrfsm.hasNote();
+	// 	}
+
+	// 	@Override
+	// 	public void end(boolean interrupted) {
+	// 		timer.stop();
+	// 		timer.reset();
+	// 	}
+	// }
 }
