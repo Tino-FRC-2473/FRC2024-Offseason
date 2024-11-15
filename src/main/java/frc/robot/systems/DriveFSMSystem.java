@@ -94,7 +94,7 @@ public class DriveFSMSystem extends SubsystemBase {
 			rearRight.getPosition()
 		});
 
-	private MBRFSMv2 mbrfsm;
+	// private MBRFSMv2 mbrfsm;
 
 	private int lockedSpeakerId;
 	private boolean isSpeakerAligned;
@@ -946,66 +946,66 @@ public class DriveFSMSystem extends SubsystemBase {
 		return Math.min(Math.max(value, lowerBound), upperBound);
 	}
 
-	public class ATAlignmentCommand extends Command {
-		private Timer timer = new Timer();
-		private int id;
+	// public class ATAlignmentCommand extends Command {
+	// 	private Timer timer = new Timer();
+	// 	private int id;
 
-		/**
-		 * Creates AT Alignment command during auto.
-		 * @param tagID the id of the tag to be aligned with
-		 */
-		public ATAlignmentCommand(int tagID) {
-			this.id = tagID;
-		}
+	// 	/**
+	// 	 * Creates AT Alignment command during auto.
+	// 	 * @param tagID the id of the tag to be aligned with
+	// 	 */
+	// 	public ATAlignmentCommand(int tagID) {
+	// 		this.id = tagID;
+	// 	}
 
-		@Override
-		public void initialize() {
-			System.out.println("ALIGNMENT TO APRIL TAG INIT");
-			timer.start();
-		}
+	// 	@Override
+	// 	public void initialize() {
+	// 		System.out.println("ALIGNMENT TO APRIL TAG INIT");
+	// 		timer.start();
+	// 	}
 
-		@Override
-		public void execute() {
-			alignToAT(id);
-		}
+	// 	@Override
+	// 	public void execute() {
+	// 		alignToAT(id);
+	// 	}
 
-		@Override
-		public boolean isFinished() {
-			return isSpeakerAligned;
-		}
+	// 	@Override
+	// 	public boolean isFinished() {
+	// 		return isSpeakerAligned;
+	// 	}
 
-		@Override
-		public void end(boolean interrupted) {
-			timer.stop();
-			timer.reset();
-			isSpeakerAligned = false;
-			isSpeakerPositionAligned = false;
-		}
-	}
+	// 	@Override
+	// 	public void end(boolean interrupted) {
+	// 		timer.stop();
+	// 		timer.reset();
+	// 		isSpeakerAligned = false;
+	// 		isSpeakerPositionAligned = false;
+	// 	}
+	// }
 
-	public class NoteAlignmentCommand extends Command {
-		private Timer timer = new Timer();
+	// public class NoteAlignmentCommand extends Command {
+	// 	private Timer timer = new Timer();
 
-		@Override
-		public void initialize() {
-			System.out.println("ALIGNMENT INITIALIZED");
-			timer.start();
-		}
+	// 	@Override
+	// 	public void initialize() {
+	// 		System.out.println("ALIGNMENT INITIALIZED");
+	// 		timer.start();
+	// 	}
 
-		@Override
-		public void execute() {
-			alignToNote();
-		}
+	// 	@Override
+	// 	public void execute() {
+	// 		alignToNote();
+	// 	}
 
-		@Override
-		public boolean isFinished() {
-			return mbrfsm.hasNote();
-		}
+	// 	@Override
+	// 	public boolean isFinished() {
+	// 		// return mbrfsm.hasNote();
+	// 	}
 
-		@Override
-		public void end(boolean interrupted) {
-			timer.stop();
-			timer.reset();
-		}
-	}
+	// 	@Override
+	// 	public void end(boolean interrupted) {
+	// 		timer.stop();
+	// 		timer.reset();
+	// 	}
+	// }
 }
