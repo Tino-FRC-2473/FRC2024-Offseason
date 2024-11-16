@@ -184,15 +184,6 @@ public class DeployerFSM {
 
 	/* ------------------------ FSM state handlers ------------------------ */
 	/**
-	 * Handle behavior in IDLE.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
-	 */
-	private void handleIdleState(TeleopInput input) {
-		krakenMotor.set(0);
-	}
-
-	/**
 	 * Handle behavior in DEPLOY.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
