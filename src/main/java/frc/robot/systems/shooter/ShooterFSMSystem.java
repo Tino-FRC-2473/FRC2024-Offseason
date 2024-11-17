@@ -1,10 +1,11 @@
-package frc.robot.systems;
+package frc.robot.systems.shooter;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -15,6 +16,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 // Robot Imports
 import frc.robot.TeleopInput;
+import frc.robot.systems.intake.IntakeFSMSystem;
 import frc.robot.HardwareMap;
 import frc.robot.Constants;
 
@@ -34,6 +36,7 @@ public class ShooterFSMSystem {
 	private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
+	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -69,8 +72,8 @@ public class ShooterFSMSystem {
 		motionMagicConfigs.MotionMagicJerk = Constants.CONFIG_CONSTANT_J;
 		// Target jerk of 4000 rps/s/s (0.1 seconds)
 
-		shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
-		shooterRightMotor.getConfigurator().apply(talonFXConfigs);
+		statusCode = shooterLeftMotor.getConfigurator().apply(talonFXConfigs);
+		statusCode = shooterRightMotor.getConfigurator().apply(talonFXConfigs);
 
 		// Reset state machine
 		reset();
@@ -207,8 +210,8 @@ public class ShooterFSMSystem {
 	 * @param input action input by driver on the mech controller
 	 */
 	public void handleIdleState(TeleopInput input) {
-		shooterLeftMotor.set(0);
-		shooterRightMotor.set(0);
+		shooterLeftMotor.setControl(mVoltage.withVelocity(0));
+		shooterRightMotor.setControl(mVoltage.withVelocity(0));
 
 		input.mechLeftRumble(0);
 	}
@@ -258,8 +261,8 @@ public class ShooterFSMSystem {
 				Constants.SHOOT_VELOCITY));
 			return false;
 		} else {
-			shooterLeftMotor.set(0);
-			shooterRightMotor.set(0);
+			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
+			shooterRightMotor.setControl(mVoltage.withVelocity(0));
 			timer.stop();
 			timer.reset();
 			return true;
@@ -309,10 +312,9 @@ public class ShooterFSMSystem {
 
 		@Override
 		public void end(boolean interrupted) {
-			shooterLeftMotor.set(0);
-			shooterRightMotor.set(0);
+			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
+			shooterRightMotor.setControl(mVoltage.withVelocity(0));
 			intakeFSM.setIndexerMotor(0);
-			intakeFSM.stopPivotIntake();
 			intakeFSM.setHasNote(false);
 
 			timerSub.stop();
@@ -349,22 +351,21 @@ public class ShooterFSMSystem {
 		// Called every time the scheduler runs while the command is scheduled.
 		@Override
 		public void execute() {
-			intakeFSM.stopPivotIntake();
-
-			shooterLeftMotor.setControl(mVoltage.withVelocity(
-				-Constants.SHOOT_VELOCITY));
-			shooterRightMotor.setControl(mVoltage.withVelocity(
-				Constants.SHOOT_VELOCITY));
-			intakeFSM.setIndexerMotor(Constants.FEED_SHOOTER_VELOCITY);
+			if (timerSub.get() < Constants.AUTO_SHOOTING_SECS) {
+				shooterLeftMotor.setControl(mVoltage.withVelocity(
+					-Constants.SHOOT_VELOCITY));
+				shooterRightMotor.setControl(mVoltage.withVelocity(
+					Constants.SHOOT_VELOCITY));
+				intakeFSM.setIndexerMotor(Constants.FEED_SHOOTER_VELOCITY);
+			}
 		}
 
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
-			shooterLeftMotor.set(0);
-			shooterRightMotor.set(0);
+			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
+			shooterRightMotor.setControl(mVoltage.withVelocity(0));
 			intakeFSM.setIndexerMotor(0);
-			intakeFSM.stopPivotIntake();
 
 			timerSub.stop();
 			timerSub.reset();
@@ -399,8 +400,6 @@ public class ShooterFSMSystem {
 		// Called every time the scheduler runs while the command is scheduled.
 		@Override
 		public void execute() {
-			intakeFSM.stopPivotIntake();
-
 			if (timerSub.get() < Constants.AUTO_REVVING_SECS) {
 				shooterLeftMotor.setControl(mVoltage.withVelocity(
 					-Constants.SHOOT_VELOCITY));
@@ -413,8 +412,8 @@ public class ShooterFSMSystem {
 		// Called once the command ends or is interrupted.
 		@Override
 		public void end(boolean interrupted) {
-			shooterLeftMotor.set(0);
-			shooterRightMotor.set(0);
+			shooterLeftMotor.setControl(mVoltage.withVelocity(0));
+			shooterRightMotor.setControl(mVoltage.withVelocity(0));
 			intakeFSM.setIndexerMotor(0);
 
 			timerSub.stop();

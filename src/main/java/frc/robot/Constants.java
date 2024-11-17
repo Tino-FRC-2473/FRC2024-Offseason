@@ -28,6 +28,7 @@ public final class Constants {
 	// Auto Intake Constants
 	public static final double AUTO_PIVOT_TIMER = 0.5;
 	public static final double OUTTAKE_AUTO_TIMER = 0.7;
+	public static final double INTAKE_AUTO_TIMER = 0.7; // needs confirmation
 	public static final float TIMED_INTAKING_DURATION = 1.5f;
 	public static final float AUTO_INTAKE_POWER = 0.2f;
 	public static final float AUTO_OUTTAKE_POWER = -0.2f;
@@ -35,6 +36,7 @@ public final class Constants {
 
 	// TeleOp Intake Constants
 	public static final float INTAKE_VELOCITY = 25; //must be <=89rps
+	public static final float INDEXER_VELOCITY = 25; // need to check
 	public static final float OUTTAKE_VELOCITY = -25; //must be >=-89rps
 	public static final float FEED_SHOOTER_VELOCITY = 50; //must be <=89rps
 

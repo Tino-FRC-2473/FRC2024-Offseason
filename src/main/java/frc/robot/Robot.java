@@ -30,6 +30,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import frc.robot.Constants.MatchConstants;
 import frc.robot.SwerveConstants.DriveConstants;
+import frc.robot.systems.climber.ClimberMechFSM;
 // Systems
 import frc.robot.systems.drive.DriveFSMSystem;
 import frc.robot.systems.drive.gyro.GyroIO;
@@ -52,6 +53,7 @@ public class Robot extends LoggedRobot {
 	// Systems
 	private DriveFSMSystem driveFSMSystem;
 	private SwerveDriveSimulation swerveDriveSimulation;
+	private ClimberMechFSM climberMechFSM;
 
 	private LoggedDashboardChooser<Command> autoChooser;
 	private Command autonomousCommand;
@@ -64,6 +66,8 @@ public class Robot extends LoggedRobot {
 	public void robotInit() {
 		System.out.println("robotInit");
 		input = new TeleopInput();
+
+		climberMechFSM = new ClimberMechFSM();
 
 		switch (MatchConstants.CURRENT_MODE) {
 			case REAL:
@@ -217,6 +221,7 @@ public class Robot extends LoggedRobot {
 	@Override
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
+		climberMechFSM.update(input);
 		//mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
@@ -239,6 +244,7 @@ public class Robot extends LoggedRobot {
 	@Override
 	public void simulationPeriodic() {
 		driveFSMSystem.update(input);
+		climberMechFSM.update(input);
 		updateSimulationField();
 	}
 

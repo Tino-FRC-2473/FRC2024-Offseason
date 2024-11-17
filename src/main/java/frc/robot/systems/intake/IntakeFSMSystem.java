@@ -1,4 +1,4 @@
-package frc.robot.systems;
+package frc.robot.systems.intake;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.Encoder;
@@ -9,13 +9,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 // Third party Hardware Imports
 import com.revrobotics.ColorSensorV3;
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -47,7 +45,7 @@ public class IntakeFSMSystem {
 	private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 	private Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 	private MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
-	private CurrentLimitsConfigs currLimitcfgs = talonFXConfigs.CurrentLimits;
+	private StatusCode statusCode = StatusCode.StatusCodeNotInitialized;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -93,16 +91,8 @@ public class IntakeFSMSystem {
 		motionMagicConfigs.MotionMagicAcceleration = Constants.CONFIG_CONSTANT_A;
 		motionMagicConfigs.MotionMagicJerk = Constants.CONFIG_CONSTANT_J;
 
-		currLimitcfgs.StatorCurrentLimit = Constants.CURRENT_LIMIT_AMPS;
-		currLimitcfgs.StatorCurrentLimitEnable = true;
-
-		indexerMotor.getConfigurator().apply(talonFXConfigs);
-		intakeMotor.getConfigurator().apply(talonFXConfigs);
-
-		BaseStatusSignal.setUpdateFrequencyForAll(Constants.UPDATE_FREQUENCY_HZ,
-			indexerMotor.getVelocity(), intakeMotor.getVelocity(), pivotMotor.getPosition());
-			// Diable all status signals except for ones listed in UpdateFrequency
-		ParentDevice.optimizeBusUtilizationForAll(pivotMotor, indexerMotor, intakeMotor);
+		statusCode = indexerMotor.getConfigurator().apply(talonFXConfigs);
+		statusCode = intakeMotor.getConfigurator().apply(talonFXConfigs);
 
 		// Reset state machine
 		reset();
@@ -170,14 +160,11 @@ public class IntakeFSMSystem {
 		hasNote = hasNote();
 
 		SmartDashboard.putString("CURRENT STATE", currentState.toString());
-		SmartDashboard.putNumber("Indexer Velocity",
+		SmartDashboard.putNumber("Back Indexer Velocity",
 			indexerMotor.getVelocity().getValueAsDouble());
-		SmartDashboard.putNumber("Intake Velocity",
-			intakeMotor.getVelocity().getValueAsDouble());
 
 		SmartDashboard.putBoolean("Color Sensor in Range?", colorSensor.getProximity()
 			>= Constants.PROXIMIIY_THRESHOLD);
-		SmartDashboard.putNumber("Color Senor Val", colorSensor.getProximity());
 		SmartDashboard.putNumber("Frames with Note in View", noteColorFrames);
 		SmartDashboard.putNumber("PIVOT ENCODER VAL", throughBore.getDistance());
 
@@ -325,19 +312,7 @@ public class IntakeFSMSystem {
 	 * @param rpsVelocity The power to send to the indexer motor.
 	 */
 	public void setIndexerMotor(float rpsVelocity) {
-		if (rpsVelocity != 0) {
-			indexerMotor.setControl(mVoltage.withVelocity(-rpsVelocity));
-		} else {
-			indexerMotor.set(rpsVelocity);
-		}
-	}
-
-	/**
-	 * Stops the pivot motor and intake motor.
-	 */
-	public void stopPivotIntake() {
-		intakeMotor.stopMotor();
-		pivotMotor.set(0);
+		indexerMotor.setControl(mVoltage.withVelocity(-rpsVelocity));
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
@@ -354,8 +329,8 @@ public class IntakeFSMSystem {
 		}
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		intakeMotor.set(0);
-		indexerMotor.set(0);
+		intakeMotor.setControl(mVoltage.withVelocity(0));
+		indexerMotor.setControl(mVoltage.withVelocity(0));
 	}
 
 	/**
@@ -367,8 +342,8 @@ public class IntakeFSMSystem {
 		led.orangeLight(false);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		intakeMotor.set(0);
-		indexerMotor.set(0);
+		intakeMotor.setControl(mVoltage.withVelocity(0));
+		indexerMotor.setControl(mVoltage.withVelocity(0));
 	}
 
 	/**
@@ -386,11 +361,11 @@ public class IntakeFSMSystem {
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 
 		if (hasNote) {
-			indexerMotor.set(0);
-			intakeMotor.set(0);
+			indexerMotor.setControl(mVoltage.withVelocity(0));
+			intakeMotor.setControl(mVoltage.withVelocity(0));
 			input.mechRightRumble(Constants.SOFT_RUMBLE);
 		} else {
-			indexerMotor.setControl(mVoltage.withVelocity(Constants.INDEXER_VELOCITY));
+			indexerMotor.setControl(mVoltage.withVelocity(-Constants.INTAKE_VELOCITY));
 			intakeMotor.setControl(mVoltage.withVelocity(Constants.INTAKE_VELOCITY));
 			input.mechRightRumble(0);
 		}
@@ -412,8 +387,8 @@ public class IntakeFSMSystem {
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
 
-		intakeMotor.setControl(mVoltage.withVelocity(Constants.OUTTAKE_VELOCITY));
-		indexerMotor.setControl(mVoltage.withVelocity(-Constants.INDEXER_VELOCITY));
+		intakeMotor.setControl(mVoltage.withVelocity(+Constants.OUTTAKE_VELOCITY));
+		indexerMotor.setControl(mVoltage.withVelocity(-Constants.OUTTAKE_VELOCITY));
 	}
 
 	/**
@@ -436,7 +411,7 @@ public class IntakeFSMSystem {
 		input.mechBothRumble(Constants.HARD_RUMBLE);
 
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
-		intakeMotor.set(0);
+		intakeMotor.setControl(mVoltage.withVelocity(0));
 		indexerMotor.setControl(mVoltage.withVelocity(
 			-Constants.FEED_SHOOTER_VELOCITY));
 	}
@@ -448,8 +423,8 @@ public class IntakeFSMSystem {
 	private boolean handleAutoMoveGround() {
 		led.orangeLight(false);
 		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT));
-		intakeMotor.set(0);
-		indexerMotor.set(0);
+		intakeMotor.setControl(mVoltage.withVelocity(0));
+		indexerMotor.setControl(mVoltage.withVelocity(0));
 
 		return approxEquals(throughBore.getDistance(), Constants.GROUND_ENCODER_COUNT);
 	}
@@ -464,8 +439,6 @@ public class IntakeFSMSystem {
 		} else {
 			led.orangeLight(false);
 		}
-		intakeMotor.set(0);
-		indexerMotor.set(0);
 
 		pivotMotor.set(pidAuto(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		return approxEquals(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT);
@@ -481,13 +454,13 @@ public class IntakeFSMSystem {
 		}
 		pivotMotor.set(pid(throughBore.getDistance(), Constants.HOME_ENCODER_COUNT));
 		if (timer.get() > Constants.AUTO_SHOOTING_SECS) {
-			intakeMotor.set(0);
-			indexerMotor.set(0);
+			intakeMotor.setControl(mVoltage.withVelocity(0));
+			indexerMotor.setControl(mVoltage.withVelocity(0));
 			timer.stop();
 			timer.reset();
 			return true;
 		} else {
-			intakeMotor.set(0);
+			intakeMotor.setControl(mVoltage.withVelocity(0));
 			indexerMotor.setControl(mVoltage.withVelocity(
 				-Constants.FEED_SHOOTER_VELOCITY));
 			return false;
@@ -536,8 +509,8 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
-			intakeMotor.set(0);
-			indexerMotor.set(0);
+			intakeMotor.setControl(mVoltage.withVelocity(0));
+			indexerMotor.setControl(mVoltage.withVelocity(0));
 
 			timerSub.stop();
 			timerSub.reset();
@@ -548,7 +521,7 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public boolean isFinished() {
-			return handleAutoIntake() || timerSub.get() >= Constants.INATAKE_AUTO_TIMER;
+			return handleAutoIntake() || timerSub.get() >= 2.0;
 		}
 	}
 
@@ -634,8 +607,8 @@ public class IntakeFSMSystem {
 		 */
 		@Override
 		public void end(boolean interrupted) {
-			intakeMotor.set(0);
-			indexerMotor.set(0);
+			intakeMotor.setControl(mVoltage.withVelocity(0));
+			indexerMotor.setControl(mVoltage.withVelocity(0));
 			pivotMotor.set(0);
 
 			timerSub.stop();
@@ -648,4 +621,3 @@ public class IntakeFSMSystem {
 		}
 	}
 }
-
