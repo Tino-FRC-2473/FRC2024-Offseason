@@ -111,8 +111,11 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double rotSpeedInput;
 	private double oldRotRawInput;
 	private double rotRawInput;
+	private double oldAngleDiff;
+	private double angleDiff;
 
 	private static final double ROT_DEADZONE = 0.01;
+	private static final int DEGREES_IN_CIRCLE = 360;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
 		= NetworkTableInstance.getDefault().getStructArrayTopic("MyStates",
@@ -336,53 +339,6 @@ public class DriveFSMSystem extends SubsystemBase {
 		}
 
 		SmartDashboard.putString("Drive State", getCurrentState().toString());
-		//SmartDashboard.putBoolean("Is Speaker Aligned", isSpeakerAligned);
-
-		//SmartDashboard.putNumber("X Pos", getPose().getX());
-		//SmartDashboard.putNumber("Y Pos", getPose().getY());
-		//SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
-
-		/*
-		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-		SmartDashboard.putNumber("Gyro Yaw", gyro.getYaw());
-		SmartDashboard.putNumber("Gyro Fused Heading", gyro.getFusedHeading());
-		*/
-
-		/*SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
-			input.getControllerLeftJoystickY()
-					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-					OIConstants.DRIVE_DEADBAND));
-
-		SmartDashboard.putNumber("y feed", -MathUtil.applyDeadband((
-			input.getControllerLeftJoystickX()
-					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-					OIConstants.DRIVE_DEADBAND));
-
-		SmartDashboard.putNumber("ang feed", -MathUtil.applyDeadband(
-			(input.getControllerRightJoystickX()
-					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT),
-					OIConstants.DRIVE_DEADBAND));
-
-
-
-		SwerveModuleState[] states = new SwerveModuleState[] {
-			frontLeft.getState(),
-			frontRight.getState(),
-			rearLeft.getState(),
-			rearRight.getState()
-		};
-
-		Pose2d[] poses = new Pose2d[] {
-			getPose()
-		};
-
-		statePublisher.set(states);
-		posePublisher.set(poses);
-
-		*/
 
 		switch (currentState) {
 			case TELEOP_STATE:
@@ -394,11 +350,11 @@ public class DriveFSMSystem extends SubsystemBase {
 				double xSpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickY()
 					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
-				
+
 				double ySpeedInput = -MathUtil.applyDeadband((input.getControllerLeftJoystickX()
 					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
 					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2), OIConstants.DRIVE_DEADBAND);
-				
+
 				rotSpeedInput = -MathUtil.applyDeadband((input.getControllerRightJoystickX()
 					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
 					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND);
@@ -417,9 +373,9 @@ public class DriveFSMSystem extends SubsystemBase {
 				} else {
 					// Do the course correction, calculate the deviation and lerp it back.
 					correctRot = true;
-					double thetaD = getHeading() % 360;
-					double thetaE = (oldRotation == null) ? (getHeading() % 360)
-						: (oldRotation.getDegrees() % 360);
+					double thetaD = getHeading() % DEGREES_IN_CIRCLE;
+					double thetaE = (oldRotation == null) ? (getHeading() % DEGREES_IN_CIRCLE)
+						: (oldRotation.getDegrees() % DEGREES_IN_CIRCLE);
 
 					SmartDashboard.putNumber("Theta D", thetaD);
 					SmartDashboard.putNumber("Theta E", thetaE);
@@ -436,28 +392,9 @@ public class DriveFSMSystem extends SubsystemBase {
 
 				oldRotSpeedInput = rotSpeedInput;
 				oldRotRawInput = rotRawInput;
+				oldAngleDiff = angleDiff;
 
-				// if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
-				// 	if (xSpeedInput != 0) {
-				// 		oldPoseX = getPose().getX();
-				// 		correctX = false;
-				// 	} else {
-				// 		System.out.println("REACHED X CORRECTION");
-				// 		correctedXSpeed = pidPosition(getPose().getX(), oldPoseX);
-				// 		correctX = true;
-				// 	}
-
-				// 	if (ySpeedInput != 0) {
-				// 		oldPoseY = getPose().getY();
-				// 		correctY = false;
-				// 	} else {
-				// 		System.out.println("REACHED Y CORRECTION");
-				// 		correctedYSpeed = pidPosition(getPose().getY(), oldPoseY);
-				// 		correctY = true;
-				// 	}
-				// }
-
-				drive(xSpeedInput,ySpeedInput,
+				drive(xSpeedInput, ySpeedInput,
 					correctRot ? correctedRotSpeed : rotSpeedInput,
 					true);
 
@@ -617,22 +554,30 @@ public class DriveFSMSystem extends SubsystemBase {
 	public double pidRotation(double deviated, double expected) {
 		System.out.println("PID ROT IS RUNNING!");
 
-		double arc1 = 360 + (expected - deviated);
+		double arc1 = DEGREES_IN_CIRCLE + (expected - deviated);
 		double arc2 = (expected - deviated);
 
-		double angleDiff = (Math.abs(arc1) > Math.abs(arc2)
+		angleDiff = (Math.abs(arc1) > Math.abs(arc2)
 			? arc2 : arc1);
 
-		double correction =
-			(1 - Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
-			* (Math.abs(angleDiff) / angleDiff) //transfer sign
-			* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P; //scale to max: -Kc -> +Kc
+		double correction = 0;
+
+		if (Math.abs(angleDiff) > MechConstants.ANGLE_EPSILON) {
+			correction =
+				((Math.abs(angleDiff / DEGREES_IN_CIRCLE / 2)) //max minor arc is 180 deg; normalize
+				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P //scale to max: -Kp -> +Kp
+				- Math.abs((oldAngleDiff - angleDiff) / DEGREES_IN_CIRCLE / 2) //scaled differential
+				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_D) //scale to max: -Kd -> +Kd
+				* (Math.abs(angleDiff) / angleDiff); //transfer sign
+		}
 
 		SmartDashboard.putNumber("Saved Heading", deviated);
 		SmartDashboard.putNumber("Minor Arc", angleDiff);
+		SmartDashboard.putNumber("Angle Diff", oldAngleDiff - angleDiff);
 		SmartDashboard.putNumber("Scaled Correction", correction);
 
-		return clamp(correction, MechConstants.MIN_TURN_SPEED, MechConstants.MAX_TURN_SPEED); //redundant clamp, but keep just in case?
+		return clamp(correction, MechConstants.MIN_TURN_SPEED,
+			MechConstants.MAX_TURN_SPEED); //redundant clamp, but keep just in case?
 	}
 
 	// public double pidPosition(double deviated, double expected) {
