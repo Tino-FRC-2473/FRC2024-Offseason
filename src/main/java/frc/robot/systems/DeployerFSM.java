@@ -164,7 +164,6 @@ public class DeployerFSM {
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
-
 	/**
 	 * Handle behavior in DEPLOY.
 	 * @param input Global TeleopInput if robot in teleop mode or null if

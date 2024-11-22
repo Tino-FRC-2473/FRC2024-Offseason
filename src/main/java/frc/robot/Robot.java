@@ -20,7 +20,6 @@ import frc.robot.systems.DeployerFSM;
 public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
-	//insert system here!!!
 	private DeployerFSM deployerFSM;
 
 	/**
