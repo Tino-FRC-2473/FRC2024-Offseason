@@ -8,6 +8,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 // Robot Imports
@@ -21,8 +22,7 @@ public class DeployerFSM {
 	// FSM state definitions
 	public enum DeployerFSMState {
 		DEPLOY,
-		RETRACT,
-		IDLE
+		RETRACT
 	}
 
 	private final MotionMagicVoltage mmVoltage = new MotionMagicVoltage(0);
@@ -32,11 +32,7 @@ public class DeployerFSM {
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
-	// private CANSparkMax neoMotor;
 	private TalonFX krakenMotor;
-
-	//PID Controller for NEO motor
-	// PIDController neoPID;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -45,26 +41,16 @@ public class DeployerFSM {
 	 * the constructor is called only once when the robot boots.
 	 */
 	public DeployerFSM() {
-		// Perform neo init
-		// neoMotor = new CANSparkMax(
-		// 	NEO_MOTOR_ID,
-		// 	CANSparkMax.MotorType.kBrushless);
-
-		// neoMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
-		// neoMotor.getEncoder().setPosition(0);
-
-		// neoPID = new PIDController(NEO_P_CONSTANT, NEO_I_CONSTANT, NEO_D_CONSTANT);
-		// neoPID.setTolerance(NEO_PID_POS_TOLERANCE, NEO_PID_VEL_TOLERANCE);
-		// neoPID.reset();
-
 		//perform kraken init
 		krakenMotor = new TalonFX(HardwareMap.PIVOT_MOTOR_ID);
 		krakenMotor.setNeutralMode(NeutralModeValue.Brake);
+		// krakenMotor.setPosition(0); // reset kraken encoder(only use when tuning)
 
 		var talonFXConfigs = new TalonFXConfiguration();
 
 		// set slot 0 gains
 		var slot0Configs = talonFXConfigs.Slot0;
+		slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
 		slot0Configs.kG = Constants.MM_CONSTANT_G; // Voltae output to overcome gravity
 		slot0Configs.kS = Constants.MM_CONSTANT_S; // Voltage output to overcome static friction
 		slot0Configs.kV = Constants.MM_CONSTANT_V; // Voltage for velocity target of 1 rps
@@ -159,11 +145,6 @@ public class DeployerFSM {
 	private DeployerFSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case RETRACT:
-
-				if (input == null) {
-					return DeployerFSMState.RETRACT;
-				}
-
 				if (input.isIntakeButtonPressed()) {
 					return DeployerFSMState.DEPLOY;
 				} else {
@@ -183,14 +164,6 @@ public class DeployerFSM {
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
-	/**
-	 * Handle behavior in IDLE.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
-	 */
-	private void handleIdleState(TeleopInput input) {
-		krakenMotor.set(0);
-	}
 
 	/**
 	 * Handle behavior in DEPLOY.
@@ -199,6 +172,7 @@ public class DeployerFSM {
 	 */
 	private void handleDeployState(TeleopInput input) {
 		krakenMotor.setControl(mmVoltage.withPosition(Constants.DEPLOYED_POSITION));
+		// krakenMotor.set(0);
 	}
 
 	/**
@@ -208,5 +182,6 @@ public class DeployerFSM {
 	 */
 	private void handleRetractState(TeleopInput input) {
 		krakenMotor.setControl(mmVoltage.withPosition(Constants.HOME_POSITION));
+		// krakenMotor.set(0);
 	}
 }
