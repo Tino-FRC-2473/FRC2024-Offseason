@@ -564,9 +564,9 @@ public class DriveFSMSystem extends SubsystemBase {
 
 		if (Math.abs(angleDiff) > MechConstants.ANGLE_EPSILON) {
 			correction =
-				((Math.abs(angleDiff / DEGREES_IN_CIRCLE / 2)) //max minor arc is 180 deg; normalize
+				((Math.abs(angleDiff / DEGREES_IN_CIRCLE * 2)) //max minor arc is 180 deg; normalize
 				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P //scale to max: -Kp -> +Kp
-				- Math.abs((oldAngleDiff - angleDiff) / DEGREES_IN_CIRCLE / 2) //scaled differential
+				- Math.abs((oldAngleDiff - angleDiff) / DEGREES_IN_CIRCLE * 2) //scaled differential
 				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_D) //scale to max: -Kd -> +Kd
 				* (Math.abs(angleDiff) / angleDiff); //transfer sign
 		}
