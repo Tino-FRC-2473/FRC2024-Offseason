@@ -114,6 +114,10 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double oldAngleDiff;
 	private double angleDiff;
 
+	private double currentFilterEstimate = 0;
+	private double previousFilterEstimate = 0;
+	private static final double a = 0.9;
+
 	private static final double ROT_DEADZONE = 0.01;
 
 	private StructArrayPublisher<SwerveModuleState> statePublisher
@@ -212,6 +216,8 @@ public class DriveFSMSystem extends SubsystemBase {
 		oldAngleDiff = 0;
 		angleDiff = 0;
 
+		previousFilterEstimate = 0;
+		currentFilterEstimate = 0;
 
 		gyro.reset();
 		gyro.setAngleAdjustment(0);
@@ -348,53 +354,9 @@ public class DriveFSMSystem extends SubsystemBase {
 		}
 
 		SmartDashboard.putString("Drive State", getCurrentState().toString());
-		//SmartDashboard.putBoolean("Is Speaker Aligned", isSpeakerAligned);
-
-		//SmartDashboard.putNumber("X Pos", getPose().getX());
-		//SmartDashboard.putNumber("Y Pos", getPose().getY());
-		SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
-
-		/*
-		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-		SmartDashboard.putNumber("Gyro Yaw", gyro.getYaw());
-		SmartDashboard.putNumber("Gyro Fused Heading", gyro.getFusedHeading());
-
-
-		SmartDashboard.putNumber("x feed", -MathUtil.applyDeadband((
-			input.getControllerLeftJoystickY()
-					* Math.abs(input.getControllerLeftJoystickY()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-					OIConstants.DRIVE_DEADBAND));
-
-		SmartDashboard.putNumber("y feed", -MathUtil.applyDeadband((
-			input.getControllerLeftJoystickX()
-					* Math.abs(input.getControllerLeftJoystickX()) * ((input.getLeftTrigger() / 2)
-					+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-					OIConstants.DRIVE_DEADBAND));
-
-		SmartDashboard.putNumber("ang feed", -MathUtil.applyDeadband(
-			(input.getControllerRightJoystickX()
-					* ((input.getLeftTrigger() / 2) + DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-					/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT),
-					OIConstants.DRIVE_DEADBAND));
-
-
-
-		SwerveModuleState[] states = new SwerveModuleState[] {
-			frontLeft.getState(),
-			frontRight.getState(),
-			rearLeft.getState(),
-			rearRight.getState()
-		};
-
-		Pose2d[] poses = new Pose2d[] {
-			getPose()
-		};
-
-		statePublisher.set(states);
-		posePublisher.set(poses);
-
-		*/
+		SmartDashboard.putNumber("X Pos", getPose().getX());
+		SmartDashboard.putNumber("Y Pos", getPose().getY());
+		SmartDashboard.putNumber("Heading", getHeading());
 
 		switch (currentState) {
 			case TELEOP_STATE:
@@ -425,15 +387,22 @@ public class DriveFSMSystem extends SubsystemBase {
 				//boolean correctX = false;
 				//boolean correctY = false;
 
+				SmartDashboard.putNumber("Current filter estimate", currentFilterEstimate);
+				SmartDashboard.putNumber("previous filter estimate", previousFilterEstimate);
+				SmartDashboard.putNumber("Get Heading", getHeading());
+
 				if (rotSpeedInput != 0) {
-					oldRotation = Rotation2d.fromDegrees(getHeading());
+					currentFilterEstimate =
+						(a * getHeading()) + (1 - a) * previousFilterEstimate;
+
+					oldRotation = Rotation2d.fromDegrees(currentFilterEstimate);
 					correctRot = false;
 				} else {
 					// Do the course correction, calculate the deviation and lerp it back.
 					correctRot = true;
-					double thetaD = getHeading() % 360;
-					double thetaE = (oldRotation == null) ? (getHeading() % 360)
-						: (oldRotation.getDegrees() % 360);
+					double thetaD = currentFilterEstimate % 360;
+					double thetaE = (oldRotation == null) ? (currentFilterEstimate % 360)
+						: (previousFilterEstimate % 360);
 
 					SmartDashboard.putNumber("Theta D", thetaD);
 					SmartDashboard.putNumber("Theta E", thetaE);
@@ -451,6 +420,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				oldRotSpeedInput = rotSpeedInput;
 				oldRotRawInput = rotRawInput;
 				oldAngleDiff = angleDiff;
+				previousFilterEstimate = currentFilterEstimate;
 
 				// if (!(xSpeedInput == 0 && ySpeedInput == 0)) {
 				// 	if (xSpeedInput != 0) {

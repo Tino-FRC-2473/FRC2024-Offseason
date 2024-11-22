@@ -21,11 +21,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.systems.ClimberMechFSMLeft;
-import frc.robot.systems.ClimberMechFSMRight;
+
 // Systems
 import frc.robot.systems.DriveFSMSystem;
-import frc.robot.systems.MBRFSMv2;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
