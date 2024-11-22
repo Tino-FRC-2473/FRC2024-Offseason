@@ -116,7 +116,7 @@ public class DriveFSMSystem extends SubsystemBase {
 
 	private double currentFilterEstimate = 0;
 	private double previousFilterEstimate = 0;
-	private static final double a = 0.9;
+	private static final double a = 0.7;
 
 	private static final double ROT_DEADZONE = 0.01;
 
@@ -391,9 +391,10 @@ public class DriveFSMSystem extends SubsystemBase {
 				SmartDashboard.putNumber("previous filter estimate", previousFilterEstimate);
 				SmartDashboard.putNumber("Get Heading", getHeading());
 
-				if (rotSpeedInput != 0) {
-					currentFilterEstimate =
+				currentFilterEstimate =
 						(a * getHeading()) + (1 - a) * previousFilterEstimate;
+
+				if (rotSpeedInput != 0) {
 
 					oldRotation = Rotation2d.fromDegrees(currentFilterEstimate);
 					correctRot = false;
@@ -402,7 +403,7 @@ public class DriveFSMSystem extends SubsystemBase {
 					correctRot = true;
 					double thetaD = currentFilterEstimate % 360;
 					double thetaE = (oldRotation == null) ? (currentFilterEstimate % 360)
-						: (previousFilterEstimate % 360);
+						: (oldRotation.getDegrees() % 360);
 
 					SmartDashboard.putNumber("Theta D", thetaD);
 					SmartDashboard.putNumber("Theta E", thetaE);
