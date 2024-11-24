@@ -4,33 +4,13 @@
 package frc.robot;
 
 // WPILib Imports
-import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.MjpegServer;
-import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoMode;
-import edu.wpi.first.cscore.VideoSink;
-import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
-import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 // Third Party Imports
 import com.ctre.phoenix6.SignalLogger;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
 
 // Systems
-import frc.robot.systems.ClimberMechFSM;
-import frc.robot.systems.DriveFSMSystem;
-import frc.robot.systems.ShooterFSMSystem;
-import frc.robot.systems.IntakeFSMSystem;
-
+import frc.robot.systems.DeployerFSM;
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation.
@@ -39,23 +19,7 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
 	//insert system here!!!
-
-	// private SendableChooser<Command> autoChooser;
-	// private Command autonomousCommand;
-	// private final Field2d mField = new Field2d();
-
-	// private UsbCamera driverCam;
-	// private UsbCamera chainCam;
-	// private VideoSink videoSink;
-	// private MjpegServer driverStream;
-	// private MjpegServer chainStream;
-
-	// private final int streamWidth = 256;
-	// private final int streamHeight = 144;
-	// private final int streamFPS = 30;
-
-	// private final int redSpeakerTagID = 4;
-	// private final int blueSpeakerTagID = 7;
+	private DeployerFSM deployerFSM;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -67,90 +31,30 @@ public class Robot extends TimedRobot {
 		input = new TeleopInput();
 
 		// Instantiate all systems here
-
-		//Label all named commands here
-		// IntakeFSM Commands
-		// NamedCommands.registerCommand("I_ITN", intakeFSM.new IntakeCommand());
-		// NamedCommands.registerCommand("I_PTG", intakeFSM.new PivotToGroundCommand());
-		// NamedCommands.registerCommand("I_PTH", intakeFSM.new PivotToHomeCommand());
-
-		// // ShooterFSM Commands
-		// NamedCommands.registerCommand("S_SPN", shooterFSM.new ShootPreloadedCommand(intakeFSM));
-		// NamedCommands.registerCommand("S_RXS", shooterFSM.new RevCommand(intakeFSM));
-		// NamedCommands.registerCommand("I_FXN", shooterFSM.new ShootNoteCommand(intakeFSM));
-
-		/*
-		NamedCommands.registerCommand("S_ART", new AprilTagAlign(redSpeakerTagID,
-			driveFSMSystem, 0.5));
-		NamedCommands.registerCommand("S_ABT", new AprilTagAlign(blueSpeakerTagID,
-			driveFSMSystem, 0.5));
-		NamedCommands.registerCommand("S_AXN", new NoteAlign(driveFSMSystem,
-			0.5));
-		*/
-
-		// autoChooser = AutoBuilder.buildAutoChooser();
-
-		// SmartDashboard.putData("Auto Chooser", autoChooser);
-		// SmartDashboard.putData("Field", mField);
-
-		// driverCam = CameraServer.startAutomaticCapture(HardwareMap.DRIVER_CAM_USB);
-		// VideoMode videoMode = new VideoMode(PixelFormat.kMJPEG, streamWidth,
-		// 	streamHeight, streamFPS);
-		// driverCam.setVideoMode(videoMode);
-		// driverCam.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-		// driverCam.setResolution(streamWidth, streamHeight);
-
-		// //edu.wpi.first.cscore.HttpCamera cam = new edu.wpi.first.cscore.HttpCamera("drivercam",
-		// 	//driverCam, HttpCameraKind.kMJPGStreamer);
-		// edu.wpi.first.cscore.HttpCamera cam = new edu.wpi.first.cscore.HttpCamera("drivercam",
-		// 	"http://10.24.73.106:1181/stream.mjpg", HttpCameraKind.kMJPGStreamer);
-		// CameraServer.startAutomaticCapture(cam);
+		deployerFSM = new DeployerFSM();
 	}
 
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
-		SignalLogger.start();
-		// driveFSMSystem.resetAutonomus();
-		// autonomousCommand = getAutonomousCommand();
-		// if (autonomousCommand != null) {
-		// 	autonomousCommand.cancel();
-		// }
-		// // schedule the autonomous command (example)
-		// if (autonomousCommand != null) {
-		// 	autonomousCommand.schedule();
-		// }
 	}
 
 
 	@Override
 	public void autonomousPeriodic() {
-		CommandScheduler.getInstance().run();
-		// driveFSMSystem.updateAutonomous();
-		// mField.setRobotPose(driveFSMSystem.getPose());
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		// driveFSMSystem.reset();
-		// shooterFSM.reset();
-		// climberMechFSM.reset();
-		// intakeFSM.reset();
-		// if (autonomousCommand != null) {
-		// 	autonomousCommand.cancel();
-		// }
 		SignalLogger.start();
+		deployerFSM.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		// driveFSMSystem.update(input);
-		// shooterFSM.update(input);
-		// climberMechFSM.update(input);
-		// intakeFSM.update(input);
-		// mField.setRobotPose(driveFSMSystem.getPose());
+		deployerFSM.update(input);
 	}
 
 	@Override
@@ -176,13 +80,4 @@ public class Robot extends TimedRobot {
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
 	public void robotPeriodic() { }
-
-	/**
-	 * Get Autonomous Path Selected.
-	 * @return Returns the value selected by the auto chooser.
-	 */
-	public Command getAutonomousCommand() {
-		// return autoChooser.getSelected();
-		return null;
-	}
 }
