@@ -116,7 +116,8 @@ public class DriveFSMSystem extends SubsystemBase {
 
 	private double currentFilterEstimate = 0;
 	private double previousFilterEstimate = 0;
-	private static final double a = 0.7;
+	private static final double a = 0.75;
+	//Value to use: private static final double a = 0.75;
 
 	private static final double ROT_DEADZONE = 0.01;
 
@@ -394,7 +395,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				currentFilterEstimate =
 						(a * getHeading()) + (1 - a) * previousFilterEstimate;
 
-				if (rotSpeedInput != 0) {
+				if (Math.abs(rotSpeedInput) > MechConstants.ANGLE_EPSILON) {
 
 					oldRotation = Rotation2d.fromDegrees(currentFilterEstimate);
 					correctRot = false;
@@ -415,7 +416,7 @@ public class DriveFSMSystem extends SubsystemBase {
 				SmartDashboard.putNumber("old pose y", oldPoseY);
 				SmartDashboard.putNumber("get pose x", getPose().getX());
 				SmartDashboard.putNumber("get pose y", getPose().getY());
-				SmartDashboard.putNumber("Rot SPeed INput", rotSpeedInput);
+				SmartDashboard.putNumber("Rot Speed Input", rotSpeedInput);
 				SmartDashboard.putNumber("Old Rot Speed Input", oldRotSpeedInput);
 
 				oldRotSpeedInput = rotSpeedInput;
@@ -452,6 +453,8 @@ public class DriveFSMSystem extends SubsystemBase {
 				if (input.isBackButtonPressed()) {
 					gyro.reset();
 
+					System.out.println("GYRO RESET");
+
 					oldRotation = new Rotation2d(0);
 					oldRotSpeedInput = 0;
 					rotSpeedInput = 0;
@@ -459,6 +462,8 @@ public class DriveFSMSystem extends SubsystemBase {
 					oldRotRawInput = 0;
 					angleDiff = 0;
 					oldAngleDiff = 0;
+					previousFilterEstimate = 0;
+					currentFilterEstimate = 0;
 				}
 
 				//if (input.isTriangleButtonPressed()) {
@@ -605,7 +610,6 @@ public class DriveFSMSystem extends SubsystemBase {
 	 * @return clamped correction value for angular speed
 	 */
 	public double pidRotation(double deviated, double expected) {
-		System.out.println("PID ROT IS RUNNING!");
 
 		double arc1 = 360 + (expected - deviated);
 		double arc2 = (expected - deviated);
@@ -615,7 +619,7 @@ public class DriveFSMSystem extends SubsystemBase {
 
 		double correction = 0;
 
-		if (Math.abs(angleDiff) > MechConstants.ANGLE_EPSILON) {
+		if (Math.abs(angleDiff) > OIConstants.DRIVE_DEADBAND) {
 			correction =
 				((Math.abs(angleDiff / 180)) //the max minor arc is 180 deg; normalize
 				* MechConstants.PID_CONSTANT_ROTATION_SWERVE_P //scale to max: -Kp -> +Kp
