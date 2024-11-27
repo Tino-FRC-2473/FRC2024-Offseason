@@ -12,7 +12,6 @@ import com.revrobotics.SparkLimitSwitch.Type;
 
 // Robot Imports
 import frc.robot.TeleopInput;
-import frc.robot.motorIOs.canSparkMaxIO.CANSparkMaxIO;
 import frc.robot.motorIOs.canSparkMaxIO.CANSparkMaxWrapper;
 import frc.robot.HardwareMap;
 
@@ -43,8 +42,8 @@ public class ClimberMechFSM {
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
-	private CANSparkMaxWrapper rightMotor;
-	private CANSparkMaxWrapper leftMotor;
+	private CANSparkMax rightMotor;
+	private CANSparkMax leftMotor;
 
 	private SparkLimitSwitch leftBottomSwitch;
 	private SparkLimitSwitch rightBottomSwitch;
@@ -71,8 +70,8 @@ public class ClimberMechFSM {
 		leftMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		leftMotor.getEncoder().setPosition(0);
 
-		leftBottomSwitch = leftMotor.getForwardLimitSwitch(Type.kNormallyClosed);
-		rightBottomSwitch = rightMotor.getReverseLimitSwitch(Type.kNormallyClosed);
+		leftBottomSwitch = leftMotor.getForwardLimitSwitch(Type.kNormallyOpen);
+		rightBottomSwitch = rightMotor.getReverseLimitSwitch(Type.kNormallyOpen);
 
 		// Reset state machine
 		reset();
@@ -107,7 +106,6 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
-		System.out.println("this is running!");
 		if (input == null) {
 			return;
 		}
