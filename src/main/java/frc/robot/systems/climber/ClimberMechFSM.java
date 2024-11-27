@@ -3,6 +3,8 @@ package frc.robot.systems.climber;
 // WPILib Imports
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.jni.CANBusJNI;
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkLimitSwitch;
@@ -10,6 +12,8 @@ import com.revrobotics.SparkLimitSwitch.Type;
 
 // Robot Imports
 import frc.robot.TeleopInput;
+import frc.robot.motorIOs.canSparkMaxIO.CANSparkMaxIO;
+import frc.robot.motorIOs.canSparkMaxIO.CANSparkMaxWrapper;
 import frc.robot.HardwareMap;
 
 public class ClimberMechFSM {
@@ -39,8 +43,8 @@ public class ClimberMechFSM {
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
-	private CANSparkMax rightMotor;
-	private CANSparkMax leftMotor;
+	private CANSparkMaxWrapper rightMotor;
+	private CANSparkMaxWrapper leftMotor;
 
 	private SparkLimitSwitch leftBottomSwitch;
 	private SparkLimitSwitch rightBottomSwitch;
@@ -53,14 +57,14 @@ public class ClimberMechFSM {
 	 */
 	public ClimberMechFSM() {
 		// Perform hardware init
-		rightMotor = new CANSparkMax(
+		rightMotor = new CANSparkMaxWrapper(
 			HardwareMap.RIGHT_CLIMBER_CAN_ID,
 			CANSparkMax.MotorType.kBrushless);
 
 		rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		rightMotor.getEncoder().setPosition(0);
 
-		leftMotor = new CANSparkMax(
+		leftMotor = new CANSparkMaxWrapper(
 			HardwareMap.LEFT_CLIMBER_CAN_ID,
 			CANSparkMax.MotorType.kBrushless);
 
@@ -103,6 +107,7 @@ public class ClimberMechFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
+		System.out.println("this is running!");
 		if (input == null) {
 			return;
 		}
