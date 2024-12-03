@@ -29,6 +29,7 @@ public class DeployerFSM {
 
 	/* ======================== Private variables ======================== */
 	private DeployerFSMState currentState;
+	private double targetPos;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -43,11 +44,10 @@ public class DeployerFSM {
 	public DeployerFSM() {
 		//perform kraken init
 		krakenMotor = new TalonFX(HardwareMap.PIVOT_MOTOR_ID);
-		krakenMotor.setNeutralMode(NeutralModeValue.Brake);
 		// krakenMotor.setPosition(0); // reset kraken encoder(only use when tuning)
+		krakenMotor.setNeutralMode(NeutralModeValue.Brake);
 
 		var talonFXConfigs = new TalonFXConfiguration();
-
 		// set slot 0 gains
 		var slot0Configs = talonFXConfigs.Slot0;
 		slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
@@ -129,6 +129,14 @@ public class DeployerFSM {
 		SmartDashboard.putNumber("Accel", krakenMotor.getAcceleration().getValueAsDouble());
 		SmartDashboard.putNumber("Voltage", krakenMotor.getMotorVoltage().getValueAsDouble());
 		SmartDashboard.putString("CURRENT STATE", currentState.toString());
+		if (currentState == DeployerFSMState.DEPLOY) {
+			targetPos = Constants.DEPLOYED_POSITION;
+		} else {
+			targetPos = Constants.HOME_POSITION;
+		}
+		SmartDashboard.putNumber("Distance to Target",
+			targetPos - krakenMotor.getPosition().getValueAsDouble());
+		SmartDashboard.putNumber("Target POs", targetPos);
 	}
 
 
