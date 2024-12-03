@@ -1,24 +1,24 @@
-package frc.robot.motorIOs.canSparkMaxIO;
+package frc.robot.motorWrappers;
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkRelativeEncoder;
-
+//import com.revrobotics.sim.SparkRelativeEncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class CANSparkMaxWrapper extends CANSparkMax {
-    int deviceId;
+    //private SparkRelativeEncoderSim sim;
+    
+
     public CANSparkMaxWrapper(int deviceId, MotorType type) {
         super(deviceId,type);
-        this.deviceId = deviceId;
+
     }
 
     @Override 
     public void set(double speed) {
         super.set(speed);
-        SmartDashboard.putNumber("Speed of ID "+deviceId, get());
+        SmartDashboard.putNumber("Speed of ID "+getDeviceId(), get());
+        Logger.recordOutput("Speed of ID "+getDeviceId(),get());
         getEncoder().setPosition(getEncoder().getPosition() + speed);
     }
 }
