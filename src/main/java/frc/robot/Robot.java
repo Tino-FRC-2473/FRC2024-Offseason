@@ -30,6 +30,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import frc.robot.Constants.MatchConstants;
 import frc.robot.SwerveConstants.DriveConstants;
+import frc.robot.motorWrappers.CANSparkMaxWrapper;
 import frc.robot.systems.climber.ClimberMechFSM;
 // Systems
 import frc.robot.systems.drive.DriveFSMSystem;
@@ -67,6 +68,7 @@ public class Robot extends LoggedRobot {
 	@Override
 	public void robotInit() {
 		System.out.println("robotInit");
+		CANSparkMaxWrapper.init();
 		input = new TeleopInput();
 
 		climberMechFSM = new ClimberMechFSM();
@@ -250,6 +252,7 @@ public class Robot extends LoggedRobot {
 		driveFSMSystem.update(input);
 		//climberMechFSM.update(input);
 		updateSimulationField();
+		CANSparkMaxWrapper.updateAll();
 	}
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
