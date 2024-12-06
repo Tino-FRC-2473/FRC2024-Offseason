@@ -7,5 +7,5 @@ package frc.robot;
 public final class HardwareMap {
 
 	// ID numbers for devices on the CAN bus
-	public static final int PIVOT_MOTOR_ID = 17; //17
+	public static final int MOTOR_ID = 11; //17
 }

@@ -2,7 +2,6 @@ package frc.robot;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.PS4Controller;
-import edu.wpi.first.wpilibj.XboxController;
 
 /**
  * Common class for providing driver inputs during Teleop.
@@ -13,13 +12,10 @@ import edu.wpi.first.wpilibj.XboxController;
  */
 public class TeleopInput {
 	/* ======================== Constants ======================== */
-	private static final int MECH_CONTROLLER_PORT = 1;
 
 	/* ======================== Private variables ======================== */
 	// Input objects
 	private PS4Controller ps4Controller;
-	private XboxController xboxController;
-
 	/* ======================== Constructor ======================== */
 	/**
 	 * Create a TeleopInput and register input devices. Note that while inputs
@@ -28,7 +24,6 @@ public class TeleopInput {
 	 */
 	public TeleopInput() {
 		ps4Controller = new PS4Controller(0);
-		// xboxController = new XboxController(MECH_CONTROLLER_PORT);
 	}
 
 
@@ -40,6 +35,5 @@ public class TeleopInput {
 	 */
 	public boolean isShooterButtonPressed() {
 		return ps4Controller.getCircleButton();
-		// return xboxController.getXButton();
 	}
 }
