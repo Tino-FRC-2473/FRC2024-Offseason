@@ -119,6 +119,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
+		SmartDashboard.putBoolean("Circle Button", input.isCircleButtonPressed());
 
 		mField.setRobotPose(driveFSMSystem.getPose());
 	}

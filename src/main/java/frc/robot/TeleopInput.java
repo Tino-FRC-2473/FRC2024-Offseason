@@ -73,7 +73,7 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isCircleButtonPressed() {
-		return driverController.getCircleButtonPressed();
+		return driverController.getCircleButton();
 	}
 	/**
 	 * Get the value of the Circle button.

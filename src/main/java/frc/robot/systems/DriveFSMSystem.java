@@ -1,5 +1,7 @@
 package frc.robot.systems;
 
+import javax.transaction.xa.Xid;
+
 // Third party Hardware Imports
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -113,6 +115,12 @@ public class DriveFSMSystem extends SubsystemBase {
 	private double rotRawInput;
 	private double oldAngleDiff;
 	private double angleDiff;
+
+	private double prevAlignmentAngleDiff;
+	private double prevAlignmentXDiff;
+	private double prevAlignmentYDiff;
+
+	private static final double K_A = 0.01;
 
 	private static final double ROT_DEADZONE = 0.01;
 	private static final int DEGREES_IN_CIRCLE = 360;
@@ -482,10 +490,13 @@ public class DriveFSMSystem extends SubsystemBase {
 				return FSMState.TELEOP_STATE;
 
 			case ALIGN_TO_SPEAKER_STATE:
-				if (input.isCircleButtonReleased()) {
+				if (!input.isCircleButtonPressed()) {
 					lockedSpeakerId = -1;
 					isSpeakerAligned = false;
 					isSpeakerPositionAligned = false;
+					prevAlignmentAngleDiff = 0;
+					prevAlignmentXDiff = 0;
+					prevAlignmentYDiff = 0;
 					return FSMState.TELEOP_STATE;
 				}
 				return FSMState.ALIGN_TO_SPEAKER_STATE;
@@ -513,9 +524,9 @@ public class DriveFSMSystem extends SubsystemBase {
 		double ySpeedDelivered = ySpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
 		double rotDelivered = rot * DriveConstants.MAX_ANGULAR_SPEED;
 
-		//SmartDashboard.putNumber("x speed delivered", xSpeedDelivered);
-		//SmartDashboard.putNumber("y speed delivered", ySpeedDelivered);
-		//SmartDashboard.putNumber("rot speed delivered", rotDelivered);
+		SmartDashboard.putNumber("x speed delivered", xSpeedDelivered);
+		SmartDashboard.putNumber("y speed delivered", ySpeedDelivered);
+		SmartDashboard.putNumber("rot speed delivered", rotDelivered);
 
 
 		var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
@@ -660,11 +671,14 @@ public class DriveFSMSystem extends SubsystemBase {
 	 */
 	public void alignToSpeaker(int id) {
 		if (rpi.getAprilTagX(id) != VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-			double yDiff = rpi.getAprilTagZ(id);
-			double xDiff = rpi.getAprilTagX(id) - VisionConstants.SPEAKER_TARGET_DISTANCE;
-			double aDiff = rpi.getTagAngle(id) * (Math.PI / 180.0);
+			double yDiff = K_A * rpi.getAprilTagX(id) + (1 - K_A) * (prevAlignmentYDiff);
+			double xDiff = K_A * (rpi.getAprilTagY(id) - VisionConstants.SPEAKER_TARGET_DISTANCE) +
+				(1 - K_A) * (prevAlignmentXDiff);
+			double aDiff = K_A * (rpi.getTagAngle(id) * (Math.PI / 180.0)) + (1 - K_A) * (prevAlignmentAngleDiff);
 
-			System.out.println("xDiff " + xDiff);
+			SmartDashboard.putNumber("ADIFF", aDiff);
+			SmartDashboard.putNumber("XDiff", xDiff);
+			SmartDashboard.putNumber("YDiff", yDiff);
 
 			double xSpeed = Math.abs(xDiff) > VisionConstants.X_MARGIN_TO_SPEAKER
 				? clamp(xDiff / VisionConstants.SPEAKER_TRANSLATIONAL_ACCEL_CONSTANT,
@@ -691,6 +705,10 @@ public class DriveFSMSystem extends SubsystemBase {
 					isSpeakerAligned = true;
 				}
 			}
+
+			prevAlignmentAngleDiff = aDiff;
+			prevAlignmentXDiff = xDiff;
+			prevAlignmentYDiff = yDiff;
 
 		}
 	}
