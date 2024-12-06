@@ -40,7 +40,8 @@ public class RaspberryPI {
 		noteY = table.getDoubleTopic("note_yaw").subscribe(-1);
 		noteD = table.getDoubleTopic("note_distance").subscribe(-1);
 
-		photonTable = NetworkTableInstance.getDefault().getTable("photonvision").getSubTable("Arducam_IMX179_Camera_Module");
+		photonTable = NetworkTableInstance.getDefault().getTable("photonvision")
+			.getSubTable("Arducam_IMX179_Camera_Module");
 		tagSubscriber = photonTable.getDoubleArrayTopic("targetPose").subscribe(null);
 		tagAngleSubscriber = photonTable.getDoubleTopic("targetYaw").subscribe(0);
 	}

@@ -660,9 +660,8 @@ public class DriveFSMSystem extends SubsystemBase {
 	 */
 	public void alignToSpeaker(int id) {
 		if (rpi.getAprilTagX(id) != VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-		
-			double yDiff = rpi.getAprilTagY(id);
-			double xDiff = Math.max(0, rpi.getAprilTagX(id) - VisionConstants.SPEAKER_TARGET_DISTANCE);
+			double yDiff = rpi.getAprilTagZ(id);
+			double xDiff = rpi.getAprilTagX(id) - VisionConstants.SPEAKER_TARGET_DISTANCE;
 			double aDiff = rpi.getTagAngle(id) * (Math.PI / 180.0);
 
 			System.out.println("xDiff " + xDiff);
@@ -680,7 +679,18 @@ public class DriveFSMSystem extends SubsystemBase {
 				-VisionConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND,
 				VisionConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND) : 0;
 
-			drive(xSpeed, ySpeed, aSpeed, false);
+			if (xSpeed == 0 && ySpeed == 0) {
+				isSpeakerPositionAligned = true;
+			}
+
+			if (!isSpeakerPositionAligned) {
+				drive(xSpeed, ySpeed, aSpeed, false);
+			} else {
+				drive(0, 0, aSpeed, false);
+				if (aSpeed == 0) {
+					isSpeakerAligned = true;
+				}
+			}
 
 		}
 	}
