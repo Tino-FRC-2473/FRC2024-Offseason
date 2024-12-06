@@ -305,6 +305,8 @@ public class DriveFSMSystem extends SubsystemBase {
 				frontRight.getPosition(),
 				rearLeft.getPosition(),
 				rearRight.getPosition()});
+		
+		rpi.update();
 
 		if (input == null) {
 			return;
@@ -420,19 +422,20 @@ public class DriveFSMSystem extends SubsystemBase {
 
 			case ALIGN_TO_SPEAKER_STATE:
 				if (lockedSpeakerId == -1) {
-					if (redAlliance) {
-						//id 4
-						if (rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
-							!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-							lockedSpeakerId = VisionConstants.RED_SPEAKER_TAG_ID;
-						}
-					} else {
-						//id 7
-						if (rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
-							!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-							lockedSpeakerId = VisionConstants.BLUE_SPEAKER_TAG_ID;
-						}
-					}
+				// 	if (redAlliance) {
+				// 		//id 4
+				// 		if (rpi.getAprilTagZInv(VisionConstants.RED_SPEAKER_TAG_ID)
+				// 			!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
+				// 			lockedSpeakerId = VisionConstants.RED_SPEAKER_TAG_ID;
+				// 		}
+				// 	} else {
+				// 		//id 7
+				// 		if (rpi.getAprilTagZInv(VisionConstants.BLUE_SPEAKER_TAG_ID)
+				// 			!= VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
+				// 			lockedSpeakerId = VisionConstants.BLUE_SPEAKER_TAG_ID;
+				// 		}
+				// 	}
+					lockedSpeakerId = 9;
 				} else {
 					alignToSpeaker(lockedSpeakerId);
 				}
@@ -521,11 +524,12 @@ public class DriveFSMSystem extends SubsystemBase {
 					rotDelivered, Rotation2d.fromDegrees(getHeading()))
 				: new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
 
-		/*SmartDashboard.putNumber("s0d", swerveModuleStates[0].speedMetersPerSecond);
+		SmartDashboard.putNumber("s0d", swerveModuleStates[0].speedMetersPerSecond);
 		SmartDashboard.putNumber("s1d", swerveModuleStates[1].speedMetersPerSecond);
 		SmartDashboard.putNumber("s2d", swerveModuleStates[2].speedMetersPerSecond);
 		SmartDashboard.putNumber("s3d", swerveModuleStates[(2 + 1)].speedMetersPerSecond);
 
+		/*
 		SmartDashboard.putNumber("s0t", swerveModuleStates[0].angle.getRadians());
 		SmartDashboard.putNumber("s1t", swerveModuleStates[1].angle.getRadians());
 		SmartDashboard.putNumber("s2t", swerveModuleStates[2].angle.getRadians());
@@ -656,40 +660,28 @@ public class DriveFSMSystem extends SubsystemBase {
 	 */
 	public void alignToSpeaker(int id) {
 		if (rpi.getAprilTagX(id) != VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT) {
-			resetPose(new Pose2d(rpi.getAprilTagZ(id), rpi.getAprilTagX(id),
-				new Rotation2d(rpi.getAprilTagXInv(id))));
-		}
-		double yDiff = odometry.getPoseMeters().getY();
-		double xDiff = odometry.getPoseMeters().getX() - VisionConstants.SPEAKER_TARGET_DISTANCE;
-		double aDiff = odometry.getPoseMeters().getRotation().getRadians();
+		
+			double yDiff = rpi.getAprilTagY(id);
+			double xDiff = Math.max(0, rpi.getAprilTagX(id) - VisionConstants.SPEAKER_TARGET_DISTANCE);
+			double aDiff = rpi.getTagAngle(id) * (Math.PI / 180.0);
 
-		double xSpeed = Math.abs(xDiff) > VisionConstants.X_MARGIN_TO_SPEAKER
-			? clamp(xDiff / VisionConstants.SPEAKER_TRANSLATIONAL_ACCEL_CONSTANT,
-			-VisionConstants.MAX_SPEED_METERS_PER_SECOND,
-			VisionConstants.MAX_SPEED_METERS_PER_SECOND) : 0;
-		double ySpeed = Math.abs(yDiff) > VisionConstants.Y_MARGIN_TO_SPEAKER
-			? clamp(yDiff / VisionConstants.SPEAKER_TRANSLATIONAL_ACCEL_CONSTANT,
-			-VisionConstants.MAX_SPEED_METERS_PER_SECOND,
-			VisionConstants.MAX_SPEED_METERS_PER_SECOND) : 0;
-		double aSpeed = Math.abs(aDiff) > VisionConstants.ROT_MARGIN_TO_SPEAKER
-			? -clamp(aDiff / VisionConstants.SPEAKER_ROTATIONAL_ACCEL_CONSTANT,
-			-VisionConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND,
-			VisionConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND) : 0;
+			System.out.println("xDiff " + xDiff);
 
-		double xSpeedField = (xSpeed * Math.cos(Math.toRadians(tagOrientationAngles[id])))
-			+ (ySpeed * Math.sin(Math.toRadians(tagOrientationAngles[id])));
-		double ySpeedField = (ySpeed * Math.cos(Math.toRadians(tagOrientationAngles[id])))
-			- (xSpeed * Math.sin(Math.toRadians(tagOrientationAngles[id])));
-		if (xSpeedField == 0 && ySpeedField == 0) {
-			isSpeakerPositionAligned = true;
-		}
-		if (!isSpeakerPositionAligned) {
-			drive(xSpeedField, ySpeedField, aSpeed, true);
-		} else {
-			drive(0, 0, aSpeed, true);
-			if (aSpeed == 0) {
-				isSpeakerAligned = true;
-			}
+			double xSpeed = Math.abs(xDiff) > VisionConstants.X_MARGIN_TO_SPEAKER
+				? clamp(xDiff / VisionConstants.SPEAKER_TRANSLATIONAL_ACCEL_CONSTANT,
+				-VisionConstants.MAX_SPEED_METERS_PER_SECOND,
+				VisionConstants.MAX_SPEED_METERS_PER_SECOND) : 0;
+			double ySpeed = Math.abs(yDiff) > VisionConstants.Y_MARGIN_TO_SPEAKER
+				? clamp(yDiff / VisionConstants.SPEAKER_TRANSLATIONAL_ACCEL_CONSTANT,
+				-VisionConstants.MAX_SPEED_METERS_PER_SECOND,
+				VisionConstants.MAX_SPEED_METERS_PER_SECOND) : 0;
+			double aSpeed = Math.abs(aDiff) > VisionConstants.ROT_MARGIN_TO_SPEAKER
+				? -clamp(aDiff / VisionConstants.SPEAKER_ROTATIONAL_ACCEL_CONSTANT,
+				-VisionConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND,
+				VisionConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND) : 0;
+
+			drive(xSpeed, ySpeed, aSpeed, false);
+
 		}
 	}
 	/**
