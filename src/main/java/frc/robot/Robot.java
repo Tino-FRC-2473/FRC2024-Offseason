@@ -9,9 +9,10 @@ import edu.wpi.first.wpilibj.TimedRobot;
 // Third Party Imports
 import com.ctre.phoenix6.SignalLogger;
 
-
+import frc.robot.systems.BreakBeamSensorFSM;
 // Systems
 import frc.robot.systems.DeployerFSM;
+import frc.robot.systems.DistanceSensorFSM;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,7 +22,8 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
 	private DeployerFSM deployerFSM;
-
+	private BreakBeamSensorFSM breakFSM;
+	private DistanceSensorFSM dsFSM;
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
@@ -33,6 +35,8 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		deployerFSM = new DeployerFSM();
+		breakFSM = new BreakBeamSensorFSM();
+		dsFSM = new DistanceSensorFSM(); 
 	}
 
 

@@ -6,30 +6,24 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.TeleopInput;
 import frc.robot.systems.DeployerFSM.DeployerFSMState;
 	
-public class SensorTestingFSM {
+public class BreakBeamSensorFSM {
     private DigitalInput breakBeam;
     private SensorTestingFSMState state;
     public enum SensorTestingFSMState {
 		BEAM_INTACT,
 		BEAM_BROKEN
 	}
-    public SensorTestingFSM(){
+    public BreakBeamSensorFSM(){
         breakBeam = new DigitalInput(0);
         state = SensorTestingFSMState.BEAM_INTACT;
         update(breakBeam);
     }
-    
-
-
-
     public void update(DigitalInput input){
         boolean isBeamBroken = breakBeam.get();
         
         if(input == null){
             return;
         }
-
-        
         switch (state) {
             case BEAM_INTACT:
                 if(isBeamBroken == true) {
@@ -52,29 +46,6 @@ public class SensorTestingFSM {
         //state =(input);
         SmartDashboard.putBoolean("Break beam value", breakBeam.get());
     }
-    /**
-     * idk what im doing below
-     */
-    // private SensorTestingFSM nextState(DigitalInput input) {
-	// 	switch (state) {
-	// 		case RETRACT:
-	// 			if (breakBeam.get()) {
-	// 				return SensorTestingFSM.DEPLOY;
-	// 			} else {
-	// 				return SensorTestingFSM.RETRACT;
-	// 			}
-
-	// 		case DEPLOY:
-	// 			if (input.isIntakeButtonPressed()) {
-	// 				return SensorTestingFSM.DEPLOY;
-	// 			} else {
-	// 				return SensorTestingFSM.RETRACT;
-	// 			}
-
-	// 		default:
-	// 			throw new IllegalStateException("Invalid state: " + state.toString());
-	// 	}
-	// }
     public void handleBeamBroken(){
         SmartDashboard.putString("Beam status", "true");
     }
@@ -86,6 +57,11 @@ public class SensorTestingFSM {
             return true;
         }
         return false;
+    }
+    public void reset(){
+        state = SensorTestingFSMState.BEAM_INTACT;
+        update(null);
+
     }
 
 }
