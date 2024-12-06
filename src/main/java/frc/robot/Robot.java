@@ -8,10 +8,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 
 // Third Party Imports
 import com.ctre.phoenix6.SignalLogger;
-
-
-// Systems
-import frc.robot.systems.DeployerFSM;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -19,8 +16,8 @@ import frc.robot.systems.DeployerFSM;
  */
 public class Robot extends TimedRobot {
 	private TeleopInput input;
+	private TalonFX motor;
 	// Systems
-	private DeployerFSM deployerFSM;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -30,9 +27,7 @@ public class Robot extends TimedRobot {
 	public void robotInit() {
 		System.out.println("robotInit");
 		input = new TeleopInput();
-
-		// Instantiate all systems here
-		deployerFSM = new DeployerFSM();
+		motor = new TalonFX(11);
 	}
 
 
@@ -48,13 +43,16 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		deployerFSM.reset();
-		SignalLogger.start();
+		motor.set(0);
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		deployerFSM.update(input);
+		if (input.isShooterButtonPressed()) {
+			motor.set(0.8);
+		} else {
+			motor.set(0);
+		}
 	}
 
 	@Override

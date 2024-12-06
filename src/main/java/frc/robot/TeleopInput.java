@@ -27,7 +27,7 @@ public class TeleopInput {
 	 * by WPILib until teleop mode.
 	 */
 	public TeleopInput() {
-		ps4Controller = new PS4Controller(MECH_CONTROLLER_PORT);
+		ps4Controller = new PS4Controller(0);
 		// xboxController = new XboxController(MECH_CONTROLLER_PORT);
 	}
 
@@ -38,16 +38,8 @@ public class TeleopInput {
 	 * Get the value of the Circle Button.
 	 * @return if Circle Button is pressed
 	 */
-	public boolean isIntakeButtonPressed() {
+	public boolean isShooterButtonPressed() {
 		return ps4Controller.getCircleButton();
 		// return xboxController.getXButton();
-	}
-
-	/**
-	 * Get the value of the Square Button.
-	 * @return if Suqare Button is pressed
-	 */
-	public boolean isAmpButtonPressed() {
-		return ps4Controller.getSquareButton();
 	}
 }
