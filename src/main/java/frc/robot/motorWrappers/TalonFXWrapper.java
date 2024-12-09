@@ -48,7 +48,6 @@ public class TalonFXWrapper extends TalonFX {
         if (Robot.isSimulation()) sim.setRotorVelocity(Double.parseDouble(velocity));
         SmartDashboard.putNumber("Speed of ID "+getDeviceID(), get());
         Logger.recordOutput("Speed of ID "+getDeviceID(),get());
-        Logger.output("Speed of ID" + getDeviceID(),get());
         return super.setControl(request);
     }
 }
