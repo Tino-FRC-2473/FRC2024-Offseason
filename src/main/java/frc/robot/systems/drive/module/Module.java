@@ -14,7 +14,7 @@ public class Module {
 	private final ModuleIO io;
 
 	//this is generated when you put the @AutoLog annotation on the ModuleInfo class
-	private final ModuleIOInfoAutoLogged inputs = new ModuleIOInfoAutoLogged();
+	private ModuleIOInfoAutoLogged inputs;
 
 	private final SimpleMotorFeedforward driveFeedforward;
 	private final PIDController driveFeedback;
@@ -29,6 +29,7 @@ public class Module {
 	 */
 	public Module(ModuleIO moduleIO) {
 		io = moduleIO;
+		inputs = new ModuleIOInfoAutoLogged(io.getModuleName());
 
 		driveFeedforward = new SimpleMotorFeedforward(
 			ModuleConstants.DRIVING_FF_KS,

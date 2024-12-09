@@ -6,32 +6,44 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 public class ModuleIOInfoAutoLogged extends ModuleIO.ModuleIOInfo
 	implements LoggableInputs, Cloneable {
 
+	private String mID;
+
+	/**
+	 * ModuleIOInfoAutoLogged object.
+	 * @param moduleID
+	 */
+	public ModuleIOInfoAutoLogged(String moduleID) {
+		mID = moduleID;
+	}
+
 	@Override
 	public void toLog(LogTable table) {
-		table.put("Connected", isConnected());
-		table.put("DrivePosition", getDrivePosition());
-		table.put("DriveVelocity", getDriveVelocity());
-		table.put("DriveAppliedVolts", getDriveAppliedVolts());
-		table.put("DriveCurrentAmps", getDriveCurrentAmps());
-		table.put("TurnAbsolutePosition", getTurnAbsolutePosition());
-		table.put("TurnRelativePosition", getTurnRelativePosition());
-		table.put("TurnVelocity", getTurnVelocity());
-		table.put("TurnAppliedVolts", getTurnAppliedVolts());
-		table.put("TurnCurrentAmps", getTurnCurrentAmps());
+		table.put(mID + ": Connected", isConnected());
+		table.put(mID + ": DrivePosition", getDrivePosition());
+		table.put(mID + ": DriveVelocity", getDriveVelocity());
+		table.put(mID + ": DriveAppliedVolts", getDriveAppliedVolts());
+		table.put(mID + ": DriveCurrentAmps", getDriveCurrentAmps());
+		table.put(mID + ": TurnAbsolutePosition", getTurnAbsolutePosition());
+		table.put(mID + ": TurnRelativePosition", getTurnRelativePosition());
+		table.put(mID + ": TurnVelocity", getTurnVelocity());
+		table.put(mID + ": TurnAppliedVolts", getTurnAppliedVolts());
+		table.put(mID + ": TurnCurrentAmps", getTurnCurrentAmps());
 	}
 
 	@Override
 	public void fromLog(LogTable table) {
-		setConnected(table.get("Connected", isConnected()));
-		setDrivePosition(table.get("DrivePosition", getDrivePosition()));
-		setDriveVelocity(table.get("DriveVelocity", getDriveVelocity()));
-		setDriveAppliedVolts(table.get("DriveAppliedVolts", getDriveAppliedVolts()));
-		setDriveCurrentAmps(table.get("DriveCurrentAmps", getDriveCurrentAmps()));
-		setTurnAbsolutePosition(table.get("TurnAbsolutePosition", getTurnAbsolutePosition()));
-		setTurnRelativePosition(table.get("TurnRelativePosition", getTurnRelativePosition()));
-		setTurnVelocity(table.get("TurnVelocity", getTurnVelocity()));
-		setTurnAppliedVolts(table.get("TurnAppliedVolts", getTurnAppliedVolts()));
-		setTurnCurrentAmps(table.get("TurnCurrentAmps", getTurnCurrentAmps()));
+		setConnected(table.get(mID + ": Connected", isConnected()));
+		setDrivePosition(table.get(mID + ": DrivePosition", getDrivePosition()));
+		setDriveVelocity(table.get(mID + ": DriveVelocity", getDriveVelocity()));
+		setDriveAppliedVolts(table.get(mID + ": DriveAppliedVolts", getDriveAppliedVolts()));
+		setDriveCurrentAmps(table.get(mID + ": DriveCurrentAmps", getDriveCurrentAmps()));
+		setTurnAbsolutePosition(table.get(mID
+			+ ": TurnAbsolutePosition", getTurnAbsolutePosition()));
+		setTurnRelativePosition(table.get(mID
+			+ ": TurnRelativePosition", getTurnRelativePosition()));
+		setTurnVelocity(table.get(mID + ": TurnVelocity", getTurnVelocity()));
+		setTurnAppliedVolts(table.get(mID + ": TurnAppliedVolts", getTurnAppliedVolts()));
+		setTurnCurrentAmps(table.get(mID + ": TurnCurrentAmps", getTurnCurrentAmps()));
 	}
 
 	/**
@@ -39,7 +51,7 @@ public class ModuleIOInfoAutoLogged extends ModuleIO.ModuleIOInfo
 	 * @return ModuleIOInfo clone
 	 */
 	public ModuleIOInfoAutoLogged clone() {
-		ModuleIOInfoAutoLogged copy = new ModuleIOInfoAutoLogged();
+		ModuleIOInfoAutoLogged copy = new ModuleIOInfoAutoLogged(mID);
 		copy.setConnected(this.isConnected());
 		copy.setDrivePosition(this.getDrivePosition());
 		copy.setDriveVelocity(this.getDriveVelocity());

@@ -75,25 +75,29 @@ public class Robot extends LoggedRobot {
 						HardwareMap.FRONT_LEFT_DRIVING_CAN_ID,
 						HardwareMap.FRONT_LEFT_TURNING_CAN_ID,
 						HardwareMap.FRONT_LEFT_CANCODER_ID,
-						DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET
+						DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET,
+						"FL"
 					),
 					new ModuleIOTalonFX(// front right
 						HardwareMap.FRONT_RIGHT_DRIVING_CAN_ID,
 						HardwareMap.FRONT_RIGHT_TURNING_CAN_ID,
 						HardwareMap.FRONT_RIGHT_CANCODER_ID,
-						DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET
+						DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET,
+						"FR"
 					),
 					new ModuleIOTalonFX(// back left
 						HardwareMap.REAR_LEFT_DRIVING_CAN_ID,
 						HardwareMap.REAR_LEFT_TURNING_CAN_ID,
 						HardwareMap.REAR_LEFT_CANCODER_ID,
-						DriveConstants.REAR_LEFT_CHASSIS_ANGULAR_OFFSET
+						DriveConstants.REAR_LEFT_CHASSIS_ANGULAR_OFFSET,
+						"BL"
 					),
 					new ModuleIOTalonFX(// back right
 						HardwareMap.REAR_RIGHT_DRIVING_CAN_ID,
 						HardwareMap.REAR_RIGHT_TURNING_CAN_ID,
 						HardwareMap.REAR_RIGHT_CANCODER_ID,
-						DriveConstants.REAR_RIGHT_CHASSIS_ANGULAR_OFFSET
+						DriveConstants.REAR_RIGHT_CHASSIS_ANGULAR_OFFSET,
+						"BR"
 					)
 				);
 
@@ -269,7 +273,7 @@ public class Robot extends LoggedRobot {
 				Logger.recordOutput("FieldSimulation/Notes", notes.toArray(Pose3d[]::new));
 			}
 
-			driveFSMSystem.setPose(swerveDriveSimulation.getSimulatedDriveTrainPose());
+			//driveFSMSystem.setPose(swerveDriveSimulation.getSimulatedDriveTrainPose());
 		}
 	}
 }

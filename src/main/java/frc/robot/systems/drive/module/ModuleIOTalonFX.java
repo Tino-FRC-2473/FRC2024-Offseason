@@ -43,9 +43,10 @@ public class ModuleIOTalonFX implements ModuleIO {
 	 * @param turningMotorId
 	 * @param encoderId
 	 * @param angleOffset
+	 * @param moduleName
 	 */
 	public ModuleIOTalonFX(int driveMotorId, int turningMotorId,
-		int encoderId, double angleOffset) {
+		int encoderId, double angleOffset, String moduleName) {
 		driveMotor = new TalonFX(driveMotorId);
 		turnMotor = new TalonFX(turningMotorId);
 		turningEncoder = new CANcoder(encoderId);
@@ -78,6 +79,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 
 		driveMotor.optimizeBusUtilization();
 		turnMotor.optimizeBusUtilization();
+
+		setModuleName(moduleName);
 	}
 
 	@Override
