@@ -6,10 +6,9 @@ package frc.robot;
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.ctre.phoenix6.Orchestra;
 // Third Party Imports
-import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -20,7 +19,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 public class Robot extends TimedRobot {
 	private TeleopInput input;
 	private TalonFX motor;
-	private MotionMagicVelocityVoltage mRequest;
+	private Orchestra orchestra;
 	// Systems
 
 	/**
@@ -32,25 +31,11 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 		input = new TeleopInput();
 		motor = new TalonFX(HardwareMap.MOTOR_ID);
-		motor.setNeutralMode(NeutralModeValue.Coast);
+		motor.setNeutralMode(NeutralModeValue.Brake);
 
-		var talonConfigs = new TalonFXConfiguration();
-		var slot0Configs = talonConfigs.Slot0;
-		var mmConfigs = talonConfigs.MotionMagic;
-
-		slot0Configs.kS = Constants.SLOT_0_S;
-		slot0Configs.kV = Constants.SLOT_0_V;
-		slot0Configs.kA = Constants.SLOT_0_A;
-		slot0Configs.kP = Constants.SLOT_0_P;
-		slot0Configs.kI = 0;
-		slot0Configs.kD = 0;
-
-		mmConfigs.MotionMagicAcceleration = Constants.MMAGIC_CONSTANT_A;
-		mmConfigs.MotionMagicJerk = Constants.MMAGIC_CONSTANT_J;
-
-		mRequest = new MotionMagicVelocityVoltage(Constants.TARGET_VELO_RPS);
-
-		motor.getConfigurator().apply(talonConfigs);
+		orchestra = new Orchestra();
+		orchestra.addInstrument(motor);
+		orchestra.loadMusic("f1.chrp");
 	}
 
 
@@ -67,21 +52,25 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		motor.set(0);
+		orchestra.stop();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		if (input.isShooterButtonPressed()) {
-			motor.setControl(mRequest);
-		} else {
-			motor.set(0);
+		motor.set(0);
+
+		if (input.isPlayButtonPressed() && !orchestra.isPlaying()) {
+			orchestra.play();
+		} else if (input.isPauseButtonPressed() && orchestra.isPlaying()) {
+			orchestra.pause();
+		} else if (input.isStopButtonPressed()) {
+			orchestra.stop();
 		}
 	}
 
 	@Override
 	public void disabledInit() {
 		System.out.println("-------- Disabled Init --------");
-		SignalLogger.stop();
 	}
 
 	@Override
@@ -101,8 +90,8 @@ public class Robot extends TimedRobot {
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
 	public void robotPeriodic() {
-		SmartDashboard.putNumber("Velocity", motor.getVelocity().getValueAsDouble());
-		SmartDashboard.putNumber("Acceleration", motor.getAcceleration().getValueAsDouble());
-		SmartDashboard.putNumber("Voltage", motor.getMotorVoltage().getValueAsDouble());
+		SmartDashboard.putBoolean("PLAY BUTTON", input.isPlayButtonPressed());
+		SmartDashboard.putBoolean("PAUSE BUTTON", input.isPauseButtonPressed());
+		SmartDashboard.putBoolean("STOP BUTTON", input.isStopButtonPressed());
 	}
 }

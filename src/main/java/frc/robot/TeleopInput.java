@@ -30,10 +30,26 @@ public class TeleopInput {
 	/* ------------------------ Mech Controller ------------------------ */
 
 	/**
+	 * Get the value of the Square Button.
+	 * @return if Square Button is pressed
+	 */
+	public boolean isPauseButtonPressed() {
+		return ps4Controller.getSquareButtonPressed();
+	}
+
+	/**
 	 * Get the value of the Circle Button.
 	 * @return if Circle Button is pressed
 	 */
-	public boolean isShooterButtonPressed() {
-		return ps4Controller.getCircleButton();
+	public boolean isStopButtonPressed() {
+		return ps4Controller.getCircleButtonPressed();
+	}
+
+	/**
+	 * Get the value of the Triangle Button.
+	 * @return if Triangle Button is pressed
+	 */
+	public boolean isPlayButtonPressed() {
+		return ps4Controller.getTriangleButtonPressed();
 	}
 }
