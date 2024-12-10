@@ -1,9 +1,5 @@
 package frc.robot;
 
-import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
-
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
@@ -18,7 +14,6 @@ public class RaspberryPI {
 
 	private DoubleSubscriber fpsCounter;
 	private DoubleArraySubscriber tagSubscriber;
-	private DoubleSubscriber tagAngleSubscriber;
 	private double previousValueReceived = 0;
 	private DoubleSubscriber noteY;
 	private DoubleSubscriber noteD;
@@ -26,46 +21,19 @@ public class RaspberryPI {
 	private Timer timer = new Timer();
 	public static final int VALUES_PER_TAG = 6;
 
-	PhotonCamera camera = new PhotonCamera("Arducam_IMX179_Camera_Module");
-	PhotonPipelineResult result = camera.getLatestResult();
-	NetworkTable photonTable;
-
-
 	/**Updates the FPS each iteration of the robot.*/
 	public RaspberryPI() {
 		timer.start();
 		table = NetworkTableInstance.getDefault().getTable("datatable");
 		fpsCounter = table.getDoubleTopic("x").subscribe(-1);
-		//tagSubscriber = table.getDoubleArrayTopic("april_tag_data").subscribe(null);
+		tagSubscriber = table.getDoubleArrayTopic("april_tag_data").subscribe(null);
 		noteY = table.getDoubleTopic("note_yaw").subscribe(-1);
 		noteD = table.getDoubleTopic("note_distance").subscribe(-1);
-
-		photonTable = NetworkTableInstance.getDefault().getTable("photonvision").getSubTable("Arducam_IMX179_Camera_Module");
-		tagSubscriber = photonTable.getDoubleArrayTopic("targetPose").subscribe(null);
-		tagAngleSubscriber = photonTable.getDoubleTopic("targetYaw").subscribe(0);
 	}
 
 	/**Updates the values in SmartDashboard. */
 	public void update() {
 		updateFPS();
-		result = camera.getLatestResult();
-	}
-
-	public PhotonTrackedTarget getAprilTag(int id) {
-		if (result.hasTargets()) {
-			var targets = result.getTargets();
-			System.out.println("fiducial targets reached " + targets);
-			for (var target: targets) {
-				if (target.getFiducialId() == id) {
-					System.out.println("fiducial id reached " + id);
-					return target;
-				}
-			}
-		}
-
-		return null;
-
-
 	}
 
 	/**
@@ -87,9 +55,9 @@ public class RaspberryPI {
 	 * This value is used in tag-relative swerve movements
 	 */
 	public double getAprilTagX(int id) {
-		if (getAprilTag(id) != null) {
-			return tagSubscriber.get()[1];
-		} else {
+		try {
+			return tagSubscriber.get()[(VALUES_PER_TAG * (id - 1))];
+		} catch (NullPointerException e) {
 			return VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT;
 		}
 	}
@@ -101,7 +69,7 @@ public class RaspberryPI {
 	 */
 	public double getAprilTagY(int id) {
 		try {
-			return tagSubscriber.get()[0];
+			return tagSubscriber.get()[(VALUES_PER_TAG * (id - 1)) + 1];
 		} catch (NullPointerException e) {
 			return VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT;
 		}
@@ -114,7 +82,7 @@ public class RaspberryPI {
 	 */
 	public double getAprilTagZ(int id) {
 		try {
-			return -tagSubscriber.get()[2];
+			return tagSubscriber.get()[(VALUES_PER_TAG * (id - 1)) + 2];
 		} catch (NullPointerException e) {
 			return VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT;
 		}
@@ -127,7 +95,7 @@ public class RaspberryPI {
 	 */
 	public double getAprilTagXInv(int id) {
 		try {
-			return tagSubscriber.get()[1];
+			return tagSubscriber.get()[(VALUES_PER_TAG * (id - 1)) + 2 + 1];
 		} catch (NullPointerException e) {
 			return VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT;
 		}
@@ -140,7 +108,7 @@ public class RaspberryPI {
 	 */
 	public double getAprilTagYInv(int id) {
 		try {
-			return tagSubscriber.get()[0];
+			return tagSubscriber.get()[(VALUES_PER_TAG * (id - 1)) + 2 + 2];
 		} catch (NullPointerException e) {
 			return VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT;
 		}
@@ -153,7 +121,7 @@ public class RaspberryPI {
 	 */
 	public double getAprilTagZInv(int id) {
 		try {
-			return tagSubscriber.get()[2];
+			return tagSubscriber.get()[(VALUES_PER_TAG * (id - 1)) + 2 + 2 + 1];
 		} catch (NullPointerException e) {
 			return VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT;
 		}
@@ -180,14 +148,6 @@ public class RaspberryPI {
 			return noteY.get();
 		} catch (NullPointerException e) {
 			return VisionConstants.UNABLE_TO_SEE_NOTE_CONSTANT;
-		}
-	}
-
-	public double getTagAngle(int id) {
-		if (getAprilTag(id) != null) {
-			return tagAngleSubscriber.get();
-		} else {
-			return VisionConstants.UNABLE_TO_SEE_TAG_CONSTANT;
 		}
 	}
 
