@@ -4,8 +4,7 @@ public final class Constants {
 	// PID Constants
 	public static final double INRANGE_VALUE = 0.5;
 
-	public static final double TARGET_VELO_RPM = 60; //5361
-	public static final double TARGET_VELO_RPS = TARGET_VELO_RPM / 60;
+	public static final double TARGET_VELO_RPS = 84;
 
 	public static final double SLOT_0_S = 0.1; //0.10
 		//Voltage required to overcome static friction (0.15)
