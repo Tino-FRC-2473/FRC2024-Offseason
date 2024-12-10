@@ -49,6 +49,6 @@ public class ClimberMech2D {
     }
 
     private double encoderToAngle(double encoderPosition) {
-        return (encoderPosition / Constants.ENCODER_COUNTS_PER_REV) * 360.0;
+        return (encoderPosition / Constants.SPARK_CPR) * 360.0;
     }
 }

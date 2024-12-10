@@ -85,6 +85,7 @@ public final class Constants {
 
 	// Encoder Constants
 	public static final double DEFAULT_PERIODIC_SECS = Robot.defaultPeriodSecs;
-	public static final double ENCODER_COUNTS_PER_REV = 42;
+    public static final double TALONFX_CPR = 1;
+	public static final double CANSPARK_CPR = 42;
 
 }

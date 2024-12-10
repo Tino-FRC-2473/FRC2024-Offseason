@@ -1,53 +1,42 @@
 package frc.robot.motorWrappers;
 
-import org.littletonrobotics.junction.Logger;
-
-import com.ctre.phoenix6.StatusCode;
-import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.sim.TalonFXSimState;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Robot;
+import frc.robot.Constants;
 
 
-public class TalonFXWrapper extends TalonFX {
-
-    TalonFXSimState sim;
+public class TalonFXWrapper extends TalonFX implements Loggable {
 
     public TalonFXWrapper(int deviceId) { 
         super(deviceId); 
-        sim = getSimState();
+        init();
     }
 
     public TalonFXWrapper(int deviceId, String canbus) { 
         super(deviceId,canbus); 
-        sim = getSimState();
+        init();
+
+    }
+
+    public void update() {
+        double deltaTime = Constants.DEFAULT_PERIODIC_SECS;
+        double encoderCPR = Constants.TALONFX_CPR;
+        setPosition(getPosition().getValue() + get() * deltaTime * encoderCPR);
+        
     }
 
    @Override 
     public void set(double speed) {
         super.set(speed);
-        if (Robot.isSimulation()) sim.setRotorVelocity(speed);
     }
 
     @Override
-    public StatusCode setControl(MotionMagicVelocityVoltage request) {
-        if (Robot.isSimulation()) sim.setRotorVelocity(request.Velocity);
-        SmartDashboard.putNumber("Speed of ID "+getDeviceID(), get());
-        Logger.recordOutput("Speed of ID "+getDeviceID(),get());
-        return super.setControl(request);
+    public int getCanId() {
+        return this.getDeviceID();
     }
 
-    public StatusCode setControl(ControlRequest request) {
-        String velocity = request.getControlInfo().get("Velocity");
-        if (velocity == null) {
-            throw new RuntimeException("Control request not supported in wrapper");
-        }
-        if (Robot.isSimulation()) sim.setRotorVelocity(Double.parseDouble(velocity));
-        SmartDashboard.putNumber("Speed of ID "+getDeviceID(), get());
-        Logger.recordOutput("Speed of ID "+getDeviceID(),get());
-        return super.setControl(request);
+    @Override
+    public double getEncoderPosition() {
+        return getPosition().getValue();
     }
 }
