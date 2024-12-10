@@ -30,9 +30,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import frc.robot.Constants.MatchConstants;
 import frc.robot.SwerveConstants.DriveConstants;
-import frc.robot.motorWrappers.CANSparkMaxWrapper;
+import frc.robot.motorWrappers.MotorManager;
 import frc.robot.systems.climber.ClimberMechFSM;
-import frc.robot.systems.climber.ClimberMech2D;
+// import frc.robot.systems.climber.ClimberMech2D;
 
 // Systems
 import frc.robot.systems.drive.DriveFSMSystem;
@@ -44,7 +44,6 @@ import frc.robot.systems.drive.gyro.GyroIOSim;
 import frc.robot.systems.drive.module.ModuleIO;
 import frc.robot.systems.drive.module.ModuleIOSim;
 import frc.robot.systems.drive.module.ModuleIOTalonFX;
-import frc.robot.systems.shooter.ShooterFSMSystem;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ public class Robot extends LoggedRobot {
 	private DriveFSMSystem driveFSMSystem;
 	private SwerveDriveSimulation swerveDriveSimulation;
 	private ClimberMechFSM climberMechFSM;
-	private ClimberMech2D climberMech2D;
+	// private ClimberMech2D climberMech2D;
 	//private ShooterFSMSystem shooterFSMSystem;
 
 	private LoggedDashboardChooser<Command> autoChooser;
@@ -72,11 +71,10 @@ public class Robot extends LoggedRobot {
 	@Override
 	public void robotInit() {
 		System.out.println("robotInit");
-		CANSparkMaxWrapper.init();
 		input = new TeleopInput();
 
 		climberMechFSM = new ClimberMechFSM();
-		climberMech2D = new ClimberMech2D();
+		// climberMech2D = new ClimberMech2D();
 		//shooterFSMSystem = new ShooterFSMSystem();
 
 		switch (MatchConstants.CURRENT_MODE) {
@@ -232,7 +230,7 @@ public class Robot extends LoggedRobot {
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
 		climberMechFSM.update(input);
-		climberMech2D.update();
+		// climberMech2D.update();
 		//shooterFSMSystem.update(input);
 		//mField.setRobotPose(driveFSMSystem.getPose());
 	}
@@ -258,8 +256,8 @@ public class Robot extends LoggedRobot {
 		driveFSMSystem.update(input);
 		//climberMechFSM.update(input);
 		updateSimulationField();
-		CANSparkMaxWrapper.updateAll();
-		climberMech2D.update();
+		MotorManager.update();
+		// climberMech2D.update();
 	}
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.

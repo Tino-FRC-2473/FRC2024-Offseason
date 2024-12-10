@@ -4,28 +4,26 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import frc.robot.Constants;
 
-
 public class TalonFXWrapper extends TalonFX implements Loggable {
 
-    public TalonFXWrapper(int deviceId) { 
-        super(deviceId); 
+    public TalonFXWrapper(int deviceId) {
+        super(deviceId);
         init();
     }
 
-    public TalonFXWrapper(int deviceId, String canbus) { 
-        super(deviceId,canbus); 
+    public TalonFXWrapper(int deviceId, String canbus) {
+        super(deviceId, canbus);
         init();
-
     }
 
     public void update() {
-        double deltaTime = Constants.DEFAULT_PERIODIC_SECS;
+        double delta = Constants.DEFAULT_PERIODIC_SECS;
         double encoderCPR = Constants.TALONFX_CPR;
-        setPosition(getPosition().getValue() + get() * deltaTime * encoderCPR);
-        
+
+        setPosition(getPosition().getValue() + get() * delta * encoderCPR);
     }
 
-   @Override 
+    @Override
     public void set(double speed) {
         super.set(speed);
     }

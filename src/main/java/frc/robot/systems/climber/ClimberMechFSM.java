@@ -1,7 +1,12 @@
 package frc.robot.systems.climber;
 
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 // WPILib Imports
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import org.littletonrobotics.junction.Logger;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -10,7 +15,8 @@ import com.revrobotics.SparkLimitSwitch.Type;
 
 // Robot Imports
 import frc.robot.TeleopInput;
-import frc.robot.motorWrappers.CANSparkMaxWrapper;
+import frc.robot.motorWrappers.SparkMaxWrapper;
+import frc.robot.Constants;
 import frc.robot.HardwareMap;
 
 public class ClimberMechFSM {
@@ -54,16 +60,18 @@ public class ClimberMechFSM {
 	 */
 	public ClimberMechFSM() {
 		// Perform hardware init
-		rightMotor = new CANSparkMaxWrapper(
+		rightMotor = new SparkMaxWrapper(
 			HardwareMap.RIGHT_CLIMBER_CAN_ID,
-			CANSparkMax.MotorType.kBrushless);
+			CANSparkMax.MotorType.kBrushless
+		);
 
 		rightMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		rightMotor.getEncoder().setPosition(0);
 
-		leftMotor = new CANSparkMaxWrapper(
+		leftMotor = new SparkMaxWrapper(
 			HardwareMap.LEFT_CLIMBER_CAN_ID,
-			CANSparkMax.MotorType.kBrushless);
+			CANSparkMax.MotorType.kBrushless
+		);
 
 		leftMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 		leftMotor.getEncoder().setPosition(0);
@@ -271,5 +279,45 @@ public class ClimberMechFSM {
 			return MODIFIERS[2] * value;
 		}
 		return value;
+	}
+
+	private class ClimberMech2D {
+		private final SparkMaxWrapper leftMotor, rightMotor;
+		private final Mechanism2d mechanism2d;
+		private final MechanismLigament2d leftClimber, rightClimber;
+	
+		public ClimberMech2D(SparkMaxWrapper leftMotor, SparkMaxWrapper rightMotor) {
+			this.leftMotor = leftMotor;
+			this.rightMotor = rightMotor;
+			  
+			leftMotor.getEncoder().setPosition(0);
+			rightMotor.getEncoder().setPosition(0);
+	
+			mechanism2d = new Mechanism2d(100, 100); 
+			MechanismRoot2d rootLeft = mechanism2d.getRoot("LeftClimber", 20, 50); 
+			MechanismRoot2d rootRight = mechanism2d.getRoot("RightClimber", 80, 50); 
+			leftClimber = rootLeft.append(new MechanismLigament2d("Left Arm", 30, 90)); 
+			rightClimber = rootRight.append(new MechanismLigament2d("Right Arm", 30, 90)); 
+	
+			Logger.recordOutput("ClimberMechanism2D", mechanism2d);
+		}
+	
+		public void update() {
+			double leftEncoderPos = leftMotor.getEncoder().getPosition();
+			double rightEncoderPos = rightMotor.getEncoder().getPosition();
+	
+			double leftAngle = encoderToAngle(leftEncoderPos);
+			double rightAngle = encoderToAngle(rightEncoderPos);
+	
+			leftClimber.setAngle(leftAngle);
+			rightClimber.setAngle(rightAngle);
+	
+			Logger.recordOutput("Climber/LeftClimberAngle", leftAngle);
+			Logger.recordOutput("Climber/RightClimberAngle", rightAngle);
+		}
+	
+		private double encoderToAngle(double encoderPosition) {
+			return (encoderPosition / Constants.CANSPARK_CPR) * 360.0;
+		}
 	}
 }
