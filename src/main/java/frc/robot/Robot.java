@@ -3,16 +3,16 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import com.playingwithfusion.TimeOfFlight;
+
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Third Party Imports
-import com.ctre.phoenix6.SignalLogger;
 
-import frc.robot.systems.BreakBeamSensorFSM;
-// Systems
-import frc.robot.systems.DeployerFSM;
-import frc.robot.systems.DistanceSensorFSM;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,9 +21,9 @@ import frc.robot.systems.DistanceSensorFSM;
 public class Robot extends TimedRobot {
 	private TeleopInput input;
 	// Systems
-	private DeployerFSM deployerFSM;
-	private BreakBeamSensorFSM breakFSM;
-	private DistanceSensorFSM dsFSM;
+	private AnalogInput sharp;
+	private DigitalInput breakbeam;
+	private TimeOfFlight pwFlight;
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
@@ -32,11 +32,9 @@ public class Robot extends TimedRobot {
 	public void robotInit() {
 		System.out.println("robotInit");
 		input = new TeleopInput();
-
-		// Instantiate all systems here
-		deployerFSM = new DeployerFSM();
-		breakFSM = new BreakBeamSensorFSM();
-		dsFSM = new DistanceSensorFSM(); 
+		sharp = new AnalogInput(0);
+		breakbeam = new DigitalInput(0);
+		pwFlight = new TimeOfFlight(0);
 	}
 
 
@@ -52,19 +50,15 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		deployerFSM.reset();
-		SignalLogger.start();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		deployerFSM.update(input);
 	}
 
 	@Override
 	public void disabledInit() {
 		System.out.println("-------- Disabled Init --------");
-		SignalLogger.stop();
 	}
 
 	@Override
@@ -83,5 +77,9 @@ public class Robot extends TimedRobot {
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
-	public void robotPeriodic() { }
+	public void robotPeriodic() {
+		SmartDashboard.putBoolean("beam break", breakbeam.get());
+		SmartDashboard.putNumber("sharp ToF", sharp.getValue());
+		SmartDashboard.putNumber("PWF Distance mm", pwFlight.getRange());
+	}
 }
