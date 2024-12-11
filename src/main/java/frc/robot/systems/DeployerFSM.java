@@ -59,6 +59,7 @@ public class DeployerFSM {
 
 		// Reset state machine
 		reset();
+		updateOutputs();
 	}
 
 	/* ======================== Public methods ======================== */
@@ -106,8 +107,7 @@ public class DeployerFSM {
 
 		currentState = nextState(input);
 
-		SmartDashboard.putNumber("POS", encoder.getPosition());
-		SmartDashboard.putNumber("VELO", encoder.getVelocity());
+		// updateOutputs();
 	}
 
 
@@ -138,6 +138,14 @@ public class DeployerFSM {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
+	}
+
+	/**
+	 * Publish Output values to smart dashboard.
+	 */
+	public void updateOutputs() {
+		SmartDashboard.putNumber("POS", encoder.getPosition());
+		SmartDashboard.putNumber("VELO", encoder.getVelocity());
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */

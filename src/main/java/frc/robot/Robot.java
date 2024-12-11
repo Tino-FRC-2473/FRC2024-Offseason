@@ -79,5 +79,7 @@ public class Robot extends TimedRobot {
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
-	public void robotPeriodic() { }
+	public void robotPeriodic() {
+		deployerFSM.updateOutputs();
+	}
 }
