@@ -38,7 +38,8 @@ import frc.robot.systems.drive.gyro.GyroIOPigeon2;
 import frc.robot.systems.drive.gyro.GyroIOSim;
 import frc.robot.systems.drive.module.ModuleIO;
 import frc.robot.systems.drive.module.ModuleIOSim;
-import frc.robot.systems.drive.module.ModuleIOTalonFX;
+import frc.robot.systems.drive.module.ModuleIOSparkMAX;
+//import frc.robot.systems.drive.module.ModuleIOTalonFX;
 
 import java.util.List;
 
@@ -71,31 +72,31 @@ public class Robot extends LoggedRobot {
 
 				driveFSMSystem = new DriveFSMSystem(
 					new GyroIOPigeon2(),
-					new ModuleIOTalonFX(// front left
+					new ModuleIOSparkMAX(// front left
 						HardwareMap.FRONT_LEFT_DRIVING_CAN_ID,
 						HardwareMap.FRONT_LEFT_TURNING_CAN_ID,
-						HardwareMap.FRONT_LEFT_CANCODER_ID,
+						//HardwareMap.FRONT_LEFT_CANCODER_ID,
 						DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET,
 						"FL"
 					),
-					new ModuleIOTalonFX(// front right
+					new ModuleIOSparkMAX(// front right
 						HardwareMap.FRONT_RIGHT_DRIVING_CAN_ID,
 						HardwareMap.FRONT_RIGHT_TURNING_CAN_ID,
-						HardwareMap.FRONT_RIGHT_CANCODER_ID,
+						//HardwareMap.FRONT_RIGHT_CANCODER_ID,
 						DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET,
 						"FR"
 					),
-					new ModuleIOTalonFX(// back left
+					new ModuleIOSparkMAX(// back left
 						HardwareMap.REAR_LEFT_DRIVING_CAN_ID,
 						HardwareMap.REAR_LEFT_TURNING_CAN_ID,
-						HardwareMap.REAR_LEFT_CANCODER_ID,
+						//HardwareMap.REAR_LEFT_CANCODER_ID,
 						DriveConstants.REAR_LEFT_CHASSIS_ANGULAR_OFFSET,
 						"BL"
 					),
-					new ModuleIOTalonFX(// back right
+					new ModuleIOSparkMAX(// back right
 						HardwareMap.REAR_RIGHT_DRIVING_CAN_ID,
 						HardwareMap.REAR_RIGHT_TURNING_CAN_ID,
-						HardwareMap.REAR_RIGHT_CANCODER_ID,
+						//HardwareMap.REAR_RIGHT_CANCODER_ID,
 						DriveConstants.REAR_RIGHT_CHASSIS_ANGULAR_OFFSET,
 						"BR"
 					)

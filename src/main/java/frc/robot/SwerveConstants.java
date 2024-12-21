@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -82,6 +81,7 @@ public final class SwerveConstants {
 		// Invert the turning encoder, since the output shaft rotates in the opposite direction of
 		// the steering motor in the MAXSwerve Module.
 		public static final boolean TURNING_MOTOR_INVERTED = true;
+		public static final boolean DRIVING_MOTOR_INVERTED = false;
 
 		// Calculations required for driving motor conversion factors and feed forward
 		public static final double DRIVING_MOTOR_FREE_SPEED_RPS = NeoMotorConstants.
@@ -120,9 +120,6 @@ public final class SwerveConstants {
 		public static final double TURNING_I = 0;
 		public static final double TURNING_D = 0;
 		public static final double TURNING_FF = 0;
-
-		public static final IdleMode DRIVING_MOTOR_IDLE_MODE = IdleMode.kBrake;
-		public static final IdleMode TURNING_MOTOR_IDLE_MODE = IdleMode.kBrake;
 
 		public static final int DRIVING_MOTOR_CURRENT_LIMIT = 40; // amps
 		public static final int TURNING_MOTOR_CURRENT_LIMIT = 30; // amps
