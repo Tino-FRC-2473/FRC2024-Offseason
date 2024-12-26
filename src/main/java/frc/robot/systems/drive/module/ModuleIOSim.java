@@ -10,9 +10,11 @@ public class ModuleIOSim implements ModuleIO {
 	/**
 	 * Creates a ModuleIOSim object that takes a MapleSim SwerveModSim object.
 	 * @param moduleSim
+	 * @param moduleID
 	 */
-	public ModuleIOSim(SwerveModuleSimulation moduleSim) {
+	public ModuleIOSim(SwerveModuleSimulation moduleSim, String moduleID) {
 		moduleSimulation = moduleSim;
+		setModuleName(moduleID);
 	}
 
 	@Override

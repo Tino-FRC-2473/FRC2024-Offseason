@@ -137,10 +137,10 @@ public class Robot extends LoggedRobot {
 				driveFSMSystem =
 					new DriveFSMSystem(
 						new GyroIOSim(gyroSimulation),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[0]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[1]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[2]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[(2 + 1)]));
+						new ModuleIOSim(swerveDriveSimulation.getModules()[0], "FL"),
+						new ModuleIOSim(swerveDriveSimulation.getModules()[1], "FR"),
+						new ModuleIOSim(swerveDriveSimulation.getModules()[2], "BL"),
+						new ModuleIOSim(swerveDriveSimulation.getModules()[(2 + 1)], "BR"));
 
 				//driveFSMSystem.setPose(new Pose2d(1.4, 5.6, new Rotation2d()));
 
