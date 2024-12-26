@@ -366,7 +366,7 @@ public class DriveFSMSystem extends SubsystemBase {
 
 		//flip the axis around based on what alliance it's on - EXPERIMENTAL
 		boolean isFlipped = DriverStation.getAlliance().isPresent()
-				&& DriverStation.getAlliance().get() == Alliance.Red;
+				&& DriverStation.getAlliance().get() != Alliance.Red;
 
 		//should run closed loop drive and turn voltage controls based on chassis speeds
 		runVelocity(
@@ -515,7 +515,7 @@ public class DriveFSMSystem extends SubsystemBase {
 	/**
 	 * Returns the heading of the robot.
 	 *
-	 * @return the robot's heading in degrees, from -180 to 180
+	 * @return the robot's heading in degrees, from 0 to 360
 	 */
 	public double getHeading() {
 		return gyroIOInfo.getYawPosition().getDegrees();

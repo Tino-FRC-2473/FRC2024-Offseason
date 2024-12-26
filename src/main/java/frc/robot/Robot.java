@@ -33,8 +33,8 @@ import frc.robot.SwerveConstants.DriveConstants;
 // Systems
 import frc.robot.systems.drive.DriveFSMSystem;
 import frc.robot.systems.drive.gyro.GyroIO;
+import frc.robot.systems.drive.gyro.GyroIONavX;
 // IO Implementations
-import frc.robot.systems.drive.gyro.GyroIOPigeon2;
 import frc.robot.systems.drive.gyro.GyroIOSim;
 import frc.robot.systems.drive.module.ModuleIO;
 import frc.robot.systems.drive.module.ModuleIOSim;
@@ -71,7 +71,7 @@ public class Robot extends LoggedRobot {
 				this.swerveDriveSimulation = null;
 
 				driveFSMSystem = new DriveFSMSystem(
-					new GyroIOPigeon2(),
+					new GyroIONavX(),
 					new ModuleIOSparkMAX(// front left
 						HardwareMap.FRONT_LEFT_DRIVING_CAN_ID,
 						HardwareMap.FRONT_LEFT_TURNING_CAN_ID,

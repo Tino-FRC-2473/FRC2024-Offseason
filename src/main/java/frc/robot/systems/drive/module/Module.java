@@ -43,7 +43,7 @@ public class Module {
 			ModuleConstants.TURNING_I,
 			ModuleConstants.TURNING_D);
 
-		turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
+		turnFeedback.enableContinuousInput(0, 2 * Math.PI);
 		setBrakeMode(true);
 	}
 
