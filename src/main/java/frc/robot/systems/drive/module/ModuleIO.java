@@ -182,7 +182,18 @@ public interface ModuleIO {
 			this.turnCurrentAmps = turnCurrent;
 		}
 	}
-
+	//TODO: Check if this should go into the ModuleIOInfo class
+	/**
+	 * Apply PID values to the motor controller using the motor's PID controller
+	 * @param P Proportional gain
+	 * @param I Integral gain
+	 * @param D Derivative gain
+	 * @param FF Feedforward gain
+	 * @param slot PID slot to apply to
+	 * @param onDriveMotor Whether to apply to the drive motor or on the turning motor
+	 * @throws IllegalArgumentException if the slot number is invalid (greater than 2 on TalonFX)
+	 */
+	default void applyPID(double P, double I, double D, double FF, int slot, boolean onDriveMotor) throws IllegalArgumentException { }
 
 	/**
 	 * Update all the values of the logged values of the module through a ModuleIOInfo object.
@@ -214,7 +225,7 @@ public interface ModuleIO {
 	 */
 	default void setTurnBrakeMode(boolean enable) { }
 
-	/**
+/**
 	 * Set the name of the module.
 	 * @param moduleName
 	 */
