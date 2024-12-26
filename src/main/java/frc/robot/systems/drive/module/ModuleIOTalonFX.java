@@ -3,9 +3,7 @@ package frc.robot.systems.drive.module;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -80,6 +78,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 		driveMotor.optimizeBusUtilization();
 		turnMotor.optimizeBusUtilization();
 
+
 		setModuleName(moduleName);
 	}
 
@@ -148,5 +147,29 @@ public class ModuleIOTalonFX implements ModuleIO {
 	@Override
 	public void resetEncoders() {
 		driveMotor.setPosition(0);
+	}
+
+	@Override
+	public void applyPID(double P, double I, double D, double FF, int slot, boolean onDriveMotor) throws IllegalArgumentException {
+		// Jump table for the slot configs
+		var slotConfigs = new SlotConfigs[] {
+				SlotConfigs.from(new Slot0Configs()),
+				SlotConfigs.from(new Slot1Configs()),
+				SlotConfigs.from(new Slot2Configs())
+		};
+
+		if(slot > 2) throw new IllegalArgumentException("Invalid slot number. Max allowed for TalonFX is 2");
+
+		slotConfigs[slot].kP = P;
+		slotConfigs[slot].kI = I;
+		slotConfigs[slot].kD = D;
+
+		//TODO: Apply ff based on kV on the motor config, check out the different units and convert
+
+		if(onDriveMotor) {
+			driveMotor.getConfigurator().apply(slotConfigs[slot]);
+		} else {
+			turnMotor.getConfigurator().apply(slotConfigs[slot]);
+		}
 	}
 }

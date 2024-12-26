@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 import frc.robot.SwerveConstants.ModuleConstants;
@@ -103,5 +104,15 @@ public class ModuleIOSparkMAX implements ModuleIO {
 	@Override
 	public void resetEncoders() {
 		driveEncoder.setPosition(0);
+	}
+
+	@Override
+	public void applyPID(double P, double I, double D, double FF, int slot, boolean onDriveMotor) {
+		//TODO: Is the pass by value done by java here mean that we get the reference to each pid controller?
+		SparkPIDController pidController = onDriveMotor ? driveMotor.getPIDController() : turnMotor.getPIDController();
+		pidController.setP(P, slot);
+		pidController.setI(I, slot);
+		pidController.setD(D, slot);
+		pidController.setFF(FF, slot);
 	}
 }
