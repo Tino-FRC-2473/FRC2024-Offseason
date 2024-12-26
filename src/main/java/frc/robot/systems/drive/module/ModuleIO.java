@@ -230,5 +230,4 @@ public interface ModuleIO {
 
 	/** Reset the encoder position values. */
 	default void resetEncoders() { }
-
 }
