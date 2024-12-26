@@ -9,7 +9,7 @@ public final class Constants {
 			REPLAY
 		}
 
-		public static final Mode CURRENT_MODE = Mode.SIM;
+		public static final Mode CURRENT_MODE = Mode.REAL;
 		public static final double SIM_STARTING_POSE_X = 1.4;
 		public static final double SIM_STARTING_POSE_Y = 5.6;
 	}
