@@ -20,6 +20,8 @@ public class ModuleIOSparkMAX implements ModuleIO {
 
 	private final Rotation2d angleEncoderOffset;
 
+	private String mName;
+
 	/**
 	 * Makes a ModuleIOTalonFX object that models a MK4n with 2 Krakenx60s,
 	 * a CANCoder, and specified angle offset.
@@ -38,31 +40,23 @@ public class ModuleIOSparkMAX implements ModuleIO {
 		driveEncoder = driveMotor.getEncoder();
 		this.angleEncoderOffset = new Rotation2d(angleOffset);
 
-		driveEncoder.setPositionConversionFactor(
-				ModuleConstants.DRIVING_ENCODER_POSITION_FACTOR);
-		driveEncoder.setVelocityConversionFactor(
-				ModuleConstants.DRIVING_ENCODOR_VELOCITY_FACTOR);
-
-		turningAbsEncoder.setPositionConversionFactor(
-				ModuleConstants.TURNING_ENCODER_POSITION_FACTOR);
-		turningAbsEncoder.setVelocityConversionFactor(
-				ModuleConstants.TURNING_ENCODER_VELOCITY_FACTOR);
-
 		driveMotor.setSmartCurrentLimit(ModuleConstants.DRIVING_MOTOR_CURRENT_LIMIT);
 		turnMotor.setSmartCurrentLimit(ModuleConstants.TURNING_MOTOR_CURRENT_LIMIT);
 
 		driveMotor.burnFlash();
 		turnMotor.burnFlash();
 
-		setModuleName(moduleName);
+		mName = moduleName;
 	}
 
 	@Override
 	public void updateInputs(ModuleIOInfo inputs) {
 		inputs.setConnected(true); //find a better way to set connected
 
-		inputs.setDrivePosition(driveEncoder.getPosition());
-		inputs.setDriveVelocity(driveEncoder.getVelocity());
+		inputs.setDrivePosition(driveEncoder.getPosition() * 2 * Math.PI
+			/ ModuleConstants.DRIVE_GEAR_RATIO);
+		inputs.setDriveVelocity(driveEncoder.getVelocity() * 2 * Math.PI
+			/ ModuleConstants.DRIVE_GEAR_RATIO);
 		inputs.setDriveAppliedVolts(turnMotor.getBusVoltage());
 		inputs.setDriveCurrentAmps(driveMotor.getOutputCurrent());
 
@@ -72,8 +66,8 @@ public class ModuleIOSparkMAX implements ModuleIO {
 		inputs.setTurnRelativePosition(
 			Rotation2d.fromRotations(turningRelEncoder.getPosition()
 				/ ModuleConstants.TURN_GEAR_RATIO));
-		inputs.setTurnVelocity(
-			turningRelEncoder.getVelocity() / ModuleConstants.TURN_GEAR_RATIO);
+		inputs.setTurnVelocity(turningRelEncoder.getVelocity() * 2 * Math.PI
+			/ ModuleConstants.TURN_GEAR_RATIO);
 		inputs.setTurnAppliedVolts(turnMotor.getBusVoltage());
 		inputs.setTurnCurrentAmps(turnMotor.getOutputCurrent());
 	}
@@ -103,5 +97,15 @@ public class ModuleIOSparkMAX implements ModuleIO {
 	@Override
 	public void resetEncoders() {
 		driveEncoder.setPosition(0);
+	}
+
+	@Override
+	public String getModuleName() {
+		return mName;
+	}
+
+	@Override
+	public void setModuleName(String moduleName) {
+		mName = moduleName;
 	}
 }

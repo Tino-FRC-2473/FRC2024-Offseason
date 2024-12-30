@@ -35,6 +35,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 	private final StatusSignal<Double> turnAppliedVolts;
 	private final StatusSignal<Double> turnCurrent;
 
+	private String mName;
+
 	/**
 	 * Makes a ModuleIOTalonFX object that models a MK4n with 2 Krakenx60s,
 	 * a CANCoder, and specified angle offset.
@@ -80,7 +82,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 		driveMotor.optimizeBusUtilization();
 		turnMotor.optimizeBusUtilization();
 
-		setModuleName(moduleName);
+		mName = moduleName;
 	}
 
 	@Override
@@ -148,5 +150,15 @@ public class ModuleIOTalonFX implements ModuleIO {
 	@Override
 	public void resetEncoders() {
 		driveMotor.setPosition(0);
+	}
+
+	@Override
+	public void setModuleName(String moduleName) {
+		mName = moduleName;
+	}
+
+	@Override
+	public String getModuleName() {
+		return mName;
 	}
 }
