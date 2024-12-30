@@ -282,21 +282,9 @@ public class DriveFSMSystem extends SubsystemBase {
 		switch (currentState) {
 			case TELEOP_STATE:
 				if (input != null) {
-					drive(-MathUtil.applyDeadband((input.getControllerLeftJoystickY()
-						* Math.abs(input.getControllerLeftJoystickY())
-							* ((input.getLeftTrigger() / 2)
-						+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-							OIConstants.DRIVE_DEADBAND),
-						-MathUtil.applyDeadband((input.getControllerLeftJoystickX()
-						* Math.abs(input.getControllerLeftJoystickX())
-							* ((input.getLeftTrigger() / 2)
-						+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT) / 2),
-							OIConstants.DRIVE_DEADBAND),
-						-MathUtil.applyDeadband((input.getControllerRightJoystickX()
-						* ((input.getLeftTrigger() / 2)
-							+ DriveConstants.LEFT_TRIGGER_DRIVE_CONSTANT)
-						/ DriveConstants.ANGULAR_SPEED_LIMIT_CONSTANT), OIConstants.DRIVE_DEADBAND),
-						true);
+					drive(input.getControllerLeftJoystickY(),
+						-input.getControllerLeftJoystickX(),
+						-input.getControllerRightJoystickX(), true);
 
 					if (input.isBackButtonPressed()) {
 						gyroIO.resetHeading();
@@ -345,21 +333,49 @@ public class DriveFSMSystem extends SubsystemBase {
 	public void drive(double xSpeed, double ySpeed, double rot,
 		boolean fieldRelative) {
 
-		double xSpeedDelivered = xSpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
-		double ySpeedDelivered = ySpeed * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
-		double rotDelivered = rot * DriveConstants.MAX_ANGULAR_SPEED;
+		SmartDashboard.putNumber("X Speed", xSpeed);
+		SmartDashboard.putNumber("Y Speed", ySpeed);
+		SmartDashboard.putNumber("Rot", rot);
 
-		System.out.println("THIS FUNCTION IS RUNNING");
+		//convert XY to polar and square the magnitude and angle (carrying sign) first
+		Rotation2d inputTranslationDir = new Rotation2d(xSpeed, ySpeed);
+		double inputTranslationMag = MathUtil.applyDeadband(
+				Math.hypot(xSpeed, ySpeed), OIConstants.DRIVE_DEADBAND
+		);
+		double theta = MathUtil.applyDeadband(rot, OIConstants.DRIVE_DEADBAND);
+
+		inputTranslationMag = inputTranslationMag * inputTranslationMag;
+		theta = Math.copySign(theta * theta, theta);
+
+		Translation2d inputVelocity =
+				new Pose2d(
+					new Translation2d(), inputTranslationDir
+				).transformBy(
+					new Transform2d(inputTranslationMag, 0.0, new Rotation2d())
+				).getTranslation();
+
+		// Convert the commanded speeds into the correct units for the drivetrain
+		double xSpeedDelivered = inputVelocity.getX() * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
+		double ySpeedDelivered = inputVelocity.getY() * DriveConstants.MAX_SPEED_METERS_PER_SECOND;
+		double rotDelivered = theta * DriveConstants.MAX_ANGULAR_SPEED;
 
 		SmartDashboard.putNumber("X Speed Delivered", xSpeedDelivered);
 		SmartDashboard.putNumber("Y Speed Delivered", ySpeedDelivered);
 		SmartDashboard.putNumber("Rot Speed Delivered", rotDelivered);
 
+
+		//flip the axis around based on what alliance it's on - EXPERIMENTAL
+		boolean isFlipped = DriverStation.getAlliance().isPresent()
+				&& DriverStation.getAlliance().get() != Alliance.Red;
+
 		//should run closed loop drive and turn voltage controls based on chassis speeds
 		runVelocity(
 			fieldRelative
 				? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered,
-					rotDelivered, Rotation2d.fromDegrees(getHeading()))
+					rotDelivered,
+						(isFlipped
+								? getRotation().plus(new Rotation2d(Math.PI))
+								: getRotation()))
 				: new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered)
 		);
 	}
