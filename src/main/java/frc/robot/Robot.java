@@ -33,7 +33,7 @@ import frc.robot.SwerveConstants.DriveConstants;
 import frc.robot.motorWrappers.MotorManager;
 import frc.robot.systems.climber.ClimberMechFSM;
 // import frc.robot.systems.climber.ClimberMech2D;
-
+import frc.robot.systems.climber.Mech2DSim;
 // Systems
 import frc.robot.systems.drive.DriveFSMSystem;
 import frc.robot.systems.drive.gyro.GyroIO;
@@ -58,6 +58,7 @@ public class Robot extends LoggedRobot {
 	private DriveFSMSystem driveFSMSystem;
 	private SwerveDriveSimulation swerveDriveSimulation;
 	private ClimberMechFSM climberMechFSM;
+	private Mech2DSim armSim;
 	// private ClimberMech2D climberMech2D;
 	//private ShooterFSMSystem shooterFSMSystem;
 
@@ -74,7 +75,7 @@ public class Robot extends LoggedRobot {
 		input = new TeleopInput();
 
 		climberMechFSM = new ClimberMechFSM();
-		// climberMech2D = new ClimberMech2D();
+		armSim = new Mech2DSim();
 		//shooterFSMSystem = new ShooterFSMSystem();
 
 		switch (MatchConstants.CURRENT_MODE) {
@@ -194,6 +195,7 @@ public class Robot extends LoggedRobot {
 
 		// Start AKit Logger
 		Logger.start();
+		System.out.println("-------- Init complete --------");
 	}
 
 	@Override
@@ -229,7 +231,7 @@ public class Robot extends LoggedRobot {
 	@Override
 	public void teleopPeriodic() {
 		driveFSMSystem.update(input);
-		climberMechFSM.update(input);
+		//climberMechFSM.update(input);
 		// climberMech2D.update();
 		//shooterFSMSystem.update(input);
 		//mField.setRobotPose(driveFSMSystem.getPose());
@@ -253,11 +255,11 @@ public class Robot extends LoggedRobot {
 
 	@Override
 	public void simulationPeriodic() {
-		driveFSMSystem.update(input);
+		//driveFSMSystem.update(input);
 		//climberMechFSM.update(input);
-		updateSimulationField();
+		//updateSimulationField();
 		MotorManager.update();
-		// climberMech2D.update();
+		armSim.update();
 	}
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
