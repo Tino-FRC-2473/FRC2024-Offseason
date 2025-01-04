@@ -231,4 +231,16 @@ public interface ModuleIO {
 	/** Reset the encoder position values. */
 	default void resetEncoders() { }
 
+	/**
+	 * Sets the velocity of the drive motor with the motor controller.
+	 * @param velocity
+	 * */
+	default void setDriveVelocity(double velocity) { }
+
+	/**
+	 * Sets the position of the turn motor with the motor controller.
+	 * @param rotation
+	 * */
+	default void setTurnPosition(Rotation2d rotation) { }
+
 }

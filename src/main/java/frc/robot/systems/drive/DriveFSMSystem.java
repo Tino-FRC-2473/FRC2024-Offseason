@@ -282,7 +282,7 @@ public class DriveFSMSystem extends SubsystemBase {
 		switch (currentState) {
 			case TELEOP_STATE:
 				if (input != null) {
-					drive(input.getControllerLeftJoystickY(),
+					drive(-input.getControllerLeftJoystickY(),
 						-input.getControllerLeftJoystickX(),
 						-input.getControllerRightJoystickX(), true);
 
@@ -363,19 +363,11 @@ public class DriveFSMSystem extends SubsystemBase {
 		SmartDashboard.putNumber("Y Speed Delivered", ySpeedDelivered);
 		SmartDashboard.putNumber("Rot Speed Delivered", rotDelivered);
 
-
-		//flip the axis around based on what alliance it's on - EXPERIMENTAL
-		boolean isFlipped = DriverStation.getAlliance().isPresent()
-				&& DriverStation.getAlliance().get() != Alliance.Red;
-
 		//should run closed loop drive and turn voltage controls based on chassis speeds
 		runVelocity(
 			fieldRelative
 				? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered,
-					rotDelivered,
-						(isFlipped
-								? getRotation().plus(new Rotation2d(Math.PI))
-								: getRotation()))
+					rotDelivered, getRotation())
 				: new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered)
 		);
 	}

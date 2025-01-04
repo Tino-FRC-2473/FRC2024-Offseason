@@ -1,7 +1,5 @@
 package frc.robot.systems.drive.module;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -16,12 +14,8 @@ public class Module {
 	//this is generated when you put the @AutoLog annotation on the ModuleInfo class
 	private ModuleIOInfoAutoLogged inputs;
 
-	private final SimpleMotorFeedforward driveFeedforward;
-	private final PIDController driveFeedback;
-	private final PIDController turnFeedback;
 	private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
 	private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
-	private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
 
 	/**
 	 * Creates a Module object that the FSMs interact with.
@@ -30,21 +24,6 @@ public class Module {
 	public Module(ModuleIO moduleIO) {
 		io = moduleIO;
 		inputs = new ModuleIOInfoAutoLogged(io.getModuleName());
-
-		driveFeedforward = new SimpleMotorFeedforward(
-			ModuleConstants.DRIVING_FF_KS,
-			ModuleConstants.DRIVING_FF_KV);
-		driveFeedback = new PIDController(
-			ModuleConstants.DRIVING_P,
-			ModuleConstants.DRIVING_I,
-			ModuleConstants.DRIVING_D);
-		turnFeedback = new PIDController(
-			ModuleConstants.TURNING_P,
-			ModuleConstants.TURNING_I,
-			ModuleConstants.TURNING_D);
-
-		turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
-		setBrakeMode(true);
 	}
 
 	/** Logger to process and update inputs to be called every periodic on the MAIN thread. */
@@ -67,36 +46,15 @@ public class Module {
 		speedSetpoint = optimizedState.speedMetersPerSecond;
 
 		//Triggers closed loop correction cycles
-		setCloosedLoopCorrection();
+		io.setDriveVelocity(speedSetpoint / ModuleConstants.WHEEL_RADIUS);
+		io.setTurnPosition(angleSetpoint);
 
 		return optimizedState;
-	}
-
-	/**
-	 * Voltage based closed loop turn control
-	 * based on the angle and speed setpoint of the desired state.
-	 */
-	private void setCloosedLoopCorrection() {
-		// Run closed loop turn control
-		io.setTurnVoltage(
-			turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
-
-		// Scale velocity based on turn error
-		// - vector projection of speedSetpoint on error deviation (in radians)
-		double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
-
-		// Run closed loop drive control
-		double velocity = adjustSpeedSetpoint / ModuleConstants.WHEEL_RADIUS;
-		io.setDriveVoltage(
-			driveFeedforward.calculate(velocity)
-				+ driveFeedback.calculate(inputs.getDriveVelocity(), velocity));
 	}
 
 	/** Reset drive and turn encoders. */
 	public void resetEncoders() {
 		//resets relative turn encoder
-		turnRelativeOffset = inputs.getTurnAbsolutePosition()
-			.minus(inputs.getTurnRelativePosition());
 		io.resetEncoders();
 	}
 
@@ -137,9 +95,7 @@ public class Module {
 	 * @return current turn angle of module in radians.
 	 */
 	public Rotation2d getAngle() {
-		return inputs.getTurnRelativePosition().plus(
-			turnRelativeOffset != null ? turnRelativeOffset : new Rotation2d()
-		);
+		return inputs.getTurnAbsolutePosition();
 	}
 
 	/**

@@ -5,7 +5,6 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
-import frc.robot.systems.drive.gyro.GyroIO.GyroIOInfo;
 
 public class GyroIONavX implements GyroIO {
 	private AHRS gyro = new AHRS(SPI.Port.kMXP);

@@ -37,7 +37,7 @@ import frc.robot.systems.drive.gyro.GyroIONavX;
 // IO Implementations
 import frc.robot.systems.drive.gyro.GyroIOSim;
 import frc.robot.systems.drive.module.ModuleIO;
-import frc.robot.systems.drive.module.ModuleIOSim;
+import frc.robot.systems.drive.module.ModuleIOSimTalonFX;
 import frc.robot.systems.drive.module.ModuleIOSparkMAX;
 //import frc.robot.systems.drive.module.ModuleIOTalonFX;
 
@@ -82,7 +82,7 @@ public class Robot extends LoggedRobot {
 					new ModuleIOSparkMAX(// front right
 						HardwareMap.FRONT_RIGHT_DRIVING_CAN_ID,
 						HardwareMap.FRONT_RIGHT_TURNING_CAN_ID,
-						//HardwareMap.FRONT_RIGHT_CANCODER_ID,
+						//HardwareMap.FRONT_RIGHT_CANCODER_ID
 						DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET,
 						"FR"
 					),
@@ -137,10 +137,10 @@ public class Robot extends LoggedRobot {
 				driveFSMSystem =
 					new DriveFSMSystem(
 						new GyroIOSim(gyroSimulation),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[0]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[1]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[2]),
-						new ModuleIOSim(swerveDriveSimulation.getModules()[(2 + 1)]));
+						new ModuleIOSimTalonFX(swerveDriveSimulation.getModules()[0]),
+						new ModuleIOSimTalonFX(swerveDriveSimulation.getModules()[1]),
+						new ModuleIOSimTalonFX(swerveDriveSimulation.getModules()[2]),
+						new ModuleIOSimTalonFX(swerveDriveSimulation.getModules()[(2 + 1)]));
 
 				//driveFSMSystem.setPose(new Pose2d(1.4, 5.6, new Rotation2d()));
 
