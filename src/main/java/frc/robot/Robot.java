@@ -255,9 +255,9 @@ public class Robot extends LoggedRobot {
 
 	@Override
 	public void simulationPeriodic() {
-		//driveFSMSystem.update(input);
-		//climberMechFSM.update(input);
-		//updateSimulationField();
+		driveFSMSystem.update(input);
+		climberMechFSM.update(input);
+		updateSimulationField();
 		MotorManager.update();
 		armSim.update();
 	}
