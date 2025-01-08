@@ -33,7 +33,7 @@ import frc.robot.SwerveConstants.DriveConstants;
 import frc.robot.motorWrappers.MotorManager;
 import frc.robot.systems.climber.ClimberMechFSM;
 // import frc.robot.systems.climber.ClimberMech2D;
-import frc.robot.systems.climber.Mech2DSim;
+import frc.robot.systems.climber.ClimberMech2D;
 // Systems
 import frc.robot.systems.drive.DriveFSMSystem;
 import frc.robot.systems.drive.gyro.GyroIO;
@@ -58,7 +58,6 @@ public class Robot extends LoggedRobot {
 	private DriveFSMSystem driveFSMSystem;
 	private SwerveDriveSimulation swerveDriveSimulation;
 	private ClimberMechFSM climberMechFSM;
-	private Mech2DSim armSim;
 	// private ClimberMech2D climberMech2D;
 	//private ShooterFSMSystem shooterFSMSystem;
 
@@ -75,7 +74,6 @@ public class Robot extends LoggedRobot {
 		input = new TeleopInput();
 
 		climberMechFSM = new ClimberMechFSM();
-		armSim = new Mech2DSim();
 		//shooterFSMSystem = new ShooterFSMSystem();
 
 		switch (MatchConstants.CURRENT_MODE) {
@@ -259,7 +257,6 @@ public class Robot extends LoggedRobot {
 		climberMechFSM.update(input);
 		updateSimulationField();
 		MotorManager.update();
-		armSim.update();
 	}
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.

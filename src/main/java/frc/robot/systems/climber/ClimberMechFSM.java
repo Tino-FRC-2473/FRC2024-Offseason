@@ -44,6 +44,9 @@ public class ClimberMechFSM {
 	/* ======================== Private variables ======================== */
 	private ClimberMechFSMState currentState;
 
+	// Mechanism2D
+	private ClimberMech2D mech2D;
+
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
 	private CANSparkMax rightMotor;
@@ -78,6 +81,8 @@ public class ClimberMechFSM {
 
 		leftBottomSwitch = leftMotor.getForwardLimitSwitch(Type.kNormallyOpen);
 		rightBottomSwitch = rightMotor.getReverseLimitSwitch(Type.kNormallyOpen);
+
+		mech2D = new ClimberMech2D();
 
 		// Reset state machine
 		reset();
@@ -128,6 +133,9 @@ public class ClimberMechFSM {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
+
+		mech2D.update(leftMotor.getEncoder().getPosition(), rightMotor.getEncoder().getPosition());
+
 		SmartDashboard.putString("Climber State", currentState.toString());
 		SmartDashboard.putNumber("left encoder position", leftMotor.getEncoder().getPosition());
 		SmartDashboard.putNumber("right encoder position", rightMotor.getEncoder().getPosition());
@@ -281,43 +289,4 @@ public class ClimberMechFSM {
 		return value;
 	}
 
-	private class ClimberMech2D {
-		private final SparkMaxWrapper leftMotor, rightMotor;
-		private final Mechanism2d mechanism2d;
-		private final MechanismLigament2d leftClimber, rightClimber;
-	
-		public ClimberMech2D(SparkMaxWrapper leftMotor, SparkMaxWrapper rightMotor) {
-			this.leftMotor = leftMotor;
-			this.rightMotor = rightMotor;
-			  
-			leftMotor.getEncoder().setPosition(0);
-			rightMotor.getEncoder().setPosition(0);
-	
-			mechanism2d = new Mechanism2d(100, 100); 
-			MechanismRoot2d rootLeft = mechanism2d.getRoot("LeftClimber", 20, 50); 
-			MechanismRoot2d rootRight = mechanism2d.getRoot("RightClimber", 80, 50); 
-			leftClimber = rootLeft.append(new MechanismLigament2d("Left Arm", 30, 90)); 
-			rightClimber = rootRight.append(new MechanismLigament2d("Right Arm", 30, 90)); 
-	
-			Logger.recordOutput("ClimberMechanism2D", mechanism2d);
-		}
-	
-		public void update() {
-			double leftEncoderPos = leftMotor.getEncoder().getPosition();
-			double rightEncoderPos = rightMotor.getEncoder().getPosition();
-	
-			double leftAngle = encoderToAngle(leftEncoderPos);
-			double rightAngle = encoderToAngle(rightEncoderPos);
-	
-			leftClimber.setAngle(leftAngle);
-			rightClimber.setAngle(rightAngle);
-	
-			Logger.recordOutput("Climber/LeftClimberAngle", leftAngle);
-			Logger.recordOutput("Climber/RightClimberAngle", rightAngle);
-		}
-	
-		private double encoderToAngle(double encoderPosition) {
-			return (encoderPosition / Constants.CANSPARK_CPR) * 360.0;
-		}
-	}
 }
